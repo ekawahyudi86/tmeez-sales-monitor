@@ -34,7 +34,8 @@
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
-<link rel="manifest" href="manifest.webmanifest"></head>
+<link rel="manifest" href="manifest.webmanifest">    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
 <body class="h-full flex flex-col text-slate-800 antialiased overflow-x-hidden">
 
     <div id="login-screen" class="fixed inset-0 z-[100] bg-slate-950/95 flex items-center justify-center p-4">
@@ -61,7 +62,7 @@
 
             <!-- Role Switcher & User Profile Simulation -->
             <div class="flex items-center space-x-2 sm:space-x-4">
-                <div class="bg-slate-800 p-1 rounded-xl flex items-center border border-slate-700">
+                <div id="role-switcher" class="bg-slate-800 p-1 rounded-xl flex items-center border border-slate-700">
                     <button onclick="switchRole('sales')" id="btn-sales" class="px-3 py-1.5 text-xs font-medium rounded-lg transition-all flex items-center gap-1.5 bg-brand-600 text-white shadow">
                         <i data-lucide="smartphone" class="w-3.5 h-3.5"></i>
                         <span class="hidden sm:inline">Tampilan</span> Sales
@@ -236,7 +237,7 @@
                             <i data-lucide="file-text" class="w-5 h-5 text-indigo-600"></i>
                             Buat Invoice & Nota Penjualan
                         </h2>
-                        <span class="text-[10px] bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full font-semibold">Otomatis Hitung & PDF</span>
+                        <span class="text-[10px] bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full font-semibold">PCS · Harga Fleksibel · Diskon · PDF</span>
                     </div>
 
                     <form id="invoice-form" onsubmit="handleInvoiceSubmit(event)" class="space-y-4 flex-1 flex flex-col justify-between">
@@ -250,7 +251,7 @@
 
                             <!-- Produk dari Master Data -->
                             <div class="space-y-2">
-                                <label class="block text-xs font-semibold text-slate-700">Produk & Kuantitas (Dus)</label>
+                                <label class="block text-xs font-semibold text-slate-700">Produk, Qty, Harga & Diskon</label>
                                 <div id="invoice-products" class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2"></div>
                             </div>
 
@@ -262,7 +263,7 @@
                                 </div>
                                 <div class="text-right">
                                     <p class="text-xs text-slate-500 font-medium">Total Volume</p>
-                                    <p class="text-sm font-bold text-indigo-900" id="invoice-qty-display">0 Dus</p>
+                                    <p class="text-sm font-bold text-indigo-900" id="invoice-qty-display">0 PCS</p>
                                 </div>
                             </div>
 
@@ -388,7 +389,7 @@
                                 <th class="py-3.5 px-6">Peringkat & Nama Sales</th>
                                 <th class="py-3.5 px-4 text-center">Target Kunjungan</th>
                                 <th class="py-3.5 px-4 text-center">Aktual Kunjungan</th>
-                                <th class="py-3.5 px-4 text-center">Target Dus</th>
+                                <th class="py-3.5 px-4 text-center">Target PCS</th>
                                 <th class="py-3.5 px-4 text-center">Aktual Dus</th>
                                 <th class="py-3.5 px-6 text-right">Pencapaian KPI</th>
                             </tr>
@@ -415,7 +416,7 @@
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <section class="bg-white rounded-2xl p-6 border shadow-sm"><h2 class="font-bold mb-4">KPI Operasional Sales</h2><div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center"><div class="bg-slate-50 p-3 rounded-xl"><b>342</b><p class="text-[11px]">Total Visit</p></div><div class="bg-slate-50 p-3 rounded-xl"><b>221</b><p class="text-[11px]">Effective Call</p></div><div class="bg-slate-50 p-3 rounded-xl"><b>64,6%</b><p class="text-[11px]">Strike Rate</p></div><div class="bg-slate-50 p-3 rounded-xl"><b>5,6</b><p class="text-[11px]">Avg Dus/Order</p></div></div></section>
-              <section class="bg-white rounded-2xl p-6 border shadow-sm"><h2 class="font-bold mb-4">Pengaturan Target & Geofence</h2><div class="grid grid-cols-3 gap-3"><label class="text-xs">Target Dus<input type="number" value="150" class="mt-1 w-full border rounded-lg p-2"></label><label class="text-xs">Target Visit<input type="number" value="25" class="mt-1 w-full border rounded-lg p-2"></label><label class="text-xs">Radius GPS (m)<input id="admin-radius" type="number" value="100" class="mt-1 w-full border rounded-lg p-2"></label></div><button onclick="showToast('Pengaturan target tersimpan')" class="mt-3 w-full py-2 bg-brand-600 text-white rounded-lg text-xs font-semibold">Simpan Pengaturan</button></section>
+              <section class="bg-white rounded-2xl p-6 border shadow-sm"><h2 class="font-bold mb-4">Pengaturan Target & Geofence</h2><div class="grid grid-cols-3 gap-3"><label class="text-xs">Target PCS<input type="number" value="150" class="mt-1 w-full border rounded-lg p-2"></label><label class="text-xs">Target Visit<input type="number" value="25" class="mt-1 w-full border rounded-lg p-2"></label><label class="text-xs">Radius GPS (m)<input id="admin-radius" type="number" value="100" class="mt-1 w-full border rounded-lg p-2"></label></div><button onclick="showToast('Pengaturan target tersimpan')" class="mt-3 w-full py-2 bg-brand-600 text-white rounded-lg text-xs font-semibold">Simpan Pengaturan</button></section>
               <section class="lg:col-span-2 bg-white rounded-2xl p-6 border shadow-sm"><div class="flex justify-between"><div><h2 class="font-bold">Ringkasan Operasional</h2><p class="text-xs text-slate-500">Stok motoris, setoran, piutang, outlet baru dan hasil kunjungan.</p></div><button onclick="exportCsv()" class="px-3 py-2 bg-slate-900 text-white rounded-lg text-xs font-semibold">Export CSV</button></div><div class="mt-4 overflow-x-auto"><table class="w-full text-xs"><thead><tr class="bg-slate-50"><th class="p-2 text-left">Sales</th><th>Visit</th><th>Order</th><th>Strike Rate</th><th>Dus</th><th>Setoran</th><th>Piutang</th></tr></thead><tbody><tr><td colspan="7" class="p-6 text-center text-slate-400">Belum ada data operasional.</td></tr></tbody></table></div></section>
 
               <section class="lg:col-span-2 bg-white rounded-2xl p-6 border shadow-sm">
@@ -423,7 +424,7 @@
                 <div class="grid lg:grid-cols-3 gap-5">
                   <div><h3 class="text-sm font-bold mb-2">Tambah Sales</h3><form onsubmit="addSales(event)" class="space-y-2"><input id="m-sales-name" required placeholder="Nama sales" class="w-full border rounded-lg p-2 text-xs"><input id="m-sales-phone" placeholder="No. HP / WhatsApp" class="w-full border rounded-lg p-2 text-xs"><input id="m-sales-area" required placeholder="Area / wilayah" class="w-full border rounded-lg p-2 text-xs"><div class="grid grid-cols-2 gap-2"><input id="m-sales-user" required placeholder="Username" autocomplete="off" class="border rounded-lg p-2 text-xs"><input id="m-sales-pass" required minlength="4" type="password" placeholder="Password awal" autocomplete="new-password" class="border rounded-lg p-2 text-xs"></div><div class="grid grid-cols-2 gap-2"><input id="m-sales-visit" type="number" value="0" placeholder="Target visit/bulan" class="border rounded-lg p-2 text-xs"><input id="m-sales-box" type="number" value="0" placeholder="Target dus/bulan" class="border rounded-lg p-2 text-xs"></div><button class="w-full bg-slate-900 text-white rounded-lg py-2 text-xs font-semibold">Buat Sales & Akun</button></form></div>
                   <div><h3 class="text-sm font-bold mb-2">Toko</h3><form onsubmit="addStoreMaster(event)" class="space-y-2"><input id="m-store-name" required placeholder="Nama toko" class="w-full border rounded-lg p-2 text-xs"><input id="m-store-owner" placeholder="Pemilik / WA" class="w-full border rounded-lg p-2 text-xs"><select id="m-store-sales" required class="w-full border rounded-lg p-2 text-xs"><option value="">Pilih sales penanggung jawab</option></select><div class="grid grid-cols-2 gap-2"><input id="m-store-lat" required type="number" step="any" placeholder="Latitude" class="border rounded-lg p-2 text-xs"><input id="m-store-lng" required type="number" step="any" placeholder="Longitude" class="border rounded-lg p-2 text-xs"></div><button type="button" onclick="fillCurrentStoreGps()" class="w-full border rounded-lg py-2 text-xs font-semibold">Isi GPS Posisi Sekarang</button><button class="w-full bg-brand-600 text-white rounded-lg py-2 text-xs font-semibold">Tambah Toko</button></form><div id="store-list" class="mt-3 space-y-1"></div></div>
-                  <div><h3 class="text-sm font-bold mb-2">Produk</h3><form onsubmit="addProduct(event)" class="space-y-2"><input id="m-product-name" required placeholder="Nama produk" class="w-full border rounded-lg p-2 text-xs"><div class="grid grid-cols-2 gap-2"><input id="m-product-price" required type="number" placeholder="Harga/dus" class="border rounded-lg p-2 text-xs"><input id="m-product-pack" type="number" value="10" placeholder="Isi/dus" class="border rounded-lg p-2 text-xs"></div><button class="w-full bg-emerald-600 text-white rounded-lg py-2 text-xs font-semibold">Tambah Produk</button></form><div id="product-list" class="mt-3 space-y-1"></div></div>
+                  <div><h3 class="text-sm font-bold mb-2">Produk</h3><form onsubmit="addProduct(event)" class="space-y-2"><input id="m-product-name" required placeholder="Nama produk" class="w-full border rounded-lg p-2 text-xs"><div class="grid grid-cols-2 gap-2"><input id="m-product-price" required type="number" placeholder="Harga acuan/PCS" class="border rounded-lg p-2 text-xs"><input id="m-product-pack" type="number" value="10" placeholder="Isi/dus (info)" class="border rounded-lg p-2 text-xs"></div><button class="w-full bg-emerald-600 text-white rounded-lg py-2 text-xs font-semibold">Tambah Produk</button></form><div id="product-list" class="mt-3 space-y-1"></div></div>
                 </div>
               </section>
 
@@ -439,7 +440,7 @@
             <div class="p-5 border-b flex justify-between items-center"><div><h2 class="font-bold text-lg">Detail & Edit Sales</h2><p id="edit-sales-subtitle" class="text-xs text-slate-500"></p></div><button onclick="closeSalesModal()" class="w-9 h-9 rounded-lg bg-slate-100">✕</button></div>
             <div class="p-5 space-y-5">
               <input type="hidden" id="edit-sales-id">
-              <div class="grid sm:grid-cols-2 gap-3"><label class="text-xs font-semibold">Nama Sales<input id="edit-sales-name" class="mt-1 w-full border rounded-lg p-2.5 font-normal"></label><label class="text-xs font-semibold">No. HP / WhatsApp<input id="edit-sales-phone" class="mt-1 w-full border rounded-lg p-2.5 font-normal"></label><label class="text-xs font-semibold">Area / Wilayah<input id="edit-sales-area" class="mt-1 w-full border rounded-lg p-2.5 font-normal"></label><label class="text-xs font-semibold">Username<input id="edit-sales-user" class="mt-1 w-full border rounded-lg p-2.5 font-normal"></label><label class="text-xs font-semibold">Target Visit / Bulan<input id="edit-sales-visit" type="number" min="0" class="mt-1 w-full border rounded-lg p-2.5 font-normal"></label><label class="text-xs font-semibold">Target Dus / Bulan<input id="edit-sales-box" type="number" min="0" class="mt-1 w-full border rounded-lg p-2.5 font-normal"></label></div>
+              <div class="grid sm:grid-cols-2 gap-3"><label class="text-xs font-semibold">Nama Sales<input id="edit-sales-name" class="mt-1 w-full border rounded-lg p-2.5 font-normal"></label><label class="text-xs font-semibold">No. HP / WhatsApp<input id="edit-sales-phone" class="mt-1 w-full border rounded-lg p-2.5 font-normal"></label><label class="text-xs font-semibold">Area / Wilayah<input id="edit-sales-area" class="mt-1 w-full border rounded-lg p-2.5 font-normal"></label><label class="text-xs font-semibold">Username<input id="edit-sales-user" class="mt-1 w-full border rounded-lg p-2.5 font-normal"></label><label class="text-xs font-semibold">Target Visit / Bulan<input id="edit-sales-visit" type="number" min="0" class="mt-1 w-full border rounded-lg p-2.5 font-normal"></label><label class="text-xs font-semibold">Target PCS / Bulan<input id="edit-sales-box" type="number" min="0" class="mt-1 w-full border rounded-lg p-2.5 font-normal"></label></div>
               <button onclick="saveSalesEdit()" class="w-full bg-brand-600 text-white rounded-xl py-2.5 text-sm font-semibold">Simpan Perubahan</button>
               <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center"><div class="bg-slate-50 p-3 rounded-xl"><b id="edit-kpi-visit">0</b><p class="text-[11px]">Total Visit</p></div><div class="bg-slate-50 p-3 rounded-xl"><b id="edit-kpi-order">0</b><p class="text-[11px]">Order</p></div><div class="bg-slate-50 p-3 rounded-xl"><b id="edit-kpi-strike">0%</b><p class="text-[11px]">Strike Rate</p></div><div class="bg-slate-50 p-3 rounded-xl"><b id="edit-kpi-stores">0</b><p class="text-[11px]">Toko Didaftarkan</p></div></div>
               <div><h3 class="text-sm font-bold mb-2">Toko yang Didaftarkan Sales</h3><div id="edit-sales-stores" class="space-y-2 max-h-52 overflow-y-auto"></div></div><div><h3 class="text-sm font-bold mb-2">Riwayat Kunjungan Terakhir</h3><div id="edit-sales-visits" class="space-y-2 max-h-52 overflow-y-auto"></div></div>
@@ -458,10 +459,41 @@
 
     <!-- Script Logic for Frontend Interactivity -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        async function restoreSession(){
+            const raw=localStorage.getItem(SESSIONKEY);
+            if(!raw) return false;
+            try{
+                const saved=JSON.parse(raw);
+                if(!saved.token || !saved.user) throw new Error('Session kosong');
+                sessionToken=saved.token;
+                currentUser=saved.user;
+
+                // Server-side validation: token, expiry, account status, role.
+                const me=await apiGet('me');
+                const serverUser=me.user||{};
+                currentUser.username=serverUser.username||currentUser.username;
+                currentUser.role=String(serverUser.role||currentUser.role).toLowerCase()==='sales'?'sales':'admin';
+                currentUser.salesId=serverUser.salesId||currentUser.salesId||'';
+
+                document.getElementById('login-screen').classList.add('hidden');
+                switchRole(currentUser.role==='sales'?'sales':'admin');
+                document.getElementById('current-user-name').innerText=currentUser.name||currentUser.username||'Pengguna';
+                await refreshOnlineData(false);
+                renderMaster();renderDynamicForms();refreshVisitKpi();
+                return true;
+            }catch(err){
+                clearSession();
+                currentUser=null;
+                document.getElementById('login-screen').classList.remove('hidden');
+                return false;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
             lucide.createIcons();
             calculateInvoiceTotal();
             loadDb();
+            await restoreSession();
         });
 
         // Role Switcher Simulation
@@ -470,83 +502,36 @@
             const adminView = document.getElementById('view-admin');
             const btnSales = document.getElementById('btn-sales');
             const btnAdmin = document.getElementById('btn-admin');
+            const roleSwitcher = document.getElementById('role-switcher');
             const userName = document.getElementById('current-user-name');
             const userRole = document.getElementById('current-user-role');
+
+            // Security UI: Sales tidak pernah boleh membuka Dashboard Admin.
+            if (currentUser?.role === 'sales' && role === 'admin') role = 'sales';
+
+            if (currentUser?.role === 'sales') {
+                if (roleSwitcher) roleSwitcher.classList.add('hidden');
+            } else {
+                if (roleSwitcher) roleSwitcher.classList.remove('hidden');
+            }
 
             if (role === 'sales') {
                 salesView.classList.remove('hidden');
                 adminView.classList.add('hidden');
-                btnSales.className = "px-3 py-1.5 text-xs font-medium rounded-lg transition-all flex items-center gap-1.5 bg-brand-600 text-white shadow";
-                btnAdmin.className = "px-3 py-1.5 text-xs font-medium rounded-lg transition-all flex items-center gap-1.5 text-slate-300 hover:text-white";
+                if(btnSales) btnSales.className = "px-3 py-1.5 text-xs font-medium rounded-lg transition-all flex items-center gap-1.5 bg-brand-600 text-white shadow";
+                if(btnAdmin) btnAdmin.className = "px-3 py-1.5 text-xs font-medium rounded-lg transition-all flex items-center gap-1.5 text-slate-300 hover:text-white";
                 userName.innerText = currentUser?.name || "Sales";
-                userRole.innerText = "Sales Lapangan";
+                userRole.innerText = currentUser?.role==='sales' ? "Sales Lapangan" : "Tampilan Sales";
             } else {
                 salesView.classList.add('hidden');
                 adminView.classList.remove('hidden');
-                btnAdmin.className = "px-3 py-1.5 text-xs font-medium rounded-lg transition-all flex items-center gap-1.5 bg-brand-600 text-white shadow";
-                btnSales.className = "px-3 py-1.5 text-xs font-medium rounded-lg transition-all flex items-center gap-1.5 text-slate-300 hover:text-white";
+                if(btnAdmin) btnAdmin.className = "px-3 py-1.5 text-xs font-medium rounded-lg transition-all flex items-center gap-1.5 bg-brand-600 text-white shadow";
+                if(btnSales) btnSales.className = "px-3 py-1.5 text-xs font-medium rounded-lg transition-all flex items-center gap-1.5 text-slate-300 hover:text-white";
                 userName.innerText = currentUser?.name || "Administrator";
                 userRole.innerText = "Admin / Supervisor";
             }
         }
 
-        let currentGps = null;
-        function captureGps() {
-            const gpsStatus = document.getElementById('gps-status');
-            if (!navigator.geolocation) { gpsStatus.innerHTML = '<span class="text-red-600 font-semibold">GPS tidak didukung perangkat/browser.</span>'; return; }
-            gpsStatus.innerHTML = '<span class="text-brand-600 font-semibold">Mengambil lokasi GPS aktual...</span>';
-            navigator.geolocation.getCurrentPosition((pos) => {
-                currentGps = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy, at: new Date().toISOString() };
-                gpsStatus.innerHTML = `<span class="text-emerald-700 font-bold">${currentGps.lat.toFixed(6)}, ${currentGps.lng.toFixed(6)} · akurasi ±${Math.round(currentGps.accuracy)} m</span>`;
-                showToast("Lokasi GPS aktual berhasil diambil.");
-            }, (err) => {
-                gpsStatus.innerHTML = `<span class="text-red-600 font-semibold">GPS gagal: ${err.message}</span>`;
-            }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
-        }
-
-        function triggerCamera() { document.getElementById('store-photo-input').click(); }
-        function handleStorePhoto(input) {
-            const photoStatus = document.getElementById('photo-status');
-            if (input.files && input.files[0]) {
-                photoStatus.innerHTML = `<span class="text-emerald-700 font-bold">Foto tersimpan: ${input.files[0].name}</span>`;
-                showToast("Foto kunjungan/toko dipilih.");
-            }
-        }
-
-        function calculateInvoiceTotal() {
-            let totalAmount=0,totalQty=0;
-            document.querySelectorAll('.product-qty').forEach(input=>{ const q=parseInt(input.value)||0, price=parseInt(input.dataset.price)||0; totalAmount+=q*price; totalQty+=q; });
-            document.getElementById('invoice-total-display').innerText = "Rp " + totalAmount.toLocaleString('id-ID');
-            document.getElementById('invoice-qty-display').innerText = totalQty + " Dus";
-        }
-
-        async function fileToCompressedDataUrl(file,maxWidth=1280,quality=.72){
-          return new Promise((resolve,reject)=>{const fr=new FileReader();fr.onerror=reject;fr.onload=()=>{const img=new Image();img.onerror=reject;img.onload=()=>{let w=img.width,h=img.height;if(w>maxWidth){h=Math.round(h*maxWidth/w);w=maxWidth;}const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);resolve(c.toDataURL('image/jpeg',quality));};img.src=fr.result;};fr.readAsDataURL(file);});
-        }
-        async function handleStoreSubmit(e) {
-            e.preventDefault();
-            if(!currentUser || currentUser.role !== 'sales'){ showToast('Hanya akun Sales yang dapat mendaftarkan toko.'); return; }
-            if(!currentGps){ showToast('Ambil lokasi GPS toko terlebih dahulu.'); return; }
-            const photoInput=document.getElementById('store-photo-input'); if(!(photoInput.files&&photoInput.files[0])){showToast('Foto tampak toko wajib diambil.');return;}
-            const name=document.getElementById('store-name').value.trim(),owner=document.getElementById('owner-name').value.trim(),wa=document.getElementById('store-wa').value.trim(),address=document.getElementById('store-address').value.trim();
-            if(!name||!owner||!wa||!address){showToast('Lengkapi data toko terlebih dahulu.');return;}
-            try{
-              showToast('Mengompres foto dan mengirim data toko...'); const photoBase64=await fileToCompressedDataUrl(photoInput.files[0]);
-              await apiPost({action:'addStore',storeName:name,ownerName:owner,whatsapp:wa,address,latitude:currentGps.lat,longitude:currentGps.lng,gpsAccuracy:currentGps.accuracy||0,salesId:currentUser.salesId,salesName:currentUser.name,photoBase64,photoMimeType:'image/jpeg'});
-              await refreshOnlineData(false); document.getElementById('store-form').reset(); currentGps=null;document.getElementById('gps-status').innerText='Belum diambil';document.getElementById('photo-status').innerText='Belum ada foto diambil';showToast('Toko & foto berhasil tersimpan online dan masuk Admin');
-            }catch(err){showToast('Gagal menyimpan toko: '+err.message);}
-        }
-
-        function handleInvoiceSubmit(e) {
-            e.preventDefault();
-            showToast("Invoice berhasil dibuat & dikirim ke WhatsApp pemilik toko!");
-        }
-
-        function downloadPdfInvoice() {
-            showToast("File PDF Invoice berhasil diunduh ke perangkat!");
-        }
-
-        // KPI Period Switcher Simulation for Sales
         function switchKpiPeriod(period) {
             ['daily','weekly','monthly'].forEach(p=>document.getElementById(`kpi-btn-${p}`).className="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition");
             document.getElementById(`kpi-btn-${period}`).className="px-3 py-1.5 rounded-lg bg-white text-slate-800 shadow-sm transition";
@@ -563,8 +548,8 @@
         }
 
         const API_URL='https://script.google.com/macros/s/AKfycbyR-riwS3HVUM93sA8D09AR3Orb1kgYbZnZ9HwKSYA8Z1wo0DaJh-Z-sqQhSQvJ53ANCg/exec';
-        const DBKEY='tmeez_sales_monitor_v6_1_cache';
-        const SESSIONKEY='tmeez_sales_monitor_v6_1_session';
+        const DBKEY='tmeez_sales_monitor_v6_3_cache';
+        const SESSIONKEY='tmeez_sales_monitor_v6_3_session';
         let apiOnline=false;
         let sessionToken='';
         async function apiGet(action){
@@ -591,7 +576,7 @@
         function clearSession(){sessionToken='';localStorage.removeItem(SESSIONKEY);}
         function mapSales(x){return {id:String(x.SalesID||''),name:String(x.Name||''),phone:String(x.Phone||''),area:String(x.Area||''),targetVisit:+x.TargetVisit||0,targetBox:+x.TargetBox||0,active:String(x.Status||'Active').toLowerCase()==='active'};}
         function mapStore(x){return {id:String(x.StoreID||''),name:String(x.StoreName||''),owner:String(x.OwnerName||''),wa:String(x.WhatsApp||''),address:String(x.Address||''),lat:+x.Latitude||0,lng:+x.Longitude||0,accuracy:+x.GPSAccuracy||0,photoFileId:String(x.PhotoFileID||''),photoUrl:String(x.PhotoURL||''),createdBySalesId:String(x.CreatedBySalesID||''),createdByName:String(x.CreatedByName||''),createdAt:x.CreatedAt?String(x.CreatedAt):'',status:String(x.Status||'Active'),source:String(x.CreatedBySalesID||'')==='ADMIN'?'admin':'sales'};}
-        function mapProduct(x){return {id:String(x.ProductID||''),name:String(x.ProductName||''),price:+x.PricePerBox||0,pack:+x.UnitsPerBox||0,sku:String(x.SKU||'')};}
+        function mapProduct(x){return {id:String(x.ProductID||''),name:String(x.ProductName||''),price:+(x.PricePerPcs!==''&&x.PricePerPcs!==undefined?x.PricePerPcs:x.PricePerBox)||0,pack:+x.UnitsPerBox||10,sku:String(x.SKU||'')};}
         async function refreshOnlineData(showMessage=false){
           try{
             let st,pr;
@@ -618,7 +603,7 @@
         function saveDb(){localStorage.setItem(DBKEY,JSON.stringify(db));}
         window.addEventListener('storage',e=>{if(e.key===DBKEY && e.newValue){try{db=JSON.parse(e.newValue);renderMaster();renderDynamicForms();refreshVisitKpi();}catch(err){}}});
         async function loginApp(e){
-          e.preventDefault(); const u=document.getElementById('login-user').value.trim(),p=document.getElementById('login-pass').value;
+          e.preventDefault(); clearSession(); const u=document.getElementById('login-user').value.trim(),p=document.getElementById('login-pass').value;
           try{
             const res=await apiPost({action:'login',username:u,password:p}); sessionToken=res.token||''; const x=res.user||{}; const role=String(x.role||'').toLowerCase();
             currentUser={username:x.username||u,role:role==='sales'?'sales':'admin',name:x.sales?.Name||x.username||'Administrator',salesId:x.salesId||'',active:true}; saveSession();
@@ -639,7 +624,7 @@
           e.preventDefault(); try{await apiPost({action:'addStore',storeName:document.getElementById('m-store-name').value.trim(),ownerName:document.getElementById('m-store-owner').value.trim(),latitude:+document.getElementById('m-store-lat').value,longitude:+document.getElementById('m-store-lng').value,salesId:document.getElementById('m-store-sales')?.value||''});e.target.reset();await refreshOnlineData(false);showToast('Toko tersimpan ke Google Sheet');}catch(err){showToast('Gagal menambah toko: '+err.message);}
         }
         async function addProduct(e){
-          e.preventDefault();try{await apiPost({action:'addProduct',productName:document.getElementById('m-product-name').value.trim(),pricePerBox:+document.getElementById('m-product-price').value||0,unitsPerBox:+document.getElementById('m-product-pack').value||10,unit:'Dus'});e.target.reset();await refreshOnlineData(false);showToast('Produk tersimpan ke Google Sheet');}catch(err){showToast('Gagal menambah produk: '+err.message);}
+          e.preventDefault();try{await apiPost({action:'addProduct',productName:document.getElementById('m-product-name').value.trim(),pricePerPcs:+document.getElementById('m-product-price').value||0,unitsPerBox:+document.getElementById('m-product-pack').value||10,unit:'PCS'});e.target.reset();await refreshOnlineData(false);showToast('Produk tersimpan ke Google Sheet');}catch(err){showToast('Gagal menambah produk: '+err.message);}
         }
         function removeMaster(type,id){showToast('Hapus data online akan diaktifkan pada backend tahap berikutnya.');}
         function toggleSales(id){showToast('Aktif/nonaktif sales online akan diaktifkan pada backend tahap berikutnya.');}
@@ -648,12 +633,12 @@
           const tl=document.getElementById('store-list'),pl=document.getElementById('product-list');
           renderSalesManagement();
           if(tl) tl.innerHTML=db.stores.map(x=>`<div class="flex justify-between gap-2 bg-slate-50 p-2 rounded text-[11px]"><span class="min-w-0"><b>${escapeHtml(x.name||'')}</b>${x.source==='sales'?'<span class="ml-1 px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700">Dari Sales</span>':''}<br><span class="text-slate-500">${escapeHtml(x.address||x.owner||'')}</span><br>${Number(x.lat||0).toFixed(5)}, ${Number(x.lng||0).toFixed(5)}${x.createdByName?`<br><span class="text-brand-700">Didaftarkan: ${escapeHtml(x.createdByName)}</span>`:''}${x.createdAt?` · ${new Date(x.createdAt).toLocaleString('id-ID')}`:''}</span><button class="shrink-0" onclick="removeMaster('stores','${x.id}')">✕</button></div>`).join('')||'<p class="text-[11px] text-slate-400">Belum ada toko.</p>';
-          if(pl) pl.innerHTML=db.products.map(x=>`<div class="flex justify-between bg-slate-50 p-2 rounded text-[11px]"><span><b>${x.name}</b><br>Rp ${x.price.toLocaleString('id-ID')}/dus · isi ${x.pack}</span><button onclick="removeMaster('products','${x.id}')">✕</button></div>`).join('')||'<p class="text-[11px] text-slate-400">Belum ada produk.</p>';
+          if(pl) pl.innerHTML=db.products.map(x=>`<div class="flex justify-between bg-slate-50 p-2 rounded text-[11px]"><span><b>${x.name}</b><br>Rp ${x.price.toLocaleString('id-ID')}/PCS · ${x.pack} PCS/dus</span><button onclick="removeMaster('products','${x.id}')">✕</button></div>`).join('')||'<p class="text-[11px] text-slate-400">Belum ada produk.</p>';
         }
         function renderSalesManagement(){
           const sl=document.getElementById('sales-list'); if(!sl)return; const q=(document.getElementById('sales-search')?.value||'').toLowerCase();
           const rows=db.sales.filter(x=>{const u=db.users.find(z=>z.salesId===x.id);return [x.name,x.area,x.phone,u?.username].join(' ').toLowerCase().includes(q)});
-          sl.innerHTML=rows.map(x=>{const u=db.users.find(z=>z.salesId===x.id); const visits=db.visits.filter(v=>v.salesId===x.id); const orders=visits.filter(v=>v.result==='order').length; const strike=visits.length?Math.round(orders/visits.length*100):0; const registered=db.stores.filter(t=>t.createdBySalesId===x.id || (u && t.createdByUsername===u.username)).length; return `<div class="border rounded-xl p-4 bg-slate-50/60"><div class="flex justify-between gap-3"><div><p class="font-bold text-sm">${escapeHtml(x.name)}</p><p class="text-[11px] text-slate-500">${escapeHtml(x.area||'-')} · @${escapeHtml(u?.username||'-')}</p><p class="text-[11px] mt-1 ${x.active!==false?'text-emerald-600':'text-red-600'}">${x.active!==false?'● Akun aktif':'● Akun nonaktif'}</p></div><div class="text-right text-[11px]"><b>${visits.length}</b> visit<br><b>${registered}</b> toko baru<br><b>${strike}%</b> strike</div></div><div class="grid grid-cols-2 gap-2 mt-3 text-[11px]"><div class="bg-white rounded-lg p-2">Target Visit<br><b>${x.targetVisit||0}</b>/bulan</div><div class="bg-white rounded-lg p-2">Target Dus<br><b>${x.targetBox||0}</b>/bulan</div></div><button onclick="openSalesModal('${x.id}')" class="mt-3 w-full bg-slate-900 text-white rounded-lg py-2 text-xs font-semibold">Detail / Edit Sales</button></div>`}).join('')||'<div class="md:col-span-2 xl:col-span-3 py-8 text-center text-sm text-slate-400">Belum ada sales. Tambahkan sales melalui form di atas.</div>';
+          sl.innerHTML=rows.map(x=>{const u=db.users.find(z=>z.salesId===x.id); const visits=db.visits.filter(v=>v.salesId===x.id); const orders=visits.filter(v=>v.result==='order').length; const strike=visits.length?Math.round(orders/visits.length*100):0; const registered=db.stores.filter(t=>t.createdBySalesId===x.id || (u && t.createdByUsername===u.username)).length; return `<div class="border rounded-xl p-4 bg-slate-50/60"><div class="flex justify-between gap-3"><div><p class="font-bold text-sm">${escapeHtml(x.name)}</p><p class="text-[11px] text-slate-500">${escapeHtml(x.area||'-')} · @${escapeHtml(u?.username||'-')}</p><p class="text-[11px] mt-1 ${x.active!==false?'text-emerald-600':'text-red-600'}">${x.active!==false?'● Akun aktif':'● Akun nonaktif'}</p></div><div class="text-right text-[11px]"><b>${visits.length}</b> visit<br><b>${registered}</b> toko baru<br><b>${strike}%</b> strike</div></div><div class="grid grid-cols-2 gap-2 mt-3 text-[11px]"><div class="bg-white rounded-lg p-2">Target Visit<br><b>${x.targetVisit||0}</b>/bulan</div><div class="bg-white rounded-lg p-2">Target PCS<br><b>${x.targetBox||0}</b>/bulan</div></div><button onclick="openSalesModal('${x.id}')" class="mt-3 w-full bg-slate-900 text-white rounded-lg py-2 text-xs font-semibold">Detail / Edit Sales</button></div>`}).join('')||'<div class="md:col-span-2 xl:col-span-3 py-8 text-center text-sm text-slate-400">Belum ada sales. Tambahkan sales melalui form di atas.</div>';
         }
         function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
         function openSalesModal(id){
@@ -679,7 +664,15 @@
           const vs=document.getElementById('visit-store'),is=document.getElementById('invoice-store'),ip=document.getElementById('invoice-products');
           if(vs)vs.innerHTML='<option value="">Pilih toko yang dikunjungi</option>'+db.stores.map(x=>`<option value="${x.id}" data-lat="${x.lat}" data-lng="${x.lng}">${x.name}</option>`).join('');
           if(is)is.innerHTML='<option value="">-- Pilih Toko Terdaftar --</option>'+db.stores.map(x=>`<option value="${x.id}">${x.name}${x.owner?' ('+x.owner+')':''}</option>`).join('');
-          if(ip)ip.innerHTML=db.products.map(x=>`<div class="flex items-center justify-between gap-2"><span class="text-xs font-medium flex-1">${x.name}<br><small class="text-slate-400">Rp ${x.price.toLocaleString('id-ID')}/dus</small></span><input type="number" min="0" value="0" data-price="${x.price}" class="product-qty w-20 px-2 py-1.5 text-center rounded-lg border text-xs font-bold" oninput="calculateInvoiceTotal()"></div>`).join(''); calculateInvoiceTotal();
+          if(ip)ip.innerHTML=db.products.map(x=>`<div class="invoice-item border rounded-xl bg-white p-3" data-product-id="${x.id}" data-product-name="${escapeHtml(x.name)}">
+            <div class="flex justify-between gap-2 mb-2"><span class="text-xs font-bold">${escapeHtml(x.name)}</span><span class="text-[10px] text-slate-400">Acuan Rp ${x.price.toLocaleString('id-ID')}/PCS</span></div>
+            <div class="grid grid-cols-3 gap-2">
+              <label class="text-[10px] text-slate-500">Qty PCS<input type="number" min="0" step="1" value="0" class="product-qty mt-1 w-full px-2 py-2 rounded-lg border text-xs font-bold" oninput="calculateInvoiceTotal()"></label>
+              <label class="text-[10px] text-slate-500">Harga/PCS<input type="number" min="0" step="1" value="${x.price}" class="product-price mt-1 w-full px-2 py-2 rounded-lg border text-xs font-bold" oninput="calculateInvoiceTotal()"></label>
+              <label class="text-[10px] text-slate-500">Diskon Rp<input type="number" min="0" step="1" value="0" class="product-discount mt-1 w-full px-2 py-2 rounded-lg border text-xs font-bold" oninput="calculateInvoiceTotal()"></label>
+            </div>
+            <div class="text-right text-[11px] mt-2 text-indigo-700">Total: <b class="product-line-total">Rp 0</b></div>
+          </div>`).join(''); calculateInvoiceTotal();
         }
         function fillCurrentStoreGps(){if(!navigator.geolocation){showToast('GPS tidak tersedia');return;} navigator.geolocation.getCurrentPosition(p=>{document.getElementById('m-store-lat').value=p.coords.latitude.toFixed(7);document.getElementById('m-store-lng').value=p.coords.longitude.toFixed(7);showToast('Koordinat terisi');},e=>showToast('GPS gagal: '+e.message),{enableHighAccuracy:true});}
         function refreshVisitKpi(){ renderSalesProgress('daily');const today=new Date().toISOString().slice(0,10); let arr=db.visits.filter(v=>v.date===today); if(currentUser?.role==='sales') arr=arr.filter(v=>v.salesId===currentUser.salesId||v.user===currentUser.username); const eff=arr.filter(v=>v.result==='order').length; visitStats={calls:arr.length,effective:eff,newOutlet:arr.filter(v=>v.newOutlet).length}; const a=document.getElementById('kpi-calls'); if(a){a.innerText=arr.length;document.getElementById('kpi-effective').innerText=eff;document.getElementById('kpi-strike').innerText=arr.length?Math.round(eff/arr.length*100)+'%':'0%';document.getElementById('kpi-new').innerText=visitStats.newOutlet;}}
@@ -694,7 +687,7 @@
           const targetVisit=sales ? (period==='monthly'?Number(sales.targetVisit||0):Math.ceil(Number(sales.targetVisit||0)/25*factor)) : 0;
           const targetBox=sales ? (period==='monthly'?Number(sales.targetBox||0):Math.ceil(Number(sales.targetBox||0)/25*factor)) : 0;
           const sold=arr.reduce((n,v)=>n+Number(v.qty||0),0), visits=arr.length;
-          document.getElementById('box-progress-text').innerText=`${sold} / ${targetBox} Dus`; document.getElementById('box-progress-bar').style.width=(targetBox?Math.min(100,sold/targetBox*100):0)+'%'; document.getElementById('box-remaining').innerText=targetBox? (sold>=targetBox?'Target tercapai':`Kurang ${targetBox-sold} dus lagi`) :'Target belum ditetapkan';
+          document.getElementById('box-progress-text').innerText=`${sold} / ${targetBox} PCS`; document.getElementById('box-progress-bar').style.width=(targetBox?Math.min(100,sold/targetBox*100):0)+'%'; document.getElementById('box-remaining').innerText=targetBox? (sold>=targetBox?'Target tercapai':`Kurang ${targetBox-sold} PCS lagi`) :'Target belum ditetapkan';
           document.getElementById('visit-progress-text').innerText=`${visits} / ${targetVisit} Toko`; document.getElementById('visit-progress-bar').style.width=(targetVisit?Math.min(100,visits/targetVisit*100):0)+'%'; document.getElementById('visit-remaining').innerText=targetVisit? (visits>=targetVisit?'Target tercapai':`Kurang ${targetVisit-visits} toko lagi`) :'Target belum ditetapkan';
         }
         let activeVisit = null; let visitStats = {calls:0,effective:0,newOutlet:0};
@@ -715,6 +708,154 @@
         }
         function toggleVisitReason(){document.getElementById('no-order-reason').classList.toggle('hidden',document.getElementById('visit-result').value!=='no_order');}
         function finishVisit(){ if(!activeVisit){showToast('Belum ada check-in aktif');return;} const result=document.getElementById('visit-result').value, end=new Date(), dur=Math.max(1,Math.round((end-activeVisit.checkIn)/60000)); db.visits.push({id:uid('v'),storeId:activeVisit.storeId,store:activeVisit.store,user:currentUser?.username||'unknown',salesId:currentUser?.salesId||null,salesName:currentUser?.name||'Unknown',date:end.toISOString().slice(0,10),checkIn:activeVisit.checkIn.toISOString(),checkOut:end.toISOString(),lat:activeVisit.lat,lng:activeVisit.lng,distance:Math.round(activeVisit.distance),duration:dur,result,reason:result==='no_order'?document.getElementById('no-order-reason').value:''}); saveDb(); refreshVisitKpi(); document.getElementById('visit-result-panel').classList.add('hidden'); document.getElementById('visit-badge').className='text-xs px-3 py-1 rounded-full bg-slate-100'; document.getElementById('visit-badge').innerText='Belum check-in'; document.getElementById('visit-info').innerHTML=`Kunjungan ${activeVisit.store} selesai · durasi ${dur} menit · hasil: ${result}.`; activeVisit=null; showToast('Kunjungan tersimpan'); }
+        let lastSavedOrder = null;
+        let lastInvoiceFingerprint = '';
+
+        function rupiah(n){ return 'Rp '+Math.round(Number(n||0)).toLocaleString('id-ID'); }
+
+        function collectInvoiceItems(){
+          return [...document.querySelectorAll('.invoice-item')].map(row=>{
+            const qty=Math.max(0,Math.floor(Number(row.querySelector('.product-qty')?.value||0)));
+            const price=Math.max(0,Number(row.querySelector('.product-price')?.value||0));
+            const discount=Math.max(0,Number(row.querySelector('.product-discount')?.value||0));
+            const before=qty*price;
+            const total=Math.max(0,before-discount);
+            return {
+              productId:row.dataset.productId,
+              productName:row.dataset.productName,
+              qtyPcs:qty,
+              unitPricePcs:price,
+              discountAmount:discount,
+              subtotalBeforeDiscount:before,
+              total:total,
+              row:row
+            };
+          }).filter(x=>x.qtyPcs>0);
+        }
+
+        function calculateInvoiceTotal(){
+          const items=collectInvoiceItems();
+          let qty=0,total=0;
+          items.forEach(x=>{
+            qty+=x.qtyPcs;
+            total+=x.total;
+            const el=x.row?.querySelector('.product-line-total');
+            if(el)el.innerText=rupiah(x.total);
+          });
+          document.querySelectorAll('.invoice-item').forEach(row=>{
+            const qty=Number(row.querySelector('.product-qty')?.value||0);
+            if(!qty){const el=row.querySelector('.product-line-total');if(el)el.innerText='Rp 0';}
+          });
+          const t=document.getElementById('invoice-total-display');
+          const q=document.getElementById('invoice-qty-display');
+          if(t)t.innerText=rupiah(total);
+          if(q)q.innerText=qty+' PCS';
+          return {items,totalQtyPcs:qty,grandTotal:total};
+        }
+
+        function validateInvoice(){
+          const storeId=document.getElementById('invoice-store').value;
+          if(!storeId)throw new Error('Pilih toko terlebih dahulu.');
+          const calc=calculateInvoiceTotal();
+          if(!calc.items.length)throw new Error('Isi Qty PCS minimal pada satu produk.');
+          for(const x of calc.items){
+            if(x.discountAmount>x.subtotalBeforeDiscount)throw new Error('Diskon '+x.productName+' melebihi subtotal produk.');
+          }
+          return {storeId,...calc,notes:document.getElementById('invoice-notes').value.trim()};
+        }
+
+        async function saveInvoiceOrder(){
+          const inv=validateInvoice();
+          const fingerprint=JSON.stringify({storeId:inv.storeId,notes:inv.notes,items:inv.items.map(x=>[x.productId,x.qtyPcs,x.unitPricePcs,x.discountAmount])});
+          if(lastSavedOrder && lastInvoiceFingerprint===fingerprint)return lastSavedOrder;
+          const res=await apiPost({
+            action:'createOrder',
+            storeId:inv.storeId,
+            salesId:currentUser?.salesId||'',
+            notes:inv.notes,
+            paymentType:'Tunai',
+            items:inv.items.map(x=>({
+              productId:x.productId,
+              qtyPcs:x.qtyPcs,
+              unitPricePcs:x.unitPricePcs,
+              discountAmount:x.discountAmount
+            }))
+          });
+          lastSavedOrder=res.order;
+          lastInvoiceFingerprint=fingerprint;
+          return res.order;
+        }
+
+        async function handleInvoiceSubmit(e){
+          e.preventDefault();
+          try{
+            const order=await saveInvoiceOrder();
+            const store=db.stores.find(s=>s.id===order.storeId);
+            let wa=String(store?.wa||order.storeWhatsApp||'').replace(/\D/g,'');
+            if(wa.startsWith('0'))wa='62'+wa.slice(1);
+            if(!wa){showToast('Order tersimpan, tetapi nomor WhatsApp toko belum tersedia.');return;}
+
+            const lines=[
+              '*Tmeez - Nota Penjualan*',
+              'No: '+order.orderId,
+              'Toko: '+order.storeName,
+              'Sales: '+order.salesName,
+              '',
+              ...order.items.map((x,i)=>`${i+1}. ${x.productName}\n${x.qtyPcs} PCS × ${rupiah(x.unitPricePcs)}${x.discountAmount?'\nDiskon '+rupiah(x.discountAmount):''}\n= ${rupiah(x.total)}`),
+              '',
+              'Subtotal: '+rupiah(order.subtotal),
+              'Diskon: '+rupiah(order.discount),
+              '*TOTAL: '+rupiah(order.grandTotal)+'*',
+              order.notes?'Catatan: '+order.notes:'',
+              '',
+              'Terima kasih.'
+            ].filter(Boolean);
+            window.open('https://wa.me/'+wa+'?text='+encodeURIComponent(lines.join('\n')),'_blank','noopener');
+            showToast('Order tersimpan & WhatsApp dibuka');
+          }catch(err){showToast('Gagal: '+err.message);}
+        }
+
+        async function downloadPdfInvoice(){
+          try{
+            validateInvoice();
+            // saveInvoiceOrder memakai fingerprint: form sama tidak membuat order ganda.
+            const order=await saveInvoiceOrder();
+
+            if(!window.jspdf?.jsPDF)throw new Error('Modul PDF belum termuat. Pastikan internet aktif lalu muat ulang aplikasi.');
+            const {jsPDF}=window.jspdf;
+            const doc=new jsPDF({unit:'mm',format:'a4'});
+            let y=18;
+            doc.setFontSize(17);doc.text('TMEEZ - NOTA PENJUALAN',15,y);y+=8;
+            doc.setFontSize(10);
+            doc.text('No. Order: '+order.orderId,15,y);y+=5;
+            doc.text('Tanggal: '+order.orderDate,15,y);y+=5;
+            doc.text('Toko: '+order.storeName,15,y);y+=5;
+            doc.text('Sales: '+order.salesName,15,y);y+=8;
+            doc.setFontSize(9);
+            doc.text('Produk',15,y);doc.text('Qty',100,y);doc.text('Harga/PCS',120,y);doc.text('Diskon',155,y);doc.text('Total',185,y,{align:'right'});y+=4;
+            doc.line(15,y,195,y);y+=5;
+            order.items.forEach(x=>{
+              if(y>270){doc.addPage();y=18;}
+              const name=String(x.productName||'').slice(0,42);
+              doc.text(name,15,y);
+              doc.text(String(x.qtyPcs),103,y,{align:'right'});
+              doc.text(Math.round(x.unitPricePcs).toLocaleString('id-ID'),145,y,{align:'right'});
+              doc.text(Math.round(x.discountAmount).toLocaleString('id-ID'),170,y,{align:'right'});
+              doc.text(Math.round(x.total).toLocaleString('id-ID'),195,y,{align:'right'});
+              y+=6;
+            });
+            y+=2;doc.line(115,y,195,y);y+=6;
+            doc.text('Subtotal',125,y);doc.text(rupiah(order.subtotal),195,y,{align:'right'});y+=5;
+            doc.text('Diskon',125,y);doc.text(rupiah(order.discount),195,y,{align:'right'});y+=5;
+            doc.setFontSize(11);doc.text('TOTAL',125,y);doc.text(rupiah(order.grandTotal),195,y,{align:'right'});y+=8;
+            doc.setFontSize(9);
+            if(order.notes)doc.text('Catatan: '+order.notes,15,y);
+            const safe=String(order.storeName||'toko').replace(/[^a-z0-9_-]+/gi,'_');
+            doc.save(`Tmeez_${order.orderId}_${safe}.pdf`);
+            showToast('PDF berhasil dibuat');
+          }catch(err){showToast('PDF gagal: '+err.message);}
+        }
+
         function exportCsv(){
           const rows=[['Sales','Toko','Tanggal','Hasil','Durasi Menit','Jarak Meter']];
           db.visits.forEach(v=>rows.push([v.sales||'',v.store||'',v.date||'',v.result||'',v.duration||'',Math.round(v.distance||0)]));
