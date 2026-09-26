@@ -33,7 +33,9 @@
         body { font-family: 'Inter', sans-serif; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    </style>
+    
+        .wf-dot{width:20px;height:20px;border-radius:999px;background:#e2e8f0;display:inline-flex;align-items:center;justify-content:center;font-weight:700}.pay-btn{padding:16px;border-radius:12px;border:1px solid #cbd5e1;background:white;font-weight:700}.pay-btn:hover{background:#f8fafc}
+</style>
 <link rel="manifest" href="manifest.webmanifest">    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body class="h-full flex flex-col text-slate-800 antialiased overflow-x-hidden">
@@ -92,230 +94,72 @@
 
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col">
 
-        <!-- ================= SALES VIEW ================= -->
+        <!-- ================= SALES WORKFLOW V6.5 ================= -->
         <div id="view-sales" class="space-y-6 animate-fadeIn">
-            
-            <!-- Notification Banner -->
-            <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-start gap-3 shadow-sm">
-                <div class="bg-emerald-500 text-white p-2 rounded-xl mt-0.5">
-                    <i data-lucide="shield-check" class="w-5 h-5"></i>
+          <div class="max-w-3xl mx-auto">
+            <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
+              <div class="px-5 py-4 bg-slate-900 text-white flex items-center justify-between">
+                <div><p class="text-[11px] text-slate-300">TMEEZ SALES</p><h2 class="font-bold">Aktivitas Kunjungan</h2></div>
+                <button onclick="logoutApp()" class="px-3 py-2 rounded-xl bg-white/10 text-xs font-semibold">Logout</button>
+              </div>
+              <div class="px-5 pt-4"><div class="flex gap-2 text-[10px] text-slate-500"><span id="wf-dot-home" class="wf-dot bg-brand-600 text-white">1</span><span>Aktivitas</span><span>›</span><span id="wf-dot-checkin" class="wf-dot">2</span><span>Check-in</span><span>›</span><span id="wf-dot-result" class="wf-dot">3</span><span>Hasil</span><span>›</span><span id="wf-dot-order" class="wf-dot">4</span><span>Order</span></div></div>
+
+              <div id="sales-step-home" class="sales-step p-5 space-y-4">
+                <div><h3 class="text-xl font-bold text-slate-900">Mulai aktivitas hari ini</h3><p class="text-sm text-slate-500 mt-1">Setiap toko baru maupun kunjungan toko akan tercatat sebagai kunjungan Sales setelah check-in.</p></div>
+                <div class="grid sm:grid-cols-2 gap-4">
+                  <button onclick="startNewStoreWorkflow()" class="text-left p-5 rounded-2xl border-2 border-brand-100 bg-brand-50 hover:border-brand-400 transition"><div class="w-11 h-11 rounded-xl bg-brand-600 text-white flex items-center justify-center mb-3"><i data-lucide="store" class="w-5 h-5"></i></div><b>Tambah Toko Baru</b><p class="text-xs text-slate-500 mt-1">Daftarkan toko, GPS dan foto, lalu check-in.</p></button>
+                  <button onclick="startExistingVisitWorkflow()" class="text-left p-5 rounded-2xl border-2 border-indigo-100 bg-indigo-50 hover:border-indigo-400 transition"><div class="w-11 h-11 rounded-xl bg-indigo-600 text-white flex items-center justify-center mb-3"><i data-lucide="map-pin" class="w-5 h-5"></i></div><b>Kunjungan Toko</b><p class="text-xs text-slate-500 mt-1">Pilih toko yang sudah terdaftar lalu check-in GPS.</p></button>
                 </div>
-                <div class="flex-1">
-                    <h3 class="text-sm font-semibold text-emerald-900">GPS Geofencing Aktif</h3>
-                    <p class="text-xs text-emerald-700 mt-0.5">Sistem memvalidasi jarak Anda di lokasi toko. Radius validasi mengikuti pengaturan Admin sebelum laporan atau invoice dibuat.</p>
-                </div>
+                <div class="grid grid-cols-3 gap-3 text-center pt-2"><div class="bg-slate-50 rounded-xl p-3"><b id="kpi-calls">0</b><p class="text-[10px] text-slate-500">Visit Hari Ini</p></div><div class="bg-slate-50 rounded-xl p-3"><b id="wf-today-pcs">0</b><p class="text-[10px] text-slate-500">PCS Hari Ini</p></div><div class="bg-slate-50 rounded-xl p-3"><b id="wf-today-omzet">Rp 0</b><p class="text-[10px] text-slate-500">Omzet Hari Ini</p></div></div>
+              </div>
+
+              <div id="sales-step-newstore" class="sales-step hidden p-5">
+                <button onclick="workflowHome()" class="text-xs text-slate-500 mb-4">← Kembali</button><h3 class="text-lg font-bold">Tambah Data Toko Baru</h3><p class="text-xs text-slate-500 mb-4">GPS dan foto toko wajib diambil.</p>
+                <form id="store-form" onsubmit="handleStoreSubmit(event)" class="space-y-3">
+                  <input id="store-name" required placeholder="Nama toko" class="w-full px-3.5 py-3 rounded-xl border text-sm">
+                  <div class="grid sm:grid-cols-2 gap-3"><input id="owner-name" required placeholder="Nama pemilik" class="px-3.5 py-3 rounded-xl border text-sm"><input id="store-wa" required type="tel" placeholder="WhatsApp pemilik" class="px-3.5 py-3 rounded-xl border text-sm"></div>
+                  <textarea id="store-address" required rows="2" placeholder="Alamat lengkap toko" class="w-full px-3.5 py-3 rounded-xl border text-sm"></textarea>
+                  <div class="grid sm:grid-cols-2 gap-3"><div class="p-3 bg-slate-50 border rounded-xl"><p id="gps-status" class="text-[11px] text-slate-500">GPS belum diambil</p><button type="button" id="btn-capture-gps" onclick="captureGps()" class="mt-2 w-full py-2 border bg-white rounded-lg text-xs font-semibold">Ambil Lokasi GPS</button></div><div class="p-3 bg-slate-50 border rounded-xl"><p id="photo-status" class="text-[11px] text-slate-500">Foto belum diambil</p><label for="store-photo-input" class="mt-2 block w-full py-2 border bg-white rounded-lg text-xs font-semibold text-center cursor-pointer">Buka Kamera HP</label><input id="store-photo-input" type="file" accept="image/*" capture="environment" class="sr-only" onchange="handleStorePhoto(this)"></div></div>
+                  <button type="submit" class="w-full py-3 bg-brand-600 text-white rounded-xl font-semibold">Simpan Toko & Lanjut Check-in</button>
+                </form>
+              </div>
+
+              <div id="sales-step-selectstore" class="sales-step hidden p-5">
+                <button onclick="workflowHome()" class="text-xs text-slate-500 mb-4">← Kembali</button><h3 class="text-lg font-bold">Pilih Toko yang Dikunjungi</h3><p class="text-xs text-slate-500 mb-4">Hanya toko yang menjadi tanggung jawab Anda yang ditampilkan.</p>
+                <select id="workflow-store-select" class="w-full px-3.5 py-3 rounded-xl border text-sm"><option value="">Pilih toko</option></select>
+                <button onclick="continueExistingStore()" class="mt-4 w-full py-3 bg-indigo-600 text-white rounded-xl font-semibold">Lanjut ke Check-in</button>
+              </div>
+
+              <div id="sales-step-checkin" class="sales-step hidden p-5 space-y-4">
+                <button onclick="workflowHome()" class="text-xs text-slate-500">← Batalkan</button><div><h3 class="text-lg font-bold">Check-in Kunjungan</h3><p id="workflow-store-name" class="text-sm text-brand-700 font-semibold"></p></div>
+                <select id="visit-store" class="hidden"><option value=""></option></select>
+                <div id="visit-info" class="p-4 rounded-xl bg-slate-50 border text-xs text-slate-600">Pastikan Anda berada di lokasi toko lalu tekan Check-in.</div>
+                <span id="visit-badge" class="hidden">Belum check-in</span>
+                <button id="workflow-checkin-btn" onclick="checkInVisit()" class="w-full py-3 bg-brand-600 text-white rounded-xl font-semibold">Check-in GPS di Toko</button>
+                <button id="workflow-after-checkin" onclick="showOrderQuestion()" class="hidden w-full py-3 bg-slate-900 text-white rounded-xl font-semibold">Lanjut</button>
+                <div id="visit-result-panel" class="hidden"></div>
+              </div>
+
+              <div id="sales-step-result" class="sales-step hidden p-5 space-y-4">
+                <h3 class="text-lg font-bold">Apakah ada orderan?</h3><p class="text-xs text-slate-500">Pilih hasil kunjungan toko ini.</p>
+                <div class="grid grid-cols-2 gap-3"><button onclick="workflowHasOrder()" class="py-4 rounded-xl bg-emerald-600 text-white font-bold">Ya, Ada Order</button><button onclick="workflowNoOrder()" class="py-4 rounded-xl bg-slate-200 text-slate-800 font-bold">Tidak Ada Order</button></div>
+                <div id="workflow-no-order" class="hidden space-y-3 pt-3 border-t"><label class="text-xs font-semibold">Alasan tidak order</label><select id="no-order-reason" class="w-full px-3.5 py-3 rounded-xl border text-sm"><option>Harga belum cocok</option><option>Stok toko masih ada</option><option>Sudah punya supplier</option><option>Produk belum dikenal</option><option>Minta follow-up</option><option>Toko tutup</option><option>Pemilik tidak ada</option><option>Lainnya</option></select><textarea id="visit-note" rows="2" placeholder="Catatan tambahan (opsional)" class="w-full px-3.5 py-3 rounded-xl border text-sm"></textarea><button onclick="completeNoOrderVisit()" class="w-full py-3 bg-slate-900 text-white rounded-xl font-semibold">Simpan & Selesaikan Kunjungan</button></div>
+              </div>
+
+              <div id="sales-step-order" class="sales-step hidden p-5 space-y-4">
+                <button onclick="showSalesStep('result')" class="text-xs text-slate-500">← Kembali</button><h3 class="text-lg font-bold">Isi Data Order</h3>
+                <select id="invoice-store" class="hidden"><option value=""></option></select><div id="invoice-products" class="space-y-2"></div>
+                <div class="bg-indigo-50 p-4 rounded-xl flex justify-between"><div><p class="text-xs text-slate-500">Total</p><b id="invoice-total-display" class="text-lg">Rp 0</b></div><div class="text-right"><p class="text-xs text-slate-500">Volume</p><b id="invoice-qty-display">0 PCS</b></div></div>
+                <input id="invoice-notes" placeholder="Catatan order (opsional)" class="w-full px-3.5 py-3 rounded-xl border text-sm">
+                <button onclick="showPaymentStep()" class="w-full py-3 bg-indigo-600 text-white rounded-xl font-semibold">Lanjut ke Pembayaran</button>
+              </div>
+
+              <div id="sales-step-payment" class="sales-step hidden p-5 space-y-4"><button onclick="showSalesStep('order')" class="text-xs text-slate-500">← Kembali</button><h3 class="text-lg font-bold">Pilih Metode Pembayaran</h3><p class="text-xs text-slate-500">Klik metode pembayaran untuk menyimpan transaksi dan menyelesaikan kunjungan.</p><div class="grid grid-cols-2 gap-3"><button onclick="payWorkflow('Cash')" class="pay-btn">Cash</button><button onclick="payWorkflow('Transfer')" class="pay-btn">Transfer</button><button onclick="payWorkflow('QRIS')" class="pay-btn">QRIS</button><button onclick="payWorkflow('Lainnya')" class="pay-btn">Lainnya</button></div></div>
+
+              <div id="sales-step-success" class="sales-step hidden p-5 text-center space-y-4"><div class="mx-auto w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center"><i data-lucide="check" class="w-8 h-8"></i></div><div><h3 class="text-xl font-bold">Kunjungan Selesai</h3><p id="workflow-success-text" class="text-sm text-slate-500 mt-1"></p></div><div id="workflow-order-actions" class="hidden grid grid-cols-2 gap-3"><button onclick="downloadLastOrderPdf()" class="py-3 bg-slate-900 text-white rounded-xl text-sm font-semibold">Unduh PDF</button><button onclick="shareLastOrderWhatsApp()" class="py-3 bg-emerald-600 text-white rounded-xl text-sm font-semibold">Share WhatsApp</button></div><button onclick="startNextWorkflow()" class="w-full py-3 border rounded-xl font-semibold">Kunjungan Berikutnya</button><button onclick="logoutApp()" class="w-full py-3 text-red-600 text-sm font-semibold">Logout</button></div>
             </div>
-
-            <!-- Sales KPI Progress Bar Section -->
-            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-                    <div>
-                        <h2 class="font-bold text-slate-800 text-base flex items-center gap-2">
-                            <i data-lucide="target" class="w-5 h-5 text-brand-600"></i>
-                            Pencapaian KPI Anda
-                        </h2>
-                        <p class="text-xs text-slate-500">Pantau target harian, mingguan, dan bulanan Anda secara real-time.</p>
-                    </div>
-                    <!-- Period Selector for KPI -->
-                    <div class="inline-flex bg-slate-100 p-1 rounded-xl text-xs font-medium">
-                        <button onclick="switchKpiPeriod('daily')" id="kpi-btn-daily" class="px-3 py-1.5 rounded-lg bg-white text-slate-800 shadow-sm transition">Harian</button>
-                        <button onclick="switchKpiPeriod('weekly')" id="kpi-btn-weekly" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition">Mingguan</button>
-                        <button onclick="switchKpiPeriod('monthly')" id="kpi-btn-monthly" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition">Bulanan</button>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Box Sales Target -->
-                    <div class="bg-slate-50 rounded-xl p-4 border border-slate-200/60">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-xs font-semibold text-slate-600 flex items-center gap-1.5">
-                                <i data-lucide="package" class="w-4 h-4 text-brand-600"></i> Volume Penjualan Dus
-                            </span>
-                            <span class="text-xs font-bold text-slate-900" id="box-progress-text">0 / 0 Dus</span>
-                        </div>
-                        <div class="w-full bg-slate-200 h-3 rounded-full overflow-hidden">
-                            <div id="box-progress-bar" class="bg-brand-600 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
-                        </div>
-                        <p class="text-[11px] text-slate-500 mt-2 flex justify-between">
-                            <span>Status: <strong class="text-slate-500">Belum ada data</strong></span>
-                            <span id="box-remaining">Target belum ditetapkan</span>
-                        </p>
-                    </div>
-
-                    <!-- Store Visit Target -->
-                    <div class="bg-slate-50 rounded-xl p-4 border border-slate-200/60">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-xs font-semibold text-slate-600 flex items-center gap-1.5">
-                                <i data-lucide="store" class="w-4 h-4 text-indigo-600"></i> Kunjungan Toko Unik
-                            </span>
-                            <span class="text-xs font-bold text-slate-900" id="visit-progress-text">0 / 0 Toko</span>
-                        </div>
-                        <div class="w-full bg-slate-200 h-3 rounded-full overflow-hidden">
-                            <div id="visit-progress-bar" class="bg-indigo-600 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
-                        </div>
-                        <p class="text-[11px] text-slate-500 mt-2 flex justify-between">
-                            <span>Status: <strong class="text-slate-500">Belum ada data</strong></span>
-                            <span id="visit-remaining">Target belum ditetapkan</span>
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Action Tabs for Sales: Add Store vs Create Invoice -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-                <!-- CARD 1: FORM TAMBAH TOKO & KAMERA -->
-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col">
-                    <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
-                        <h2 class="font-bold text-slate-800 flex items-center gap-2 text-base">
-                            <i data-lucide="map-pin-plus" class="w-5 h-5 text-brand-600"></i>
-                            Pendaftaran Toko Baru (Store Onboarding)
-                        </h2>
-                        <span class="text-[10px] bg-brand-50 text-brand-700 px-2.5 py-1 rounded-full font-semibold">Wajib GPS & Kamera</span>
-                    </div>
-
-                    <form id="store-form" onsubmit="handleStoreSubmit(event)" class="space-y-4 flex-1 flex flex-col justify-between">
-                        <div class="space-y-3">
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Toko</label>
-                                <input type="text" id="store-name" required placeholder="Nama toko" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-600 transition">
-                            </div>
-                            
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Pemilik</label>
-                                    <input type="text" id="owner-name" required placeholder="Nama pemilik" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-600 transition">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-semibold text-slate-700 mb-1">No. WhatsApp Pemilik</label>
-                                    <input type="tel" id="store-wa" required placeholder="081234567890" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-600 transition">
-                                </div>
-                            </div>
-
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-700 mb-1">Alamat Lengkap</label>
-                                <textarea id="store-address" rows="2" required placeholder="Alamat lengkap toko" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-600 transition resize-none"></textarea>
-                            </div>
-
-                            <!-- GPS & Camera Section -->
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                                <!-- GPS Picker -->
-                                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 flex flex-col justify-between">
-                                    <div>
-                                        <p class="text-xs font-bold text-slate-700 flex items-center gap-1">
-                                            <i data-lucide="navigation" class="w-3.5 h-3.5 text-brand-600"></i> Titik Koordinat GPS
-                                        </p>
-                                        <p id="gps-status" class="text-[11px] text-slate-500 mt-1">Belum diambil (Tekan tombol di samping)</p>
-                                    </div>
-                                    <button type="button" id="btn-capture-gps" onclick="captureGps()" class="mt-3 w-full py-2 px-3 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-lg transition flex items-center justify-center gap-1.5 shadow-sm">
-                                        <i data-lucide="locate-fixed" class="w-3.5 h-3.5 text-brand-600"></i> Ambil Lokasi GPS
-                                    </button>
-                                </div>
-
-                                <!-- Camera Capture -->
-                                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 flex flex-col justify-between">
-                                    <div>
-                                        <p class="text-xs font-bold text-slate-700 flex items-center gap-1">
-                                            <i data-lucide="camera" class="w-3.5 h-3.5 text-brand-600"></i> Foto Tampak Toko
-                                        </p>
-                                        <p id="photo-status" class="text-[11px] text-slate-500 mt-1">Belum ada foto diambil</p>
-                                    </div>
-                                    <button type="button" id="btn-open-camera" onclick="triggerCamera()" class="mt-3 w-full py-2 px-3 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-lg transition flex items-center justify-center gap-1.5 shadow-sm">
-                                        <i data-lucide="aperture" class="w-3.5 h-3.5 text-brand-600"></i> Buka Kamera HP
-                                    </button>
-                                    <input id="store-photo-input" type="file" accept="image/*" capture="environment" class="fixed -left-[9999px] top-0 w-px h-px opacity-0" onchange="handleStorePhoto(this)">
-                                </div>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="mt-4 w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm rounded-xl shadow-lg shadow-brand-600/25 transition flex items-center justify-center gap-2">
-                            <i data-lucide="save" class="w-4 h-4"></i> Simpan & Daftarkan Toko
-                        </button>
-                    </form>
-                </div>
-
-                <!-- CARD 2: PEMBUATAN INVOICE & WHATSAPP -->
-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col">
-                    <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
-                        <h2 class="font-bold text-slate-800 flex items-center gap-2 text-base">
-                            <i data-lucide="file-text" class="w-5 h-5 text-indigo-600"></i>
-                            Buat Invoice & Nota Penjualan
-                        </h2>
-                        <span class="text-[10px] bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full font-semibold">PCS · Harga Fleksibel · Diskon · PDF</span>
-                    </div>
-
-                    <form id="invoice-form" onsubmit="handleInvoiceSubmit(event)" class="space-y-4 flex-1 flex flex-col justify-between">
-                        <div class="space-y-3">
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-700 mb-1">Pilih Toko Tujuan</label>
-                                <select id="invoice-store" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition bg-white">
-                                    <option value="">-- Pilih Toko Terdaftar --</option>
-                                </select>
-                            </div>
-
-                            <!-- Produk dari Master Data -->
-                            <div class="space-y-2">
-                                <label class="block text-xs font-semibold text-slate-700">Produk, Qty, Harga & Diskon</label>
-                                <div id="invoice-products" class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2"></div>
-                            </div>
-
-                            <!-- Total Summary & Payment Info -->
-                            <div class="bg-indigo-50/60 p-3.5 rounded-xl border border-indigo-100 flex items-center justify-between">
-                                <div>
-                                    <p class="text-xs text-slate-500 font-medium">Total Nilai Tagihan</p>
-                                    <p class="text-lg font-bold text-indigo-900" id="invoice-total-display">Rp 0</p>
-                                </div>
-                                <div class="text-right">
-                                    <p class="text-xs text-slate-500 font-medium">Total Volume</p>
-                                    <p class="text-sm font-bold text-indigo-900" id="invoice-qty-display">0 PCS</p>
-                                </div>
-                            </div>
-
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-700 mb-1">Ketentuan Pembayaran / Catatan</label>
-                                <input type="text" id="invoice-notes" value="" placeholder="Catatan pembayaran (opsional)" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition">
-                            </div>
-                        </div>
-
-                        <!-- Action Buttons -->
-                        <div class="grid grid-cols-2 gap-3 pt-2">
-                            <button type="button" onclick="downloadPdfInvoice()" class="py-2.5 px-4 bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs rounded-xl shadow transition flex items-center justify-center gap-1.5">
-                                <i data-lucide="download" class="w-4 h-4"></i> Unduh PDF
-                            </button>
-                            <button type="submit" class="py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-xl shadow-lg shadow-emerald-600/25 transition flex items-center justify-center gap-1.5">
-                                <i data-lucide="message-circle" class="w-4 h-4"></i> Kirim ke WhatsApp
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-            </div>
-
-            <!-- OPERATIONAL SALES MOTORIS -->
-            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-              <section class="xl:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-                <div class="flex items-center justify-between mb-4"><div><h2 class="font-bold">Kunjungan Toko</h2><p class="text-xs text-slate-500">Check-in dilakukan saat sales sudah berada di lokasi toko.</p></div><span id="visit-badge" class="text-xs px-3 py-1 rounded-full bg-slate-100">Belum check-in</span></div>
-                <div class="grid md:grid-cols-2 gap-3">
-                  <select id="visit-store" class="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"><option value="">Pilih toko yang dikunjungi</option></select>
-                  <button type="button" onclick="checkInVisit()" class="py-2.5 bg-brand-600 text-white rounded-xl text-sm font-semibold">Check-in GPS di Toko</button>
-                </div>
-                <div id="visit-info" class="mt-3 text-xs text-slate-500">Pilih toko lalu lakukan check-in. Radius validasi admin: <strong>100 meter</strong>.</div>
-                <div id="visit-result-panel" class="hidden mt-5 border-t pt-4 space-y-3">
-                  <div class="grid md:grid-cols-2 gap-3"><select id="visit-result" onchange="toggleVisitReason()" class="px-3.5 py-2.5 rounded-xl border text-sm"><option value="order">Order</option><option value="no_order">Tidak Order</option><option value="collection">Penagihan</option><option value="followup">Follow-up</option><option value="closed">Toko Tutup</option><option value="owner_absent">Pemilik Tidak Ada</option><option value="return">Retur</option><option value="other">Lainnya</option></select><input id="visit-note" class="px-3.5 py-2.5 rounded-xl border text-sm" placeholder="Catatan kunjungan"></div>
-                  <select id="no-order-reason" class="hidden w-full px-3.5 py-2.5 rounded-xl border text-sm"><option>Harga belum cocok</option><option>Stok toko masih ada</option><option>Sudah punya supplier</option><option>Produk belum dikenal</option><option>Minta follow-up</option><option>Lainnya</option></select>
-                  <div class="flex gap-3"><button onclick="finishVisit()" class="flex-1 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-semibold">Selesai Kunjungan / Check-out</button></div>
-                </div>
-              </section>
-              <section class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100"><h2 class="font-bold mb-4">KPI Hari Ini</h2><div class="grid grid-cols-2 gap-3 text-center"><div class="bg-slate-50 p-3 rounded-xl"><b id="kpi-calls">0</b><p class="text-[11px] text-slate-500">Total Visit</p></div><div class="bg-slate-50 p-3 rounded-xl"><b id="kpi-effective">0</b><p class="text-[11px] text-slate-500">Effective Call</p></div><div class="bg-slate-50 p-3 rounded-xl"><b id="kpi-strike">0%</b><p class="text-[11px] text-slate-500">Strike Rate</p></div><div class="bg-slate-50 p-3 rounded-xl"><b id="kpi-new">0</b><p class="text-[11px] text-slate-500">New Outlet</p></div></div></section>
-            </div>
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <section class="bg-white rounded-2xl p-5 border shadow-sm"><h2 class="font-bold mb-3">Stok Motoris</h2><p class="text-xs text-slate-400">Belum ada data stok.</p></section>
-              <section class="bg-white rounded-2xl p-5 border shadow-sm"><h2 class="font-bold mb-3">Kas & Setoran</h2><p class="text-xs text-slate-400">Belum ada data kas atau setoran.</p></section>
-              <section class="bg-white rounded-2xl p-5 border shadow-sm"><h2 class="font-bold mb-3">Piutang Outlet</h2><p class="text-xs text-slate-400">Belum ada data piutang.</p></section>
-            </div>
-
+          </div>
         </div>
-
 
         <!-- ================= ADMIN DASHBOARD VIEW ================= -->
         <div id="view-admin" class="space-y-6 hidden animate-fadeIn">
@@ -590,8 +434,8 @@
         }
 
         const API_URL='https://script.google.com/macros/s/AKfycbyR-riwS3HVUM93sA8D09AR3Orb1kgYbZnZ9HwKSYA8Z1wo0DaJh-Z-sqQhSQvJ53ANCg/exec';
-        const DBKEY='tmeez_sales_monitor_v6_4_5_cache';
-        const SESSIONKEY='tmeez_sales_monitor_v6_4_5_session';
+        const DBKEY='tmeez_sales_monitor_v6_5_cache';
+        const SESSIONKEY='tmeez_sales_monitor_v6_5_session';
         let apiOnline=false;
         let sessionToken='';
         async function apiGet(action,params={}){
@@ -713,8 +557,8 @@ function renderDynamicForms(){
           const ms=document.getElementById('m-store-sales');
           if(ms){const old=ms.value;ms.innerHTML='<option value="">Pilih sales penanggung jawab</option>'+db.sales.filter(s=>s.active!==false).map(s=>`<option value="${s.id}">${s.name}</option>`).join('');ms.value=old;}
           const vs=document.getElementById('visit-store'),is=document.getElementById('invoice-store'),ip=document.getElementById('invoice-products');
-          if(vs)vs.innerHTML='<option value="">Pilih toko yang dikunjungi</option>'+db.stores.map(x=>`<option value="${x.id}" data-lat="${x.lat}" data-lng="${x.lng}">${x.name}</option>`).join('');
-          if(is)is.innerHTML='<option value="">-- Pilih Toko Terdaftar --</option>'+db.stores.map(x=>`<option value="${x.id}">${x.name}${x.owner?' ('+x.owner+')':''}</option>`).join('');
+          if(vs&&!activeVisit)vs.innerHTML='<option value="">Pilih toko yang dikunjungi</option>'+db.stores.map(x=>`<option value="${x.id}" data-lat="${x.lat}" data-lng="${x.lng}">${x.name}</option>`).join('');
+          if(is&&!activeVisit)is.innerHTML='<option value="">-- Pilih Toko Terdaftar --</option>'+db.stores.map(x=>`<option value="${x.id}">${x.name}${x.owner?' ('+x.owner+')':''}</option>`).join('');
           if(ip)ip.innerHTML=db.products.map(x=>`<div class="invoice-item border rounded-xl bg-white p-3" data-product-id="${x.id}" data-product-name="${escapeHtml(x.name)}">
             <div class="flex justify-between gap-2 mb-2"><span class="text-xs font-bold">${escapeHtml(x.name)}</span><span class="text-[10px] text-slate-400">Acuan Rp ${x.price.toLocaleString('id-ID')}/PCS</span></div>
             <div class="grid grid-cols-3 gap-2">
@@ -779,15 +623,73 @@ function renderDynamicForms(){
           if(!onboardingGps){showToast('Ambil lokasi GPS toko terlebih dahulu');return;}
           if(!onboardingPhoto){showToast('Ambil foto tampak toko terlebih dahulu');return;}
           try{
-            await apiPost({action:'addStore',storeName:document.getElementById('store-name').value.trim(),ownerName:document.getElementById('owner-name').value.trim(),whatsapp:document.getElementById('store-wa')?.value||'',address:document.getElementById('store-address')?.value||'',latitude:onboardingGps.lat,longitude:onboardingGps.lng,gpsAccuracy:onboardingGps.accuracy,photoBase64:onboardingPhoto,photoMimeType:'image/jpeg'});
+            const res=await apiPost({action:'addStore',storeName:document.getElementById('store-name').value.trim(),ownerName:document.getElementById('owner-name').value.trim(),whatsapp:document.getElementById('store-wa')?.value||'',address:document.getElementById('store-address')?.value||'',latitude:onboardingGps.lat,longitude:onboardingGps.lng,gpsAccuracy:onboardingGps.accuracy,photoBase64:onboardingPhoto,photoMimeType:'image/jpeg'});
+            const newId=String(res.storeId||'');
             e.target.reset();onboardingGps=null;onboardingPhoto=null;
-            const gs=document.getElementById('gps-status');if(gs)gs.innerText='Belum diambil (Tekan tombol di samping)';
-            const ps=document.getElementById('photo-status');if(ps)ps.innerText='Belum ada foto diambil';
-            await refreshOnlineData(false);showToast('Toko berhasil didaftarkan online');
+            await refreshOnlineData(false);
+            const store=db.stores.find(x=>String(x.id)===newId);
+            if(!store)throw new Error('Toko tersimpan tetapi belum ditemukan saat sinkronisasi. Muat ulang lalu pilih Kunjungan Toko.');
+            prepareWorkflowStore(store);
+            showSalesStep('checkin');
+            showToast('Toko tersimpan. Lanjutkan check-in kunjungan.');
           }catch(err){showToast('Gagal mendaftarkan toko: '+err.message);}
         }
 
 
+
+        let workflowPaymentMethod='Cash';
+        let workflowVisitSaved=false;
+        function showSalesStep(name){
+          document.querySelectorAll('#view-sales .sales-step').forEach(x=>x.classList.add('hidden'));
+          const el=document.getElementById('sales-step-'+name);if(el)el.classList.remove('hidden');
+          const order=['home','checkin','result','order'];const at=Math.max(0,order.indexOf(name));
+          order.forEach((x,i)=>{const d=document.getElementById('wf-dot-'+x);if(d)d.className='wf-dot '+(i<=at?'bg-brand-600 text-white':'');});
+          if(window.lucide)lucide.createIcons();
+        }
+        function workflowHome(){activeVisit=null;workflowVisitSaved=false;lastSavedOrder=null;lastInvoiceFingerprint='';showSalesStep('home');renderWorkflowToday();}
+        async function startNextWorkflow(){try{await refreshOnlineData(false);}catch(_e){}workflowHome();}
+        function startNewStoreWorkflow(){onboardingGps=null;onboardingPhoto=null;showSalesStep('newstore');}
+        function startExistingVisitWorkflow(){
+          const sel=document.getElementById('workflow-store-select');
+          if(sel)sel.innerHTML='<option value="">Pilih toko</option>'+db.stores.filter(x=>String(x.status).toLowerCase()==='active').map(x=>`<option value="${x.id}">${escapeHtml(x.name)}${x.address?' · '+escapeHtml(x.address):''}</option>`).join('');
+          showSalesStep('selectstore');
+        }
+        function continueExistingStore(){const id=document.getElementById('workflow-store-select')?.value;if(!id){showToast('Pilih toko terlebih dahulu');return;}const store=db.stores.find(x=>String(x.id)===String(id));if(!store){showToast('Toko tidak ditemukan');return;}prepareWorkflowStore(store);showSalesStep('checkin');}
+        function prepareWorkflowStore(store){
+          activeVisit=null;workflowVisitSaved=false;lastSavedOrder=null;lastInvoiceFingerprint='';
+          const vs=document.getElementById('visit-store');if(vs){vs.innerHTML=`<option value="${store.id}" data-lat="${store.lat}" data-lng="${store.lng}" selected>${escapeHtml(store.name)}</option>`;vs.value=store.id;}
+          const inv=document.getElementById('invoice-store');if(inv){inv.innerHTML=`<option value="${store.id}" selected>${escapeHtml(store.name)}</option>`;inv.value=store.id;}
+          const n=document.getElementById('workflow-store-name');if(n)n.innerText=store.name;
+          const info=document.getElementById('visit-info');if(info)info.innerHTML=`Toko: <b>${escapeHtml(store.name)}</b><br>Tekan tombol di bawah untuk validasi GPS.`;
+          document.getElementById('workflow-checkin-btn')?.classList.remove('hidden');document.getElementById('workflow-after-checkin')?.classList.add('hidden');
+        }
+        function showOrderQuestion(){if(!activeVisit){showToast('Lakukan check-in terlebih dahulu');return;}showSalesStep('result');document.getElementById('workflow-no-order')?.classList.add('hidden');}
+        function workflowHasOrder(){renderDynamicForms();if(activeVisit){const inv=document.getElementById('invoice-store');if(inv){inv.value=activeVisit.storeId;}}showSalesStep('order');calculateInvoiceTotal();}
+        function workflowNoOrder(){document.getElementById('workflow-no-order')?.classList.remove('hidden');}
+        async function completeNoOrderVisit(){
+          if(!activeVisit||workflowVisitSaved)return;
+          const end=new Date(),dur=Math.max(1,Math.round((end-activeVisit.checkIn)/60000)),reason=document.getElementById('no-order-reason')?.value||'Tidak order',note=document.getElementById('visit-note')?.value||'';
+          try{await apiPost({action:'saveVisit',storeId:activeVisit.storeId,checkInAt:activeVisit.checkIn.toISOString(),checkOutAt:end.toISOString(),latitude:activeVisit.lat,longitude:activeVisit.lng,gpsAccuracy:activeVisit.accuracy||0,distanceMeter:Math.round(activeVisit.distance),durationMinute:dur,result:'no_order',notes:[reason,note].filter(Boolean).join(' - ')});workflowVisitSaved=true;document.getElementById('workflow-order-actions')?.classList.add('hidden');document.getElementById('workflow-success-text').innerText=`${activeVisit.store} · Tidak ada order · ${reason}`;showSalesStep('success');}catch(err){showToast('Gagal menyimpan kunjungan: '+err.message);}
+        }
+        function showPaymentStep(){try{validateInvoice();showSalesStep('payment');}catch(err){showToast(err.message);}}
+        async function payWorkflow(method){
+          if(!activeVisit||workflowVisitSaved)return;workflowPaymentMethod=method;
+          try{
+            const order=await saveInvoiceOrder();
+            const end=new Date(),dur=Math.max(1,Math.round((end-activeVisit.checkIn)/60000));
+            await apiPost({action:'saveVisit',storeId:activeVisit.storeId,checkInAt:activeVisit.checkIn.toISOString(),checkOutAt:end.toISOString(),latitude:activeVisit.lat,longitude:activeVisit.lng,gpsAccuracy:activeVisit.accuracy||0,distanceMeter:Math.round(activeVisit.distance),durationMinute:dur,result:'order',notes:'Pembayaran: '+method,orderId:order.orderId});
+            workflowVisitSaved=true;await refreshOnlineData(false);document.getElementById('workflow-order-actions')?.classList.remove('hidden');document.getElementById('workflow-success-text').innerText=`${order.storeName} · ${order.totalQtyPcs} PCS · ${rupiah(order.grandTotal)} · ${method}`;showSalesStep('success');showToast('Order dan kunjungan berhasil disimpan');
+          }catch(err){showToast('Gagal menyimpan transaksi: '+err.message);}
+        }
+        function renderWorkflowToday(){
+          if(currentUser?.role!=='sales')return;const orders=(db.orders||[]).filter(o=>String(o.salesId)===String(currentUser.salesId)&&periodMatch(o.date,'daily'));const visits=(db.visits||[]).filter(v=>String(v.salesId)===String(currentUser.salesId)&&periodMatch(v.checkIn||v.date,'daily'));
+          const pcs=orders.reduce((n,o)=>n+Number(o.qty||0),0),omzet=orders.reduce((n,o)=>n+Number(o.total||0),0);const a=document.getElementById('kpi-calls');if(a)a.innerText=visits.length;const b=document.getElementById('wf-today-pcs');if(b)b.innerText=pcs;const c=document.getElementById('wf-today-omzet');if(c)c.innerText=rupiah(omzet);
+        }
+        async function downloadLastOrderPdf(){if(!lastSavedOrder){showToast('Data order belum tersedia');return;}await downloadPdfInvoice();}
+        function shareLastOrderWhatsApp(){
+          const order=lastSavedOrder;if(!order){showToast('Data order belum tersedia');return;}const store=db.stores.find(s=>String(s.id)===String(order.storeId));let wa=String(store?.wa||order.storeWhatsApp||'').replace(/\D/g,'');if(wa.startsWith('0'))wa='62'+wa.slice(1);if(!wa){showToast('Nomor WhatsApp toko belum tersedia');return;}
+          const lines=['*Tmeez - Nota Penjualan*','No: '+order.orderId,'Toko: '+order.storeName,'Sales: '+order.salesName,'Pembayaran: '+workflowPaymentMethod,'',...order.items.map((x,i)=>`${i+1}. ${x.productName}\n${x.qtyPcs} PCS × ${rupiah(x.unitPricePcs)}${x.discountPerPcs?'\nDiskon '+rupiah(x.discountPerPcs)+'/PCS':''}\n= ${rupiah(x.total)}`),'','*TOTAL: '+rupiah(order.grandTotal)+'*','','Terima kasih.'];window.open('https://wa.me/'+wa+'?text='+encodeURIComponent(lines.join('\n')),'_blank','noopener');
+        }
         window.captureGps=captureGps;window.triggerCamera=triggerCamera;window.handleStorePhoto=handleStorePhoto;window.handleStoreSubmit=handleStoreSubmit;
         function fillCurrentStoreGps(){if(!navigator.geolocation){showToast('GPS tidak tersedia');return;} navigator.geolocation.getCurrentPosition(p=>{document.getElementById('m-store-lat').value=p.coords.latitude.toFixed(7);document.getElementById('m-store-lng').value=p.coords.longitude.toFixed(7);showToast('Koordinat terisi');},e=>showToast('GPS gagal: '+e.message),{enableHighAccuracy:true});}
         const APP_TIMEZONE='Asia/Jakarta';
@@ -864,7 +766,7 @@ function renderDynamicForms(){
           set('admin-kpi-visits',total);set('admin-kpi-effective',eff);set('admin-kpi-strike',total?Math.round(eff/total*100)+'%':'0%');set('admin-kpi-duration',avg+' mnt');
         }
         function refreshVisitKpi(){
-          renderRecentVisits();renderSalesProgress('daily');
+          renderRecentVisits();renderSalesProgress('daily');if(typeof renderWorkflowToday==='function')renderWorkflowToday();
           const today=jakartaTodayKey();
           let arr=(db.visits||[]).filter(v=>dateKeyJakarta(v.checkIn||v.date)===today);
           if(currentUser?.role==='sales')arr=arr.filter(v=>String(v.salesId)===String(currentUser.salesId)||v.user===currentUser.username);
@@ -888,18 +790,9 @@ function renderDynamicForms(){
         let activeVisit = null; let visitStats = {calls:0,effective:0,newOutlet:0};
         function distanceMeters(a,b,c,d){ const R=6371000, p=Math.PI/180; const x=(c-a)*p, y=(d-b)*p; const h=Math.sin(x/2)**2+Math.cos(a*p)*Math.cos(c*p)*Math.sin(y/2)**2; return 2*R*Math.asin(Math.sqrt(h)); }
         function checkInVisit(){
-          const sel=document.getElementById('visit-store'); if(!sel.value){showToast('Pilih toko terlebih dahulu');return;}
-          if(!navigator.geolocation){showToast('GPS tidak didukung perangkat');return;}
+          const sel=document.getElementById('visit-store');if(!sel?.value){showToast('Toko kunjungan belum dipilih');return;}if(!window.isSecureContext){showToast('GPS membutuhkan HTTPS');return;}if(!navigator.geolocation){showToast('GPS tidak didukung perangkat');return;}
           document.getElementById('visit-info').innerHTML='Mengambil GPS aktual...';
-          navigator.geolocation.getCurrentPosition(pos=>{
-            const opt=sel.options[sel.selectedIndex], slat=parseFloat(opt.dataset.lat), slng=parseFloat(opt.dataset.lng);
-            const dist=distanceMeters(pos.coords.latitude,pos.coords.longitude,slat,slng); const radius=parseInt(document.getElementById('admin-radius')?.value||db.settings.radius||100);
-            if(dist>radius){document.getElementById('visit-info').innerHTML=`<span class="text-red-600 font-semibold">Check-in ditolak · jarak ${Math.round(dist)} m, batas ${radius} m.</span>`;return;}
-            activeVisit={storeId:sel.value,store:opt.text,checkIn:new Date(),lat:pos.coords.latitude,lng:pos.coords.longitude,distance:dist,accuracy:pos.coords.accuracy||0};
-            document.getElementById('visit-badge').className='text-xs px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 font-semibold'; document.getElementById('visit-badge').innerText='Check-in aktif';
-            document.getElementById('visit-info').innerHTML=`<span class="text-emerald-700 font-semibold">✓ Lokasi valid · ${Math.round(dist)} m dari titik toko · ${activeVisit.checkIn.toLocaleTimeString('id-ID')}</span>`;
-            document.getElementById('visit-result-panel').classList.remove('hidden'); showToast('Check-in kunjungan berhasil');
-          },err=>showToast('GPS gagal: '+err.message),{enableHighAccuracy:true,timeout:15000,maximumAge:0});
+          navigator.geolocation.getCurrentPosition(pos=>{const opt=sel.options[sel.selectedIndex],slat=parseFloat(opt.dataset.lat),slng=parseFloat(opt.dataset.lng);if(!isFinite(slat)||!isFinite(slng)){showToast('Koordinat toko tidak valid');return;}const dist=distanceMeters(pos.coords.latitude,pos.coords.longitude,slat,slng),radius=Number(db.settings.radius||100);if(dist>radius){document.getElementById('visit-info').innerHTML=`<span class="text-red-600 font-semibold">Check-in ditolak · jarak ${Math.round(dist)} m, batas ${radius} m.</span>`;return;}activeVisit={storeId:sel.value,store:opt.text,checkIn:new Date(),lat:pos.coords.latitude,lng:pos.coords.longitude,distance:dist,accuracy:pos.coords.accuracy||0};document.getElementById('visit-info').innerHTML=`<span class="text-emerald-700 font-semibold">✓ Check-in valid · ${Math.round(dist)} m dari titik toko · akurasi ±${Math.round(activeVisit.accuracy)} m</span>`;document.getElementById('workflow-checkin-btn')?.classList.add('hidden');document.getElementById('workflow-after-checkin')?.classList.remove('hidden');showToast('Check-in berhasil');},err=>showToast(gpsErrorMessage(err)),{enableHighAccuracy:true,timeout:30000,maximumAge:0});
         }
         function toggleVisitReason(){document.getElementById('no-order-reason').classList.toggle('hidden',document.getElementById('visit-result').value!=='no_order');}
         async function finishVisit(){
@@ -984,7 +877,8 @@ function renderDynamicForms(){
             storeId:inv.storeId,
             salesId:currentUser?.salesId||'',
             notes:inv.notes,
-            paymentType:'Tunai',
+            paymentType:workflowPaymentMethod||'Cash',
+            paymentStatus:'Lunas',
             items:inv.items.map(x=>({
               productId:x.productId,
               qtyPcs:x.qtyPcs,
