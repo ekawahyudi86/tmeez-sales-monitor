@@ -94,7 +94,7 @@
 
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col">
 
-        <!-- ================= SALES WORKFLOW V6.6.1 ================= -->
+        <!-- ================= SALES WORKFLOW V6.6.2 ================= -->
         <div id="view-sales" class="space-y-6 animate-fadeIn">
           <div class="max-w-3xl mx-auto">
             <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
@@ -184,13 +184,13 @@
 
         <!-- ================= ADMIN DASHBOARD VIEW ================= -->
         <div id="view-admin" class="space-y-6 hidden animate-fadeIn">
-            <section class="bg-amber-50 border border-amber-200 rounded-2xl p-5 shadow-sm">
+            <details class="bg-amber-50 border border-amber-200 rounded-2xl p-5 shadow-sm"><summary class="cursor-pointer font-bold text-amber-900 text-sm">Diagnostik Data Penjualan <span class="font-normal text-amber-700">— buka jika diperlukan</span></summary><section class="mt-4">
               <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div><h2 class="font-bold text-amber-900">Diagnostik Data Penjualan</h2><p class="text-xs text-amber-700 mt-1">Menampilkan data Orders & OrderItems yang benar-benar diterima browser.</p></div>
                 <button onclick="runSalesDiagnostics()" class="px-4 py-2 rounded-xl bg-amber-600 text-white text-xs font-bold">Periksa Sekarang</button>
               </div>
               <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mt-4 text-xs">
-                <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Frontend</span><b id="diag-front" class="block mt-1">V6.6.1</b></div>
+                <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Frontend</span><b id="diag-front" class="block mt-1">V6.6.2</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">API</span><b id="diag-api" class="block mt-1">-</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Orders</span><b id="diag-orders" class="block mt-1">0</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">OrderItems</span><b id="diag-items" class="block mt-1">0</b></div>
@@ -200,7 +200,7 @@
               <div class="overflow-x-auto mt-4 bg-white rounded-xl border">
                 <table class="w-full text-[11px] whitespace-nowrap"><thead><tr class="bg-slate-50 text-slate-600"><th class="p-2 text-left">OrderID</th><th class="p-2 text-left">Sales</th><th class="p-2 text-left">OrderDate</th><th class="p-2 text-center">Items</th><th class="p-2 text-center">QtyPcs</th><th class="p-2 text-right">GrandTotal</th><th class="p-2 text-center">Harian</th><th class="p-2 text-center">Mingguan</th><th class="p-2 text-center">Bulanan</th></tr></thead><tbody id="diag-body"><tr><td colspan="9" class="p-5 text-center text-slate-400">Belum diperiksa.</td></tr></tbody></table>
               </div>
-            </section>
+            </section></details>
             
             <!-- Dashboard Summary Cards -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -309,7 +309,7 @@
                 <div class="mb-4"><h2 class="font-bold">Master Data Operasional</h2><p class="text-xs text-slate-500">Master data tersimpan online di Google Sheet dan digunakan oleh akun Sales.</p></div>
                 <div class="grid lg:grid-cols-3 gap-5">
                   <div><h3 class="text-sm font-bold mb-2">Tambah Sales</h3><form onsubmit="addSales(event)" class="space-y-2"><input id="m-sales-name" required placeholder="Nama sales" class="w-full border rounded-lg p-2 text-xs"><input id="m-sales-phone" placeholder="No. HP / WhatsApp" class="w-full border rounded-lg p-2 text-xs"><input id="m-sales-area" required placeholder="Area / wilayah" class="w-full border rounded-lg p-2 text-xs"><div class="grid grid-cols-2 gap-2"><input id="m-sales-user" required placeholder="Username" autocomplete="off" class="border rounded-lg p-2 text-xs"><input id="m-sales-pass" required minlength="4" type="password" placeholder="Password awal" autocomplete="new-password" class="border rounded-lg p-2 text-xs"></div><div class="grid grid-cols-2 gap-2"><input id="m-sales-visit" type="number" value="0" placeholder="Target visit/bulan" class="border rounded-lg p-2 text-xs"><input id="m-sales-box" type="number" value="0" placeholder="Target dus/bulan" class="border rounded-lg p-2 text-xs"></div><button class="w-full bg-slate-900 text-white rounded-lg py-2 text-xs font-semibold">Buat Sales & Akun</button></form></div>
-                  <div><h3 class="text-sm font-bold mb-2">Toko</h3><form onsubmit="addStoreMaster(event)" class="space-y-2"><input id="m-store-name" required placeholder="Nama toko" class="w-full border rounded-lg p-2 text-xs"><input id="m-store-owner" placeholder="Pemilik / WA" class="w-full border rounded-lg p-2 text-xs"><select id="m-store-sales" required class="w-full border rounded-lg p-2 text-xs"><option value="">Pilih sales penanggung jawab</option></select><div class="grid grid-cols-2 gap-2"><input id="m-store-lat" required type="number" step="any" placeholder="Latitude" class="border rounded-lg p-2 text-xs"><input id="m-store-lng" required type="number" step="any" placeholder="Longitude" class="border rounded-lg p-2 text-xs"></div><button type="button" onclick="fillCurrentStoreGps()" class="w-full border rounded-lg py-2 text-xs font-semibold">Isi GPS Posisi Sekarang</button><button class="w-full bg-brand-600 text-white rounded-lg py-2 text-xs font-semibold">Tambah Toko</button></form><div id="store-list" class="mt-3 space-y-1"></div></div>
+                  <div><h3 class="text-sm font-bold mb-2">Toko</h3><form onsubmit="addStoreMaster(event)" class="space-y-2"><input id="m-store-name" required placeholder="Nama toko" class="w-full border rounded-lg p-2 text-xs"><input id="m-store-owner" placeholder="Pemilik / WA" class="w-full border rounded-lg p-2 text-xs"><select id="m-store-sales" required class="w-full border rounded-lg p-2 text-xs"><option value="">Pilih sales penanggung jawab</option></select><div class="grid grid-cols-2 gap-2"><input id="m-store-lat" required type="number" step="any" placeholder="Latitude" class="border rounded-lg p-2 text-xs"><input id="m-store-lng" required type="number" step="any" placeholder="Longitude" class="border rounded-lg p-2 text-xs"></div><button type="button" onclick="fillCurrentStoreGps()" class="w-full border rounded-lg py-2 text-xs font-semibold">Isi GPS Posisi Sekarang</button><button class="w-full bg-brand-600 text-white rounded-lg py-2 text-xs font-semibold">Tambah Toko</button></form><div class="mt-3 border-t pt-3"><div class="flex items-center justify-between mb-2"><span class="text-[11px] font-bold text-slate-700">Daftar Toko <span id="store-count" class="font-normal text-slate-400">(0)</span></span></div><input id="store-search" oninput="renderStoreMasterList()" placeholder="Cari nama toko / alamat / sales..." class="w-full border rounded-lg p-2 text-xs mb-2"><select id="store-sales-filter" onchange="renderStoreMasterList()" class="w-full border rounded-lg p-2 text-xs mb-2"><option value="">Semua Sales</option></select><div id="store-list" class="space-y-1 max-h-80 overflow-y-auto pr-1"></div></div></div>
                   <div><h3 class="text-sm font-bold mb-2">Produk</h3><form onsubmit="addProduct(event)" class="space-y-2"><input id="m-product-name" required placeholder="Nama produk" class="w-full border rounded-lg p-2 text-xs"><div class="grid grid-cols-2 gap-2"><input id="m-product-price" required type="number" placeholder="Harga acuan/PCS" class="border rounded-lg p-2 text-xs"><input id="m-product-pack" type="number" value="10" placeholder="Isi/dus (info)" class="border rounded-lg p-2 text-xs"></div><button class="w-full bg-emerald-600 text-white rounded-lg py-2 text-xs font-semibold">Tambah Produk</button></form><div id="product-list" class="mt-3 space-y-1"></div></div>
                 </div>
               </section>
@@ -478,8 +478,8 @@
         }
 
         const API_URL='https://script.google.com/macros/s/AKfycbyR-riwS3HVUM93sA8D09AR3Orb1kgYbZnZ9HwKSYA8Z1wo0DaJh-Z-sqQhSQvJ53ANCg/exec';
-        const DBKEY='tmeez_sales_monitor_v6_6_1_cache';
-        const SESSIONKEY='tmeez_sales_monitor_v6_6_1_session';
+        const DBKEY='tmeez_sales_monitor_v6_6_2_cache';
+        const SESSIONKEY='tmeez_sales_monitor_v6_6_2_session';
         let apiOnline=false;
         let sessionToken='';
         async function apiGet(action,params={}){
@@ -565,10 +565,27 @@
         async function addProduct(e){
           e.preventDefault();try{await apiPost({action:'addProduct',productName:document.getElementById('m-product-name').value.trim(),pricePerPcs:+document.getElementById('m-product-price').value||0,unitsPerBox:+document.getElementById('m-product-pack').value||10,unit:'PCS'});e.target.reset();await refreshOnlineData(false);showToast('Produk tersimpan ke Google Sheet');}catch(err){showToast('Gagal menambah produk: '+err.message);}
         }
+        function renderStoreMasterList(){
+          const tl=document.getElementById('store-list');if(!tl)return;
+          const q=(document.getElementById('store-search')?.value||'').trim().toLowerCase();
+          const salesFilter=String(document.getElementById('store-sales-filter')?.value||'');
+          const rows=(db.stores||[]).filter(x=>{
+            const text=[x.name,x.address,x.owner,x.createdByName].join(' ').toLowerCase();
+            return (!q||text.includes(q))&&(!salesFilter||String(x.createdBySalesId||'')===salesFilter);
+          });
+          const count=document.getElementById('store-count');if(count)count.innerText=`(${rows.length} dari ${(db.stores||[]).length})`;
+          tl.innerHTML=rows.map(x=>`<div class="flex justify-between gap-2 bg-slate-50 p-2 rounded-xl text-[11px]"><span class="min-w-0"><b>${escapeHtml(x.name||'')}</b> <span class="${x.status==='Inactive'?'text-red-500':'text-emerald-600'}">${x.status==='Inactive'?'● Nonaktif':'● Aktif'}</span><br><span class="text-slate-500">${escapeHtml(x.address||x.owner||'')}</span><br><span class="text-brand-700">${escapeHtml(x.createdByName||'Belum ada Sales')}</span></span><button class="shrink-0 px-2 py-1 border rounded-lg bg-white font-semibold" onclick="openStoreModal('${x.id}')">Edit</button></div>`).join('')||'<p class="text-[11px] text-slate-400 py-4 text-center">Toko tidak ditemukan.</p>';
+        }
         function renderMaster(){
-          const tl=document.getElementById('store-list'),pl=document.getElementById('product-list');
+          const pl=document.getElementById('product-list');
           renderSalesManagement();
-          if(tl) tl.innerHTML=db.stores.map(x=>`<div class="flex justify-between gap-2 bg-slate-50 p-2 rounded-xl text-[11px]"><span class="min-w-0"><b>${escapeHtml(x.name||'')}</b> <span class="${x.status==='Inactive'?'text-red-500':'text-emerald-600'}">${x.status==='Inactive'?'● Nonaktif':'● Aktif'}</span><br><span class="text-slate-500">${escapeHtml(x.address||x.owner||'')}</span><br><span class="text-brand-700">${escapeHtml(x.createdByName||'Belum ada Sales')}</span></span><button class="shrink-0 px-2 py-1 border rounded-lg bg-white font-semibold" onclick="openStoreModal('${x.id}')">Edit</button></div>`).join('')||'<p class="text-[11px] text-slate-400">Belum ada toko.</p>';
+          const sf=document.getElementById('store-sales-filter');
+          if(sf){
+            const selected=sf.value;
+            sf.innerHTML='<option value="">Semua Sales</option>'+(db.sales||[]).filter(s=>s.active!==false).map(s=>`<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)}</option>`).join('');
+            if([...sf.options].some(o=>o.value===selected))sf.value=selected;
+          }
+          renderStoreMasterList();
           if(pl) pl.innerHTML=db.products.map(x=>`<div class="flex justify-between gap-2 bg-slate-50 p-2 rounded-xl text-[11px]"><span><b>${escapeHtml(x.name)}</b><br>${rupiah(x.price)}/PCS · ${x.pack} PCS/dus</span><button class="px-2 py-1 border rounded-lg bg-white font-semibold" onclick="openProductModal('${x.id}')">Edit</button></div>`).join('')||'<p class="text-[11px] text-slate-400">Belum ada produk.</p>';
         }
         function renderSalesManagement(){
@@ -927,7 +944,7 @@ function renderDynamicForms(){
         function periodLabel(period){return period==='daily'?'Hari ini':period==='weekly'?'7 hari terakhir':'Bulan ini';}
         async function runSalesDiagnostics(){
           const set=(id,v)=>{const e=document.getElementById(id);if(e)e.innerText=v;};
-          set('diag-front','V6.6.1');set('diag-status','Mengambil data langsung dari API...');
+          set('diag-front','V6.6.2');set('diag-status','Mengambil data langsung dari API...');
           try{
             const [ping,res]=await Promise.all([apiGet('ping'),apiGet('orders',{limit:500})]);
             set('diag-api',String(ping.version||'-'));
