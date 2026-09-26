@@ -94,7 +94,7 @@
 
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col">
 
-        <!-- ================= SALES WORKFLOW V6.5.1 ================= -->
+        <!-- ================= SALES WORKFLOW V6.5.2 ================= -->
         <div id="view-sales" class="space-y-6 animate-fadeIn">
           <div class="max-w-3xl mx-auto">
             <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
@@ -365,6 +365,7 @@
                 document.getElementById('current-user-name').innerText=currentUser.name||currentUser.username||'Pengguna';
                 await refreshOnlineData(false);
                 renderMaster();renderDynamicForms();refreshVisitKpi();
+                if(currentUser?.role==='sales')await restoreWorkflowDraft();
                 return true;
             }catch(err){
                 clearSession();
@@ -373,6 +374,11 @@
                 return false;
             }
         }
+
+        document.addEventListener('input',e=>{if(currentUser?.role==='sales'&&e.target.closest?.('#view-sales'))scheduleWorkflowDraft();});
+        document.addEventListener('change',e=>{if(currentUser?.role==='sales'&&e.target.closest?.('#view-sales'))scheduleWorkflowDraft();});
+        window.addEventListener('pagehide',()=>saveWorkflowDraftNow());
+        document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')saveWorkflowDraftNow();});
 
         document.addEventListener('DOMContentLoaded', async () => {
             lucide.createIcons();
@@ -434,8 +440,8 @@
         }
 
         const API_URL='https://script.google.com/macros/s/AKfycbyR-riwS3HVUM93sA8D09AR3Orb1kgYbZnZ9HwKSYA8Z1wo0DaJh-Z-sqQhSQvJ53ANCg/exec';
-        const DBKEY='tmeez_sales_monitor_v6_5_1_cache';
-        const SESSIONKEY='tmeez_sales_monitor_v6_5_1_session';
+        const DBKEY='tmeez_sales_monitor_v6_5_2_cache';
+        const SESSIONKEY='tmeez_sales_monitor_v6_5_2_session';
         let apiOnline=false;
         let sessionToken='';
         async function apiGet(action,params={}){
@@ -498,7 +504,7 @@
             if(currentUser.salesId && x.sales){const mapped=mapSales(x.sales); if(!db.sales.some(s=>s.id===mapped.id))db.sales.push(mapped);}
             document.getElementById('login-screen').classList.add('hidden'); switchRole(currentUser.role==='sales'?'sales':'admin');
             document.getElementById('current-user-name').innerText=currentUser.name; document.getElementById('current-user-role').innerText=currentUser.role==='sales'?'Sales · '+(db.sales.find(s=>s.id===currentUser.salesId)?.area||''):String(x.role||'Admin').toUpperCase();
-            await refreshOnlineData(false); renderMaster();renderDynamicForms();refreshVisitKpi(); showToast('Login online berhasil');
+            await refreshOnlineData(false); renderMaster();renderDynamicForms();refreshVisitKpi(); if(currentUser?.role==='sales')await restoreWorkflowDraft(); showToast('Login online berhasil');
           }catch(err){showToast('Login gagal: '+err.message);}
         }
         function uid(prefix){return prefix+Date.now().toString(36)+Math.random().toString(36).slice(2,5)}
@@ -541,7 +547,7 @@
         }
         function closeSalesModal(){document.getElementById('sales-modal').classList.add('hidden');}
                 function closeModal(id){document.getElementById(id)?.classList.add('hidden');}
-        function logoutApp(){clearSession();currentUser=null;location.reload();}
+        function logoutApp(){saveWorkflowDraftNow();clearSession();currentUser=null;location.reload();}
         function openPasswordModal(){document.getElementById('password-modal').classList.remove('hidden');}
         async function changeMyPassword(e){e.preventDefault();const a=document.getElementById('new-password').value,b=document.getElementById('confirm-password').value;if(a!==b){showToast('Konfirmasi password tidak sama');return;}try{await apiPost({action:'changeMyPassword',oldPassword:document.getElementById('old-password').value,newPassword:a});clearSession();showToast('Password berubah. Silakan login kembali.');setTimeout(()=>location.reload(),900);}catch(err){showToast(err.message);}}
         function openStoreModal(id){const x=db.stores.find(s=>s.id===id);if(!x)return;document.getElementById('edit-store-id').value=x.id;document.getElementById('edit-store-name').value=x.name;document.getElementById('edit-store-owner').value=x.owner;document.getElementById('edit-store-wa').value=x.wa;document.getElementById('edit-store-address').value=x.address;document.getElementById('edit-store-lat').value=x.lat;document.getElementById('edit-store-lng').value=x.lng;const sel=document.getElementById('edit-store-sales');sel.innerHTML='<option value="">Pilih Sales</option>'+db.sales.filter(s=>s.active!==false||s.id===x.createdBySalesId).map(s=>`<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('');sel.value=x.createdBySalesId;document.getElementById('edit-store-status').value=x.status||'Active';document.getElementById('store-modal').classList.remove('hidden');}
@@ -590,7 +596,7 @@ function renderDynamicForms(){
           navigator.geolocation.getCurrentPosition(pos=>{
             onboardingGps={lat:pos.coords.latitude,lng:pos.coords.longitude,accuracy:pos.coords.accuracy||0};
             if(s)s.innerText=`✓ GPS didapat · ${onboardingGps.lat.toFixed(6)}, ${onboardingGps.lng.toFixed(6)} · akurasi ±${Math.round(onboardingGps.accuracy)} m`;
-            showToast('Lokasi GPS berhasil diambil');
+            scheduleWorkflowDraft();showToast('Lokasi GPS berhasil diambil');
           },err=>{const m=gpsErrorMessage(err);if(s)s.innerText=m;showToast(m);},{enableHighAccuracy:true,timeout:30000,maximumAge:0});
         }
         function triggerCamera(){
@@ -637,18 +643,82 @@ function renderDynamicForms(){
 
 
 
+        const WORKFLOW_DRAFT_PREFIX='tmeez_sales_workflow_draft_v652_';
+        let currentSalesStep='home', restoringWorkflowDraft=false, draftTimer=null;
+        function workflowDraftKey(){return WORKFLOW_DRAFT_PREFIX+String(currentUser?.salesId||currentUser?.username||'unknown');}
+        function visibleSalesStep(){const x=[...document.querySelectorAll('#view-sales .sales-step')].find(el=>!el.classList.contains('hidden'));return x?x.id.replace('sales-step-',''):(currentSalesStep||'home');}
+        function getWorkflowDraft(){
+          if(currentUser?.role!=='sales')return null;
+          try{return JSON.parse(localStorage.getItem(workflowDraftKey())||'null');}catch(_e){return null;}
+        }
+        function clearWorkflowDraft(){if(currentUser?.role==='sales')localStorage.removeItem(workflowDraftKey());}
+        function collectWorkflowDraft(){
+          if(currentUser?.role!=='sales'||restoringWorkflowDraft||workflowVisitSaved)return null;
+          const items=[...document.querySelectorAll('#invoice-products .invoice-item')].map(row=>({
+            productId:String(row.dataset.productId||''),qty:row.querySelector('.product-qty')?.value||'0',
+            price:row.querySelector('.product-price')?.value||'0',discount:row.querySelector('.product-discount')?.value||'0'
+          }));
+          return {
+            version:1,updatedAt:new Date().toISOString(),step:visibleSalesStep(),
+            storeId:String(activeVisit?.storeId||document.getElementById('visit-store')?.value||document.getElementById('workflow-store-select')?.value||''),
+            activeVisit:activeVisit?{...activeVisit,checkIn:activeVisit.checkIn instanceof Date?activeVisit.checkIn.toISOString():activeVisit.checkIn}:null,
+            newStore:{name:document.getElementById('store-name')?.value||'',owner:document.getElementById('owner-name')?.value||'',wa:document.getElementById('store-wa')?.value||'',address:document.getElementById('store-address')?.value||''},
+            onboardingGps:onboardingGps||null,onboardingPhoto:onboardingPhoto||null,
+            noOrderOpen:!document.getElementById('workflow-no-order')?.classList.contains('hidden'),
+            noOrderReason:document.getElementById('no-order-reason')?.value||'',visitNote:document.getElementById('visit-note')?.value||'',
+            invoiceNotes:document.getElementById('invoice-notes')?.value||'',items,paymentMethod:workflowPaymentMethod||''
+          };
+        }
+        function saveWorkflowDraftNow(){
+          const d=collectWorkflowDraft();if(!d)return;
+          // home with no input is not an unfinished job
+          if(d.step==='home'&&!d.storeId&&!d.newStore.name&&!d.newStore.owner&&!d.newStore.wa&&!d.newStore.address)return;
+          try{localStorage.setItem(workflowDraftKey(),JSON.stringify(d));}catch(err){console.warn('Draft tidak dapat disimpan',err);}
+        }
+        function scheduleWorkflowDraft(){clearTimeout(draftTimer);draftTimer=setTimeout(saveWorkflowDraftNow,120);}
+        function applyOrderDraft(items){
+          (items||[]).forEach(x=>{const row=[...document.querySelectorAll('#invoice-products .invoice-item')].find(r=>String(r.dataset.productId)===String(x.productId));if(!row)return;const q=row.querySelector('.product-qty'),p=row.querySelector('.product-price'),d=row.querySelector('.product-discount');if(q)q.value=x.qty;if(p)p.value=x.price;if(d)d.value=x.discount;});calculateInvoiceTotal();
+        }
+        async function restoreWorkflowDraft(){
+          if(currentUser?.role!=='sales')return false;
+          const d=getWorkflowDraft();if(!d||!d.step||d.step==='success')return false;
+          restoringWorkflowDraft=true;
+          try{
+            const set=(id,val)=>{const e=document.getElementById(id);if(e&&val!==undefined)e.value=val;};
+            set('store-name',d.newStore?.name||'');set('owner-name',d.newStore?.owner||'');set('store-wa',d.newStore?.wa||'');set('store-address',d.newStore?.address||'');
+            onboardingGps=d.onboardingGps||null;onboardingPhoto=d.onboardingPhoto||null;
+            if(onboardingGps){const s=document.getElementById('gps-status');if(s)s.innerText=`✓ GPS draft · ${Number(onboardingGps.lat).toFixed(6)}, ${Number(onboardingGps.lng).toFixed(6)} · akurasi ±${Math.round(Number(onboardingGps.accuracy||0))} m`;}
+            if(onboardingPhoto){const s=document.getElementById('photo-status');if(s)s.innerText='✓ Foto toko dipulihkan dari draft';}
+            if(d.storeId){
+              const store=db.stores.find(x=>String(x.id)===String(d.storeId));
+              if(store)prepareWorkflowStore(store);
+            }
+            if(d.activeVisit){activeVisit={...d.activeVisit,checkIn:new Date(d.activeVisit.checkIn)};const b=document.getElementById('visit-badge');if(b){b.className='text-xs px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 font-semibold';b.innerText='Check-in aktif';}document.getElementById('workflow-checkin-btn')?.classList.add('hidden');document.getElementById('workflow-after-checkin')?.classList.remove('hidden');}
+            renderDynamicForms();
+            if(d.storeId){const inv=document.getElementById('invoice-store');if(inv)inv.value=d.storeId;}
+            applyOrderDraft(d.items);set('invoice-notes',d.invoiceNotes||'');set('no-order-reason',d.noOrderReason||'');set('visit-note',d.visitNote||'');
+            if(d.noOrderOpen)document.getElementById('workflow-no-order')?.classList.remove('hidden');
+            workflowPaymentMethod=d.paymentMethod||'';
+            showSalesStep(d.step);
+            if(workflowPaymentMethod&&d.step==='payment'){const t=document.getElementById('payment-selected');if(t)t.innerText='Metode dipilih: '+workflowPaymentMethod;const c=document.getElementById('payment-confirm-btn');if(c)c.disabled=false;}
+            showToast('Data terakhir dipulihkan');
+            return true;
+          }finally{restoringWorkflowDraft=false;}
+        }
         let workflowPaymentMethod='';
         let workflowVisitSaved=false;
         let workflowSubmitting=false;
         function showSalesStep(name){
+          currentSalesStep=name;
           document.querySelectorAll('#view-sales .sales-step').forEach(x=>x.classList.add('hidden'));
           const el=document.getElementById('sales-step-'+name);if(el)el.classList.remove('hidden');
           const order=['home','checkin','result','order'];const at=Math.max(0,order.indexOf(name));
           order.forEach((x,i)=>{const d=document.getElementById('wf-dot-'+x);if(d)d.className='wf-dot '+(i<=at?'bg-brand-600 text-white':'');});
           if(window.lucide)lucide.createIcons();
+          if(!restoringWorkflowDraft) scheduleWorkflowDraft();
         }
         function workflowHome(){activeVisit=null;workflowVisitSaved=false;workflowSubmitting=false;workflowPaymentMethod='';lastSavedOrder=null;lastInvoiceFingerprint='';showSalesStep('home');renderWorkflowToday();}
-        async function startNextWorkflow(){try{await refreshOnlineData(false);}catch(_e){}workflowHome();}
+        async function startNextWorkflow(){clearWorkflowDraft();try{await refreshOnlineData(false);}catch(_e){}workflowHome();}
         function startNewStoreWorkflow(){onboardingGps=null;onboardingPhoto=null;showSalesStep('newstore');}
         function startExistingVisitWorkflow(){
           const sel=document.getElementById('workflow-store-select');
@@ -670,7 +740,7 @@ function renderDynamicForms(){
         async function completeNoOrderVisit(){
           if(!activeVisit||workflowVisitSaved)return;
           const end=new Date(),dur=Math.max(1,Math.round((end-activeVisit.checkIn)/60000)),reason=document.getElementById('no-order-reason')?.value||'Tidak order',note=document.getElementById('visit-note')?.value||'';
-          try{await apiPost({action:'saveVisit',storeId:activeVisit.storeId,checkInAt:activeVisit.checkIn.toISOString(),checkOutAt:end.toISOString(),latitude:activeVisit.lat,longitude:activeVisit.lng,gpsAccuracy:activeVisit.accuracy||0,distanceMeter:Math.round(activeVisit.distance),durationMinute:dur,result:'no_order',notes:[reason,note].filter(Boolean).join(' - ')});workflowVisitSaved=true;document.getElementById('workflow-order-actions')?.classList.add('hidden');document.getElementById('workflow-success-text').innerText=`${activeVisit.store} · Tidak ada order · ${reason}`;showSalesStep('success');}catch(err){showToast('Gagal menyimpan kunjungan: '+err.message);}
+          try{await apiPost({action:'saveVisit',storeId:activeVisit.storeId,checkInAt:activeVisit.checkIn.toISOString(),checkOutAt:end.toISOString(),latitude:activeVisit.lat,longitude:activeVisit.lng,gpsAccuracy:activeVisit.accuracy||0,distanceMeter:Math.round(activeVisit.distance),durationMinute:dur,result:'no_order',notes:[reason,note].filter(Boolean).join(' - ')});workflowVisitSaved=true;clearWorkflowDraft();document.getElementById('workflow-order-actions')?.classList.add('hidden');document.getElementById('workflow-success-text').innerText=`${activeVisit.store} · Tidak ada order · ${reason}`;showSalesStep('success');}catch(err){showToast('Gagal menyimpan kunjungan: '+err.message);}
         }
         function showPaymentStep(){try{validateInvoice();workflowPaymentMethod='';workflowSubmitting=false;document.querySelectorAll('#sales-step-payment .pay-btn').forEach(b=>b.classList.remove('ring-2','ring-brand-600','bg-brand-50'));const t=document.getElementById('payment-selected');if(t)t.innerText='Belum memilih metode pembayaran';const c=document.getElementById('payment-confirm-btn');if(c){c.disabled=true;c.className='w-full py-3 bg-slate-300 text-white rounded-xl font-bold cursor-not-allowed';c.innerText='Bayar & Selesaikan Kunjungan';}showSalesStep('payment');}catch(err){showToast(err.message);}}
         function selectPaymentMethod(method,button){
@@ -680,6 +750,7 @@ function renderDynamicForms(){
           if(button)button.classList.add('ring-2','ring-brand-600','bg-brand-50');
           const t=document.getElementById('payment-selected');if(t)t.innerText='Metode dipilih: '+method;
           const c=document.getElementById('payment-confirm-btn');if(c){c.disabled=false;c.className='w-full py-3 bg-brand-600 text-white rounded-xl font-bold';}
+          scheduleWorkflowDraft();
         }
         async function confirmWorkflowPayment(){
           if(!activeVisit||workflowVisitSaved||workflowSubmitting)return;
@@ -694,6 +765,7 @@ function renderDynamicForms(){
             const end=new Date(),dur=Math.max(1,Math.round((end-activeVisit.checkIn)/60000));
             await apiPost({action:'saveVisit',storeId:activeVisit.storeId,checkInAt:activeVisit.checkIn.toISOString(),checkOutAt:end.toISOString(),latitude:activeVisit.lat,longitude:activeVisit.lng,gpsAccuracy:activeVisit.accuracy||0,distanceMeter:Math.round(activeVisit.distance),durationMinute:dur,result:'order',notes:'Pembayaran: '+method,orderId:order.orderId});
             workflowVisitSaved=true;
+            clearWorkflowDraft();
             await refreshOnlineData(false);
             document.getElementById('workflow-order-actions')?.classList.remove('hidden');
             document.getElementById('workflow-success-text').innerText=`${order.storeName} · ${order.totalQtyPcs} PCS · ${rupiah(order.grandTotal)} · ${method}`;
