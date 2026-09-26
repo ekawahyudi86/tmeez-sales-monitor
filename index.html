@@ -94,7 +94,7 @@
 
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col">
 
-        <!-- ================= SALES WORKFLOW V6.5.3 ================= -->
+        <!-- ================= SALES WORKFLOW V6.5.4 ================= -->
         <div id="view-sales" class="space-y-6 animate-fadeIn">
           <div class="max-w-3xl mx-auto">
             <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
@@ -105,6 +105,10 @@
               <div class="px-5 pt-4"><div class="flex gap-2 text-[10px] text-slate-500"><span id="wf-dot-home" class="wf-dot bg-brand-600 text-white">1</span><span>Aktivitas</span><span>›</span><span id="wf-dot-checkin" class="wf-dot">2</span><span>Check-in</span><span>›</span><span id="wf-dot-result" class="wf-dot">3</span><span>Hasil</span><span>›</span><span id="wf-dot-order" class="wf-dot">4</span><span>Order</span></div></div>
 
               <div id="sales-step-home" class="sales-step p-5 space-y-5">
+                <div class="rounded-2xl bg-slate-900 text-white p-5">
+                  <p id="sales-greeting" class="text-xl font-bold">Selamat datang</p>
+                  <p id="sales-greeting-date" class="text-xs text-slate-300 mt-1"></p>
+                </div>
                 <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
                   <div><p class="text-xs font-semibold text-brand-600">DASHBOARD SALES</p><h3 class="text-xl font-bold text-slate-900">Kinerja Saya</h3><p id="sales-dashboard-period-label" class="text-xs text-slate-500 mt-1">Ringkasan bulan ini</p></div>
                   <div class="inline-flex bg-slate-100 p-1 rounded-xl text-xs font-medium">
@@ -457,8 +461,8 @@
         }
 
         const API_URL='https://script.google.com/macros/s/AKfycbyR-riwS3HVUM93sA8D09AR3Orb1kgYbZnZ9HwKSYA8Z1wo0DaJh-Z-sqQhSQvJ53ANCg/exec';
-        const DBKEY='tmeez_sales_monitor_v6_5_3_cache';
-        const SESSIONKEY='tmeez_sales_monitor_v6_5_3_session';
+        const DBKEY='tmeez_sales_monitor_v6_5_4_cache';
+        const SESSIONKEY='tmeez_sales_monitor_v6_5_4_session';
         let apiOnline=false;
         let sessionToken='';
         async function apiGet(action,params={}){
@@ -484,7 +488,11 @@
         function mapSales(x){return {id:String(x.SalesID||''),name:String(x.Name||''),phone:String(x.Phone||''),area:String(x.Area||''),targetVisit:+x.TargetVisit||0,targetBox:+x.TargetBox||0,active:String(x.Status||'Active').toLowerCase()==='active'};}
         function mapStore(x){return {id:String(x.StoreID||''),name:String(x.StoreName||''),owner:String(x.OwnerName||''),wa:String(x.WhatsApp||''),address:String(x.Address||''),lat:+x.Latitude||0,lng:+x.Longitude||0,accuracy:+x.GPSAccuracy||0,photoFileId:String(x.PhotoFileID||''),photoUrl:String(x.PhotoURL||''),createdBySalesId:String(x.CreatedBySalesID||''),createdByName:String(x.CreatedByName||''),createdAt:x.CreatedAt?String(x.CreatedAt):'',status:String(x.Status||'Active'),source:String(x.CreatedBySalesID||'')==='ADMIN'?'admin':'sales'};}
         function mapVisit(x){return {id:String(x.VisitID||''),storeId:String(x.StoreID||''),store:String(x.StoreName||''),salesId:String(x.SalesID||''),salesName:String(x.SalesName||''),date:String(x.CheckInAt||'').slice(0,10),checkIn:String(x.CheckInAt||''),checkOut:String(x.CheckOutAt||''),lat:+x.CheckInLat||0,lng:+x.CheckInLng||0,accuracy:+x.GPSAccuracy||0,distance:+x.DistanceMeter||0,duration:+x.DurationMinute||0,result:String(x.Result||''),reason:String(x.Notes||'')};}
-        function mapOrderPack(x){const o=x.order||{},items=x.items||[];return {id:String(o.OrderID||''),salesId:String(o.SalesID||''),storeId:String(o.StoreID||''),date:String(o.OrderDate||o.CreatedAt||''),qty:+o.TotalQtyPcs||items.reduce((n,z)=>n+(+z.QtyPcs||0),0),subtotal:+o.Subtotal||0,discount:+o.Discount||0,total:+o.GrandTotal||0,items};}
+        function mapOrderPack(x){
+          const o=x.order||x.Order||x||{},items=x.items||x.Items||[];
+          const date=o.OrderDate??o.orderDate??o.Date??o.date??o.CreatedAt??o.createdAt??'';
+          return {id:String(o.OrderID||o.orderId||''),salesId:String(o.SalesID||o.salesId||''),storeId:String(o.StoreID||o.storeId||''),date,createdAt:o.CreatedAt||o.createdAt||'',qty:+(o.TotalQtyPcs??o.totalQtyPcs??o.QtyPcs??o.qty)||items.reduce((n,z)=>n+(+z.QtyPcs||+z.qtyPcs||0),0),subtotal:+(o.Subtotal??o.subtotal)||0,discount:+(o.Discount??o.discount)||0,total:+(o.GrandTotal??o.grandTotal??o.Total??o.total)||0,items};
+        }
         function mapProduct(x){return {id:String(x.ProductID||''),name:String(x.ProductName||''),price:+(x.PricePerPcs!==''&&x.PricePerPcs!==undefined?x.PricePerPcs:x.PricePerBox)||0,pack:+x.UnitsPerBox||10,sku:String(x.SKU||''),status:String(x.Status||'Active')};}
         async function refreshOnlineData(showMessage=false){
           try{
@@ -805,8 +813,18 @@ function renderDynamicForms(){
           ['daily','weekly','monthly'].forEach(p=>{const b=document.getElementById('sales-period-'+p);if(b)b.className='px-3 py-1.5 rounded-lg '+(p===period?'bg-white shadow-sm text-slate-900':'text-slate-500')});
           renderWorkflowToday();
         }
+        function updateSalesGreeting(){
+          if(currentUser?.role!=='sales')return;
+          const now=new Date(),hour=Number(new Intl.DateTimeFormat('en-GB',{timeZone:APP_TIMEZONE,hour:'2-digit',hourCycle:'h23'}).format(now));
+          const greeting=hour<11?'Selamat pagi':hour<15?'Selamat siang':hour<18?'Selamat sore':'Selamat malam';
+          const sales=db.sales.find(s=>String(s.id)===String(currentUser.salesId));
+          const name=sales?.name||currentUser.name||currentUser.username||'Sales';
+          const g=document.getElementById('sales-greeting');if(g)g.innerText=`${greeting}, ${name}`;
+          const d=document.getElementById('sales-greeting-date');if(d)d.innerText=new Intl.DateTimeFormat('id-ID',{timeZone:APP_TIMEZONE,weekday:'long',day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(now)+' WIB';
+        }
         function renderWorkflowToday(){
           if(currentUser?.role!=='sales')return;
+          updateSalesGreeting();
           const sid=String(currentUser.salesId||'');
           const period=currentSalesDashboardPeriod||'monthly';
           const orders=(db.orders||[]).filter(o=>String(o.salesId)===sid&&periodMatch(o.date,period));
@@ -846,10 +864,19 @@ function renderDynamicForms(){
         }
         function jakartaTodayKey(){return jakartaParts(new Date()).key;}
         function dateKeyJakarta(value){
-          if(!value)return '';
+          if(value===null||value===undefined||value==='')return '';
+          if(value instanceof Date){const p=jakartaParts(value);return p?p.key:'';}
+          // Google Sheets can return a numeric serial date.
+          if(typeof value==='number'&&isFinite(value)){
+            const d=new Date(Date.UTC(1899,11,30)+value*86400000);
+            const p=jakartaParts(d);return p?p.key:'';
+          }
           const raw=String(value).trim();
-          // Google Sheet/API may return YYYY-MM-DD or a full timestamp. Bare dates are already calendar dates.
-          if(/^\d{4}-\d{2}-\d{2}$/.test(raw))return raw;
+          let m;
+          // Calendar date/datetime emitted by Apps Script without timezone: preserve its date component.
+          if((m=raw.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})(?:[ T].*)?$/)))return `${m[1]}-${String(m[2]).padStart(2,'0')}-${String(m[3]).padStart(2,'0')}`;
+          // Common Indonesian/Sheets display: dd/MM/yyyy or dd-MM-yyyy, optionally with time.
+          if((m=raw.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:[ ,T].*)?$/)))return `${m[3]}-${String(m[2]).padStart(2,'0')}-${String(m[1]).padStart(2,'0')}`;
           const p=jakartaParts(raw);return p?p.key:'';
         }
         function addDaysKey(key,days){
@@ -1032,6 +1059,10 @@ function renderDynamicForms(){
           });
           lastSavedOrder=res.order;
           lastInvoiceFingerprint=fingerprint;
+          const ro=res.order||{};
+          const mapped={id:String(ro.orderId||ro.OrderID||''),salesId:String(ro.salesId||ro.SalesID||currentUser?.salesId||''),storeId:String(ro.storeId||ro.StoreID||inv.storeId||''),date:ro.orderDate||ro.OrderDate||new Date().toISOString(),qty:Number(ro.totalQtyPcs||ro.TotalQtyPcs||inv.items.reduce((n,z)=>n+Number(z.qtyPcs||0),0)),subtotal:Number(ro.subtotal||ro.Subtotal||0),discount:Number(ro.discount||ro.Discount||0),total:Number(ro.grandTotal||ro.GrandTotal||0),items:ro.items||[]};
+          if(mapped.id&&!db.orders.some(o=>String(o.id)===mapped.id))db.orders.unshift(mapped);
+          renderWorkflowToday();
           return res.order;
         }
 
