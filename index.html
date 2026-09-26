@@ -629,7 +629,11 @@
             }else{
               [st,pr]=await Promise.all([apiGet('stores'),apiGet('products')]);
             }
-            db.stores=(st.data||[]).map(mapStore); db.products=(pr.data||[]).map(mapProduct);
+            db.stores=(st.data||[]).map(mapStore);
+            if(currentUser?.role==='sales'){
+              db.stores=db.stores.filter(x=>String(x.createdBySalesId)===String(currentUser.salesId) && String(x.status).toLowerCase()==='active');
+            }
+            db.products=(pr.data||[]).map(mapProduct);
             apiOnline=true; saveDb(); renderMaster();renderDynamicForms();refreshVisitKpi();
             if(showMessage)showToast('Data Google Sheet berhasil disinkronkan');
           }catch(err){apiOnline=false;if(showMessage)showToast('Sinkronisasi gagal: '+err.message);}
