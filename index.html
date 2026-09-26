@@ -94,7 +94,7 @@
 
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col">
 
-        <!-- ================= SALES WORKFLOW V6.5.2 ================= -->
+        <!-- ================= SALES WORKFLOW V6.5.3 ================= -->
         <div id="view-sales" class="space-y-6 animate-fadeIn">
           <div class="max-w-3xl mx-auto">
             <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
@@ -104,13 +104,30 @@
               </div>
               <div class="px-5 pt-4"><div class="flex gap-2 text-[10px] text-slate-500"><span id="wf-dot-home" class="wf-dot bg-brand-600 text-white">1</span><span>Aktivitas</span><span>›</span><span id="wf-dot-checkin" class="wf-dot">2</span><span>Check-in</span><span>›</span><span id="wf-dot-result" class="wf-dot">3</span><span>Hasil</span><span>›</span><span id="wf-dot-order" class="wf-dot">4</span><span>Order</span></div></div>
 
-              <div id="sales-step-home" class="sales-step p-5 space-y-4">
-                <div><h3 class="text-xl font-bold text-slate-900">Mulai aktivitas hari ini</h3><p class="text-sm text-slate-500 mt-1">Setiap toko baru maupun kunjungan toko akan tercatat sebagai kunjungan Sales setelah check-in.</p></div>
+              <div id="sales-step-home" class="sales-step p-5 space-y-5">
+                <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+                  <div><p class="text-xs font-semibold text-brand-600">DASHBOARD SALES</p><h3 class="text-xl font-bold text-slate-900">Kinerja Saya</h3><p id="sales-dashboard-period-label" class="text-xs text-slate-500 mt-1">Ringkasan bulan ini</p></div>
+                  <div class="inline-flex bg-slate-100 p-1 rounded-xl text-xs font-medium">
+                    <button onclick="switchSalesDashboardPeriod('daily')" id="sales-period-daily" class="px-3 py-1.5 rounded-lg">Harian</button>
+                    <button onclick="switchSalesDashboardPeriod('weekly')" id="sales-period-weekly" class="px-3 py-1.5 rounded-lg">Mingguan</button>
+                    <button onclick="switchSalesDashboardPeriod('monthly')" id="sales-period-monthly" class="px-3 py-1.5 rounded-lg bg-white shadow-sm">Bulanan</button>
+                  </div>
+                </div>
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                  <div class="bg-white border rounded-2xl p-4"><p class="text-[11px] text-slate-500">Omzet Saya</p><b id="sales-dash-omzet" class="text-lg">Rp 0</b><p id="sales-dash-orders" class="text-[10px] text-emerald-600 mt-1">0 order</p></div>
+                  <div class="bg-white border rounded-2xl p-4"><p class="text-[11px] text-slate-500">PCS Terjual</p><b id="sales-dash-pcs" class="text-lg">0 PCS</b><p id="sales-dash-pcs-target" class="text-[10px] text-indigo-600 mt-1">Target belum ditetapkan</p></div>
+                  <div class="bg-white border rounded-2xl p-4"><p class="text-[11px] text-slate-500">Kunjungan</p><b id="sales-dash-visits" class="text-lg">0 Toko</b><p id="sales-dash-visit-target" class="text-[10px] text-brand-600 mt-1">Target belum ditetapkan</p></div>
+                  <div class="bg-white border rounded-2xl p-4"><p class="text-[11px] text-slate-500">Effective Call</p><b id="sales-dash-effective" class="text-lg">0</b><p id="sales-dash-strike" class="text-[10px] text-amber-600 mt-1">Strike Rate 0%</p></div>
+                </div>
+                <div class="grid sm:grid-cols-2 gap-4">
+                  <div class="bg-white border rounded-2xl p-4"><div class="flex justify-between text-xs"><b>Target PCS</b><span id="sales-pcs-progress-text">0 / 0 PCS</span></div><div class="h-2 bg-slate-100 rounded-full mt-3 overflow-hidden"><div id="sales-pcs-progress-bar" class="h-full bg-emerald-500 rounded-full" style="width:0%"></div></div><p id="sales-pcs-remaining" class="text-[10px] text-slate-500 mt-2">Target belum ditetapkan</p></div>
+                  <div class="bg-white border rounded-2xl p-4"><div class="flex justify-between text-xs"><b>Target Kunjungan</b><span id="sales-visit-progress-text">0 / 0 Toko</span></div><div class="h-2 bg-slate-100 rounded-full mt-3 overflow-hidden"><div id="sales-visit-progress-bar" class="h-full bg-brand-600 rounded-full" style="width:0%"></div></div><p id="sales-visit-remaining" class="text-[10px] text-slate-500 mt-2">Target belum ditetapkan</p></div>
+                </div>
+                <div class="pt-2 border-t"><h3 class="font-bold text-slate-900">Aktivitas Sales</h3><p class="text-xs text-slate-500 mt-1">Pengisian tetap dilakukan bertahap agar lebih mudah digunakan di lapangan.</p></div>
                 <div class="grid sm:grid-cols-2 gap-4">
                   <button onclick="startNewStoreWorkflow()" class="text-left p-5 rounded-2xl border-2 border-brand-100 bg-brand-50 hover:border-brand-400 transition"><div class="w-11 h-11 rounded-xl bg-brand-600 text-white flex items-center justify-center mb-3"><i data-lucide="store" class="w-5 h-5"></i></div><b>Tambah Toko Baru</b><p class="text-xs text-slate-500 mt-1">Daftarkan toko, GPS dan foto, lalu check-in.</p></button>
                   <button onclick="startExistingVisitWorkflow()" class="text-left p-5 rounded-2xl border-2 border-indigo-100 bg-indigo-50 hover:border-indigo-400 transition"><div class="w-11 h-11 rounded-xl bg-indigo-600 text-white flex items-center justify-center mb-3"><i data-lucide="map-pin" class="w-5 h-5"></i></div><b>Kunjungan Toko</b><p class="text-xs text-slate-500 mt-1">Pilih toko yang sudah terdaftar lalu check-in GPS.</p></button>
                 </div>
-                <div class="grid grid-cols-3 gap-3 text-center pt-2"><div class="bg-slate-50 rounded-xl p-3"><b id="kpi-calls">0</b><p class="text-[10px] text-slate-500">Visit Hari Ini</p></div><div class="bg-slate-50 rounded-xl p-3"><b id="wf-today-pcs">0</b><p class="text-[10px] text-slate-500">PCS Hari Ini</p></div><div class="bg-slate-50 rounded-xl p-3"><b id="wf-today-omzet">Rp 0</b><p class="text-[10px] text-slate-500">Omzet Hari Ini</p></div></div>
               </div>
 
               <div id="sales-step-newstore" class="sales-step hidden p-5">
@@ -440,8 +457,8 @@
         }
 
         const API_URL='https://script.google.com/macros/s/AKfycbyR-riwS3HVUM93sA8D09AR3Orb1kgYbZnZ9HwKSYA8Z1wo0DaJh-Z-sqQhSQvJ53ANCg/exec';
-        const DBKEY='tmeez_sales_monitor_v6_5_2_cache';
-        const SESSIONKEY='tmeez_sales_monitor_v6_5_2_session';
+        const DBKEY='tmeez_sales_monitor_v6_5_3_cache';
+        const SESSIONKEY='tmeez_sales_monitor_v6_5_3_session';
         let apiOnline=false;
         let sessionToken='';
         async function apiGet(action,params={}){
@@ -481,7 +498,7 @@
             }
             db.stores=(st.data||[]).map(mapStore);
             if(currentUser?.role==='sales')db.stores=db.stores.filter(x=>String(x.createdBySalesId)===String(currentUser.salesId)&&String(x.status).toLowerCase()==='active');
-            db.products=(pr.data||[]).map(mapProduct);apiOnline=true;saveDb();renderMaster();renderDynamicForms();refreshVisitKpi();renderAdminDashboard(currentAdminPeriod||'monthly');
+            db.products=(pr.data||[]).map(mapProduct);apiOnline=true;saveDb();renderMaster();renderDynamicForms();refreshVisitKpi();renderAdminDashboard(currentAdminPeriod||'monthly');renderWorkflowToday();
             if(showMessage)showToast('Data Google Sheet berhasil disinkronkan');
           }catch(err){apiOnline=false;if(showMessage)showToast('Sinkronisasi gagal: '+err.message);}
         }
@@ -778,9 +795,39 @@ function renderDynamicForms(){
           }
         }
         async function payWorkflow(method){selectPaymentMethod(method,null);}
+        let currentSalesDashboardPeriod='monthly';
+        function salesTargetForPeriod(monthly,period){
+          monthly=Number(monthly||0);if(period==='monthly')return monthly;
+          return Math.ceil(monthly/25*(period==='weekly'?7:1));
+        }
+        function switchSalesDashboardPeriod(period){
+          currentSalesDashboardPeriod=period;
+          ['daily','weekly','monthly'].forEach(p=>{const b=document.getElementById('sales-period-'+p);if(b)b.className='px-3 py-1.5 rounded-lg '+(p===period?'bg-white shadow-sm text-slate-900':'text-slate-500')});
+          renderWorkflowToday();
+        }
         function renderWorkflowToday(){
-          if(currentUser?.role!=='sales')return;const orders=(db.orders||[]).filter(o=>String(o.salesId)===String(currentUser.salesId)&&periodMatch(o.date,'daily'));const visits=(db.visits||[]).filter(v=>String(v.salesId)===String(currentUser.salesId)&&periodMatch(v.checkIn||v.date,'daily'));
-          const pcs=orders.reduce((n,o)=>n+Number(o.qty||0),0),omzet=orders.reduce((n,o)=>n+Number(o.total||0),0);const a=document.getElementById('kpi-calls');if(a)a.innerText=visits.length;const b=document.getElementById('wf-today-pcs');if(b)b.innerText=pcs;const c=document.getElementById('wf-today-omzet');if(c)c.innerText=rupiah(omzet);
+          if(currentUser?.role!=='sales')return;
+          const sid=String(currentUser.salesId||'');
+          const period=currentSalesDashboardPeriod||'monthly';
+          const orders=(db.orders||[]).filter(o=>String(o.salesId)===sid&&periodMatch(o.date,period));
+          const visits=(db.visits||[]).filter(v=>String(v.salesId)===sid&&periodMatch(v.checkIn||v.date,period));
+          const sales=(db.sales||[]).find(s=>String(s.id)===sid)||{};
+          const pcs=orders.reduce((n,o)=>n+Number(o.qty||0),0);
+          const omzet=orders.reduce((n,o)=>n+Number(o.total||0),0);
+          const effective=visits.filter(v=>v.result==='order').length;
+          const strike=visits.length?Math.round(effective/visits.length*100):0;
+          const targetPcs=salesTargetForPeriod(sales.targetBox,period),targetVisit=salesTargetForPeriod(sales.targetVisit,period);
+          const set=(id,val)=>{const e=document.getElementById(id);if(e)e.innerText=val;};
+          set('sales-dashboard-period-label',period==='daily'?'Ringkasan hari ini':period==='weekly'?'Ringkasan 7 hari terakhir':'Ringkasan bulan ini');
+          set('sales-dash-omzet',rupiah(omzet));set('sales-dash-orders',orders.length+' order');
+          set('sales-dash-pcs',pcs+' PCS');set('sales-dash-visits',visits.length+' Toko');set('sales-dash-effective',effective);set('sales-dash-strike','Strike Rate '+strike+'%');
+          set('sales-dash-pcs-target',targetPcs?`Target ${targetPcs} PCS`:'Target belum ditetapkan');set('sales-dash-visit-target',targetVisit?`Target ${targetVisit} toko`:'Target belum ditetapkan');
+          set('sales-pcs-progress-text',`${pcs} / ${targetPcs} PCS`);set('sales-visit-progress-text',`${visits.length} / ${targetVisit} Toko`);
+          const pb=document.getElementById('sales-pcs-progress-bar'),vb=document.getElementById('sales-visit-progress-bar');if(pb)pb.style.width=(targetPcs?Math.min(100,pcs/targetPcs*100):0)+'%';if(vb)vb.style.width=(targetVisit?Math.min(100,visits.length/targetVisit*100):0)+'%';
+          set('sales-pcs-remaining',targetPcs?(pcs>=targetPcs?'Target tercapai':`Kurang ${targetPcs-pcs} PCS lagi`):'Target belum ditetapkan');
+          set('sales-visit-remaining',targetVisit?(visits.length>=targetVisit?'Target tercapai':`Kurang ${targetVisit-visits.length} toko lagi`):'Target belum ditetapkan');
+          // Compatibility with existing KPI code.
+          const calls=document.getElementById('kpi-calls');if(calls)calls.innerText=visits.length;
         }
         async function downloadLastOrderPdf(){if(!lastSavedOrder){showToast('Data order belum tersedia');return;}await downloadPdfInvoice();}
         function shareLastOrderWhatsApp(){
