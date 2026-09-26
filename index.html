@@ -326,7 +326,7 @@
                     <div>
                         <p class="text-xs font-medium text-slate-500">Total Omzet Bulan Ini</p>
                         <h3 id="admin-total-omzet" class="text-xl font-bold text-slate-900 mt-1">Rp 0</h3>
-                        <span class="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md mt-2 inline-block">Belum ada transaksi</span>
+                        <span id="admin-omzet-status" class="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md mt-2 inline-block">Belum ada transaksi</span>
                     </div>
                     <div class="bg-brand-50 text-brand-600 p-3 rounded-xl">
                         <i data-lucide="wallet" class="w-6 h-6"></i>
@@ -337,7 +337,7 @@
                     <div>
                         <p class="text-xs font-medium text-slate-500">Kunjungan Toko Total</p>
                         <h3 id="admin-total-visits" class="text-xl font-bold text-slate-900 mt-1">0 Toko</h3>
-                        <span class="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md mt-2 inline-block">Belum ada kunjungan</span>
+                        <span id="admin-visits-status" class="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md mt-2 inline-block">Belum ada kunjungan</span>
                     </div>
                     <div class="bg-indigo-50 text-indigo-600 p-3 rounded-xl">
                         <i data-lucide="map-pinned" class="w-6 h-6"></i>
@@ -348,7 +348,7 @@
                     <div>
                         <p class="text-xs font-medium text-slate-500">Volume PCS Terjual</p>
                         <h3 id="admin-total-pcs" class="text-xl font-bold text-slate-900 mt-1">0 PCS</h3>
-                        <span class="text-[11px] font-semibold text-brand-600 bg-brand-50 px-2 py-0.5 rounded-md mt-2 inline-block">Target belum ditetapkan</span>
+                        <span id="admin-pcs-status" class="text-[11px] font-semibold text-brand-600 bg-brand-50 px-2 py-0.5 rounded-md mt-2 inline-block">Target belum ditetapkan</span>
                     </div>
                     <div class="bg-emerald-50 text-emerald-600 p-3 rounded-xl">
                         <i data-lucide="boxes" class="w-6 h-6"></i>
@@ -359,7 +359,7 @@
                     <div>
                         <p class="text-xs font-medium text-slate-500">Sales Aktif Lapangan</p>
                         <h3 id="admin-active-sales" class="text-xl font-bold text-slate-900 mt-1">0 Orang</h3>
-                        <span class="text-[11px] font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md mt-2 inline-block">Belum ada sales</span>
+                        <span id="admin-sales-status" class="text-[11px] font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md mt-2 inline-block">Belum ada sales</span>
                     </div>
                     <div class="bg-amber-50 text-amber-600 p-3 rounded-xl">
                         <i data-lucide="users" class="w-6 h-6"></i>
@@ -590,8 +590,8 @@
         }
 
         const API_URL='https://script.google.com/macros/s/AKfycbyR-riwS3HVUM93sA8D09AR3Orb1kgYbZnZ9HwKSYA8Z1wo0DaJh-Z-sqQhSQvJ53ANCg/exec';
-        const DBKEY='tmeez_sales_monitor_v6_4_4_cache';
-        const SESSIONKEY='tmeez_sales_monitor_v6_4_4_session';
+        const DBKEY='tmeez_sales_monitor_v6_4_5_cache';
+        const SESSIONKEY='tmeez_sales_monitor_v6_4_5_session';
         let apiOnline=false;
         let sessionToken='';
         async function apiGet(action,params={}){
@@ -790,16 +790,64 @@ function renderDynamicForms(){
 
         window.captureGps=captureGps;window.triggerCamera=triggerCamera;window.handleStorePhoto=handleStorePhoto;window.handleStoreSubmit=handleStoreSubmit;
         function fillCurrentStoreGps(){if(!navigator.geolocation){showToast('GPS tidak tersedia');return;} navigator.geolocation.getCurrentPosition(p=>{document.getElementById('m-store-lat').value=p.coords.latitude.toFixed(7);document.getElementById('m-store-lng').value=p.coords.longitude.toFixed(7);showToast('Koordinat terisi');},e=>showToast('GPS gagal: '+e.message),{enableHighAccuracy:true});}
-        function periodMatch(dateStr,period){const d=new Date(dateStr),n=new Date();if(isNaN(d))return false;if(period==='daily')return d.toDateString()===n.toDateString();if(period==='weekly'){const x=new Date(n);x.setDate(n.getDate()-6);x.setHours(0,0,0,0);return d>=x&&d<=n;}return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth();}
+        const APP_TIMEZONE='Asia/Jakarta';
+        function jakartaParts(value=new Date()){
+          const d=value instanceof Date?value:new Date(value);
+          if(isNaN(d))return null;
+          const parts=new Intl.DateTimeFormat('en-CA',{timeZone:APP_TIMEZONE,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(d);
+          const o={};parts.forEach(x=>{if(x.type!=='literal')o[x.type]=x.value;});
+          return {year:+o.year,month:+o.month,day:+o.day,key:`${o.year}-${o.month}-${o.day}`,monthKey:`${o.year}-${o.month}`};
+        }
+        function jakartaTodayKey(){return jakartaParts(new Date()).key;}
+        function dateKeyJakarta(value){
+          if(!value)return '';
+          const raw=String(value).trim();
+          // Google Sheet/API may return YYYY-MM-DD or a full timestamp. Bare dates are already calendar dates.
+          if(/^\d{4}-\d{2}-\d{2}$/.test(raw))return raw;
+          const p=jakartaParts(raw);return p?p.key:'';
+        }
+        function addDaysKey(key,days){
+          const [y,m,d]=key.split('-').map(Number);
+          const x=new Date(Date.UTC(y,m-1,d+days,12,0,0));
+          return x.toISOString().slice(0,10);
+        }
+        function periodMatch(value,period){
+          const key=dateKeyJakarta(value),today=jakartaTodayKey();if(!key)return false;
+          if(period==='daily')return key===today;
+          if(period==='weekly')return key>=addDaysKey(today,-6)&&key<=today;
+          return key.slice(0,7)===today.slice(0,7);
+        }
+        function periodLabel(period){return period==='daily'?'Hari ini':period==='weekly'?'7 hari terakhir':'Bulan ini';}
         function renderAdminDashboard(period='monthly'){
           const visits=(db.visits||[]).filter(v=>periodMatch(v.checkIn||v.date,period));
           const orders=(db.orders||[]).filter(o=>periodMatch(o.date,period));
+          const activeSales=(db.sales||[]).filter(s=>s.active!==false);
+          const omzet=orders.reduce((n,o)=>n+Number(o.total||0),0);
+          const pcs=orders.reduce((n,o)=>n+Number(o.qty||0),0);
           const set=(id,v)=>{const e=document.getElementById(id);if(e)e.innerText=v;};
-          set('admin-total-omzet',rupiah(orders.reduce((n,o)=>n+o.total,0)));set('admin-total-visits',visits.length+' Toko');set('admin-total-pcs',orders.reduce((n,o)=>n+o.qty,0)+' PCS');set('admin-active-sales',(db.sales||[]).filter(s=>s.active!==false).length+' Orang');
+          set('admin-total-omzet',rupiah(omzet));set('admin-total-visits',visits.length+' Toko');set('admin-total-pcs',pcs+' PCS');set('admin-active-sales',activeSales.length+' Orang');
+          set('admin-omzet-status',orders.length?`${orders.length} transaksi · ${periodLabel(period)}`:'Belum ada transaksi');
+          set('admin-visits-status',visits.length?`${visits.length} kunjungan · ${periodLabel(period)}`:'Belum ada kunjungan');
+          const factor=period==='daily'?1:period==='weekly'?7:25;
+          const targetPcs=activeSales.reduce((n,s)=>n+(period==='monthly'?Number(s.targetBox||0):Math.ceil(Number(s.targetBox||0)/25*factor)),0);
+          set('admin-pcs-status',targetPcs?(pcs>=targetPcs?'Target PCS tercapai':`${pcs} dari ${targetPcs} PCS`):(pcs?`${pcs} PCS terjual · ${periodLabel(period)}`:'Target belum ditetapkan'));
+          set('admin-sales-status',activeSales.length?`${activeSales.length} sales aktif`:'Belum ada sales');
+
           const body=document.getElementById('leaderboard-tbody');
-          const rows=(db.sales||[]).map(s=>{const v=visits.filter(x=>x.salesId===s.id),o=orders.filter(x=>x.salesId===s.id),qty=o.reduce((n,x)=>n+x.qty,0);const factor=period==='daily'?1:period==='weekly'?7:25;const tv=period==='monthly'?s.targetVisit:Math.ceil((s.targetVisit||0)/25*factor),tq=period==='monthly'?s.targetBox:Math.ceil((s.targetBox||0)/25*factor);const score=((tv?v.length/tv:0)+(tq?qty/tq:0))/2;return {s,v:v.length,o:o.length,qty,tv,tq,score,omzet:o.reduce((n,x)=>n+x.total,0)}}).sort((a,b)=>b.score-a.score);
+          const rows=activeSales.map(s=>{
+            const v=visits.filter(x=>String(x.salesId)===String(s.id));
+            const o=orders.filter(x=>String(x.salesId)===String(s.id));
+            const qty=o.reduce((n,x)=>n+Number(x.qty||0),0);
+            const tv=period==='monthly'?Number(s.targetVisit||0):Math.ceil(Number(s.targetVisit||0)/25*factor);
+            const tq=period==='monthly'?Number(s.targetBox||0):Math.ceil(Number(s.targetBox||0)/25*factor);
+            const visitPct=tv?Math.min(1,v.length/tv):0, pcsPct=tq?Math.min(1,qty/tq):0;
+            const dimensions=(tv?1:0)+(tq?1:0);
+            const score=dimensions?((tv?visitPct:0)+(tq?pcsPct:0))/dimensions:0;
+            return {s,v:v.length,o:o.length,qty,tv,tq,score,omzet:o.reduce((n,x)=>n+Number(x.total||0),0)};
+          }).sort((a,b)=>b.score-a.score||b.omzet-a.omzet||b.qty-a.qty);
           if(body)body.innerHTML=rows.map((r,i)=>`<tr><td class="py-3 px-6"><b>${i+1}. ${escapeHtml(r.s.name)}</b><br><span class="text-slate-400">${escapeHtml(r.s.area||'-')}</span></td><td class="text-center">${r.tv}</td><td class="text-center">${r.v}</td><td class="text-center">${r.tq}</td><td class="text-center">${r.qty}</td><td class="px-6 text-right font-bold">${Math.round(r.score*100)}%</td></tr>`).join('')||'<tr><td colspan="6" class="py-8 px-6 text-center text-slate-400">Belum ada data kinerja sales.</td></tr>';
-          const ob=document.getElementById('admin-operational-body');if(ob)ob.innerHTML=rows.map(r=>`<tr><td class="p-2"><b>${escapeHtml(r.s.name)}</b></td><td class="text-center">${r.v}</td><td class="text-center">${r.o}</td><td class="text-center">${r.v?Math.round(r.o/r.v*100):0}%</td><td class="text-center">${r.qty}</td><td class="text-right p-2">${rupiah(r.omzet)}</td></tr>`).join('')||'<tr><td colspan="6" class="p-6 text-center text-slate-400">Belum ada data operasional.</td></tr>';
+          const ob=document.getElementById('admin-operational-body');
+          if(ob)ob.innerHTML=rows.map(r=>`<tr><td class="p-2"><b>${escapeHtml(r.s.name)}</b></td><td class="text-center">${r.v}</td><td class="text-center">${r.o}</td><td class="text-center">${r.v?Math.round(r.o/r.v*100):0}%</td><td class="text-center">${r.qty}</td><td class="text-right p-2">${rupiah(r.omzet)}</td></tr>`).join('')||'<tr><td colspan="6" class="p-6 text-center text-slate-400">Belum ada data operasional.</td></tr>';
         }
         function applyOnlineSettings(rows){
           const obj={};rows.forEach(x=>obj[String(x.Key)]=x.Value);
@@ -815,20 +863,27 @@ function renderDynamicForms(){
           const set=(id,val)=>{const x=document.getElementById(id);if(x)x.innerText=val;};
           set('admin-kpi-visits',total);set('admin-kpi-effective',eff);set('admin-kpi-strike',total?Math.round(eff/total*100)+'%':'0%');set('admin-kpi-duration',avg+' mnt');
         }
-        function refreshVisitKpi(){ renderRecentVisits(); renderSalesProgress('daily');const today=new Date().toISOString().slice(0,10); let arr=db.visits.filter(v=>v.date===today); if(currentUser?.role==='sales') arr=arr.filter(v=>v.salesId===currentUser.salesId||v.user===currentUser.username); const eff=arr.filter(v=>v.result==='order').length; visitStats={calls:arr.length,effective:eff,newOutlet:arr.filter(v=>v.newOutlet).length}; const a=document.getElementById('kpi-calls'); if(a){a.innerText=arr.length;document.getElementById('kpi-effective').innerText=eff;document.getElementById('kpi-strike').innerText=arr.length?Math.round(eff/arr.length*100)+'%':'0%';document.getElementById('kpi-new').innerText=visitStats.newOutlet;}}
-
+        function refreshVisitKpi(){
+          renderRecentVisits();renderSalesProgress('daily');
+          const today=jakartaTodayKey();
+          let arr=(db.visits||[]).filter(v=>dateKeyJakarta(v.checkIn||v.date)===today);
+          if(currentUser?.role==='sales')arr=arr.filter(v=>String(v.salesId)===String(currentUser.salesId)||v.user===currentUser.username);
+          const eff=arr.filter(v=>v.result==='order').length;
+          visitStats={calls:arr.length,effective:eff,newOutlet:arr.filter(v=>v.newOutlet).length};
+          const a=document.getElementById('kpi-calls');if(a){a.innerText=arr.length;document.getElementById('kpi-effective').innerText=eff;document.getElementById('kpi-strike').innerText=arr.length?Math.round(eff/arr.length*100)+'%':'0%';document.getElementById('kpi-new').innerText=visitStats.newOutlet;}
+        }
         function renderSalesProgress(period='daily'){
-          const sales=currentUser?.role==='sales'?db.sales.find(x=>x.id===currentUser.salesId):null;
-          const now=new Date(); let arr=db.visits.filter(v=>!sales || v.salesId===sales.id);
-          if(period==='daily') arr=arr.filter(v=>v.date===now.toISOString().slice(0,10));
-          if(period==='weekly'){const start=new Date(now);start.setDate(now.getDate()-6);arr=arr.filter(v=>new Date(v.date)>=new Date(start.toISOString().slice(0,10)));}
-          if(period==='monthly') arr=arr.filter(v=>(v.date||'').slice(0,7)===now.toISOString().slice(0,7));
-          const factor=period==='daily'?1:period==='weekly'?7:1;
-          const targetVisit=sales ? (period==='monthly'?Number(sales.targetVisit||0):Math.ceil(Number(sales.targetVisit||0)/25*factor)) : 0;
-          const targetBox=sales ? (period==='monthly'?Number(sales.targetBox||0):Math.ceil(Number(sales.targetBox||0)/25*factor)) : 0;
-          let ord=(db.orders||[]).filter(o=>!sales||o.salesId===sales.id);if(period==='daily')ord=ord.filter(o=>periodMatch(o.date,'daily'));if(period==='weekly')ord=ord.filter(o=>periodMatch(o.date,'weekly'));if(period==='monthly')ord=ord.filter(o=>periodMatch(o.date,'monthly'));const sold=ord.reduce((n,o)=>n+Number(o.qty||0),0), visits=arr.length;
-          document.getElementById('box-progress-text').innerText=`${sold} / ${targetBox} PCS`; document.getElementById('box-progress-bar').style.width=(targetBox?Math.min(100,sold/targetBox*100):0)+'%'; document.getElementById('box-remaining').innerText=targetBox? (sold>=targetBox?'Target tercapai':`Kurang ${targetBox-sold} PCS lagi`) :'Target belum ditetapkan';
-          document.getElementById('visit-progress-text').innerText=`${visits} / ${targetVisit} Toko`; document.getElementById('visit-progress-bar').style.width=(targetVisit?Math.min(100,visits/targetVisit*100):0)+'%'; document.getElementById('visit-remaining').innerText=targetVisit? (visits>=targetVisit?'Target tercapai':`Kurang ${targetVisit-visits} toko lagi`) :'Target belum ditetapkan';
+          const sales=currentUser?.role==='sales'?db.sales.find(x=>String(x.id)===String(currentUser.salesId)):null;
+          let arr=(db.visits||[]).filter(v=>(!sales||String(v.salesId)===String(sales.id))&&periodMatch(v.checkIn||v.date,period));
+          const factor=period==='daily'?1:period==='weekly'?7:25;
+          const targetVisit=sales?(period==='monthly'?Number(sales.targetVisit||0):Math.ceil(Number(sales.targetVisit||0)/25*factor)):0;
+          const targetBox=sales?(period==='monthly'?Number(sales.targetBox||0):Math.ceil(Number(sales.targetBox||0)/25*factor)):0;
+          const ord=(db.orders||[]).filter(o=>(!sales||String(o.salesId)===String(sales.id))&&periodMatch(o.date,period));
+          const sold=ord.reduce((n,o)=>n+Number(o.qty||0),0),visits=arr.length;
+          const bt=document.getElementById('box-progress-text'),bb=document.getElementById('box-progress-bar'),br=document.getElementById('box-remaining');
+          if(bt)bt.innerText=`${sold} / ${targetBox} PCS`;if(bb)bb.style.width=(targetBox?Math.min(100,sold/targetBox*100):0)+'%';if(br)br.innerText=targetBox?(sold>=targetBox?'Target tercapai':`Kurang ${targetBox-sold} PCS lagi`):'Target belum ditetapkan';
+          const vt=document.getElementById('visit-progress-text'),vb=document.getElementById('visit-progress-bar'),vr=document.getElementById('visit-remaining');
+          if(vt)vt.innerText=`${visits} / ${targetVisit} Toko`;if(vb)vb.style.width=(targetVisit?Math.min(100,visits/targetVisit*100):0)+'%';if(vr)vr.innerText=targetVisit?(visits>=targetVisit?'Target tercapai':`Kurang ${targetVisit-visits} toko lagi`):'Target belum ditetapkan';
         }
         let activeVisit = null; let visitStats = {calls:0,effective:0,newOutlet:0};
         function distanceMeters(a,b,c,d){ const R=6371000, p=Math.PI/180; const x=(c-a)*p, y=(d-b)*p; const h=Math.sin(x/2)**2+Math.cos(a*p)*Math.cos(c*p)*Math.sin(y/2)**2; return 2*R*Math.asin(Math.sqrt(h)); }
