@@ -94,7 +94,7 @@
 
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col">
 
-        <!-- ================= SALES WORKFLOW V6.6.0 ================= -->
+        <!-- ================= SALES WORKFLOW V6.6.1 ================= -->
         <div id="view-sales" class="space-y-6 animate-fadeIn">
           <div class="max-w-3xl mx-auto">
             <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
@@ -190,7 +190,7 @@
                 <button onclick="runSalesDiagnostics()" class="px-4 py-2 rounded-xl bg-amber-600 text-white text-xs font-bold">Periksa Sekarang</button>
               </div>
               <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mt-4 text-xs">
-                <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Frontend</span><b id="diag-front" class="block mt-1">V6.6.0</b></div>
+                <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Frontend</span><b id="diag-front" class="block mt-1">V6.6.1</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">API</span><b id="diag-api" class="block mt-1">-</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Orders</span><b id="diag-orders" class="block mt-1">0</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">OrderItems</span><b id="diag-items" class="block mt-1">0</b></div>
@@ -478,8 +478,8 @@
         }
 
         const API_URL='https://script.google.com/macros/s/AKfycbyR-riwS3HVUM93sA8D09AR3Orb1kgYbZnZ9HwKSYA8Z1wo0DaJh-Z-sqQhSQvJ53ANCg/exec';
-        const DBKEY='tmeez_sales_monitor_v6_6_0_cache';
-        const SESSIONKEY='tmeez_sales_monitor_v6_6_0_session';
+        const DBKEY='tmeez_sales_monitor_v6_6_1_cache';
+        const SESSIONKEY='tmeez_sales_monitor_v6_6_1_session';
         let apiOnline=false;
         let sessionToken='';
         async function apiGet(action,params={}){
@@ -927,7 +927,7 @@ function renderDynamicForms(){
         function periodLabel(period){return period==='daily'?'Hari ini':period==='weekly'?'7 hari terakhir':'Bulan ini';}
         async function runSalesDiagnostics(){
           const set=(id,v)=>{const e=document.getElementById(id);if(e)e.innerText=v;};
-          set('diag-front','V6.6.0');set('diag-status','Mengambil data langsung dari API...');
+          set('diag-front','V6.6.1');set('diag-status','Mengambil data langsung dari API...');
           try{
             const [ping,res]=await Promise.all([apiGet('ping'),apiGet('orders',{limit:500})]);
             set('diag-api',String(ping.version||'-'));
@@ -941,7 +941,7 @@ function renderDynamicForms(){
               const sales=db.sales.find(s=>String(s.id)===String(mapped.salesId));
               const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
               const yes=b=>b?'<b class="text-emerald-600">YA</b>':'<b class="text-red-500">TIDAK</b>';
-              return `<tr class="border-t"><td class="p-2">${esc(mapped.id)}</td><td class="p-2">${esc(sales?.name||mapped.salesId)}</td><td class="p-2">${esc(o.OrderDate||o.orderDate||o.CreatedAt||'')}</td><td class="p-2 text-center">${items.length}</td><td class="p-2 text-center font-bold">${itemQty}</td><td class="p-2 text-right">${rupiah(Number(o.GrandTotal??o.grandTotal??0))}</td><td class="p-2 text-center">${yes(orderPeriodMatch(mapped,'daily'))}</td><td class="p-2 text-center">${yes(orderPeriodMatch(mapped,'weekly'))}</td><td class="p-2 text-center">${yes(orderPeriodMatch(mapped,'monthly'))}</td></tr>`;
+              return `<tr class="border-t"><td class="p-2">${esc(mapped.id)}</td><td class="p-2">${esc(sales?.name||mapped.salesId)}</td><td class="p-2">${esc(o.OrderDateDisplay||o.OrderDate||o.orderDate||o.CreatedAt||'')}</td><td class="p-2 text-center">${items.length}</td><td class="p-2 text-center font-bold">${itemQty}</td><td class="p-2 text-right">${rupiah(Number(o.GrandTotal??o.grandTotal??0))}</td><td class="p-2 text-center">${yes(orderPeriodMatch(mapped,'daily'))}</td><td class="p-2 text-center">${yes(orderPeriodMatch(mapped,'weekly'))}</td><td class="p-2 text-center">${yes(orderPeriodMatch(mapped,'monthly'))}</td></tr>`;
             });
             set('diag-orders',packs.length);set('diag-items',totalItems);set('diag-pcs',totalPcs);
             const body=document.getElementById('diag-body');if(body)body.innerHTML=rows.join('')||'<tr><td colspan="9" class="p-5 text-center text-red-500">API tidak mengirim order.</td></tr>';
