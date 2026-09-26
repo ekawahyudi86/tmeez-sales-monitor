@@ -94,7 +94,7 @@
 
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col">
 
-        <!-- ================= SALES WORKFLOW V6.5.7 ================= -->
+        <!-- ================= SALES WORKFLOW V6.5.8 ================= -->
         <div id="view-sales" class="space-y-6 animate-fadeIn">
           <div class="max-w-3xl mx-auto">
             <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
@@ -461,8 +461,8 @@
         }
 
         const API_URL='https://script.google.com/macros/s/AKfycbyR-riwS3HVUM93sA8D09AR3Orb1kgYbZnZ9HwKSYA8Z1wo0DaJh-Z-sqQhSQvJ53ANCg/exec';
-        const DBKEY='tmeez_sales_monitor_v6_5_7_cache';
-        const SESSIONKEY='tmeez_sales_monitor_v6_5_7_session';
+        const DBKEY='tmeez_sales_monitor_v6_5_8_cache';
+        const SESSIONKEY='tmeez_sales_monitor_v6_5_8_session';
         let apiOnline=false;
         let sessionToken='';
         async function apiGet(action,params={}){
@@ -492,7 +492,8 @@
           const o=x.order||x.Order||x||{},items=x.items||x.Items||[];
           const date=o.OrderDate??o.orderDate??o.Date??o.date??o.CreatedAt??o.createdAt??'';
           const rawDateKey=o.OrderDateKey||o.orderDateKey||o.CreatedDateKey||''; const dateKey=rawDateKey?dateKeyJakarta(rawDateKey):'';
-          return {id:String(o.OrderID||o.orderId||''),salesId:String(o.SalesID||o.salesId||''),storeId:String(o.StoreID||o.storeId||''),date,dateKey,createdAt:o.CreatedAt||o.createdAt||'',isToday:o.IsToday===true||String(o.IsToday).toLowerCase()==='true',isLast7Days:o.IsLast7Days===true||String(o.IsLast7Days).toLowerCase()==='true',isThisMonth:o.IsThisMonth===true||String(o.IsThisMonth).toLowerCase()==='true',serverTodayKey:String(o.ServerTodayKey||''),qty:+(o.TotalQtyPcs??o.totalQtyPcs??o.QtyPcs??o.qty)||items.reduce((n,z)=>n+(+z.QtyPcs||+z.qtyPcs||0),0),subtotal:+(o.Subtotal??o.subtotal)||0,discount:+(o.Discount??o.discount)||0,total:+(o.GrandTotal??o.grandTotal??o.Total??o.total)||0,items};
+          const flag=v=>v===undefined||v===null||v===''?null:(v===true||String(v).toLowerCase()==='true');
+          return {id:String(o.OrderID||o.orderId||''),salesId:String(o.SalesID||o.salesId||''),storeId:String(o.StoreID||o.storeId||''),date,dateKey,createdAt:o.CreatedAt||o.createdAt||'',isToday:flag(o.IsToday),isLast7Days:flag(o.IsLast7Days),isThisMonth:flag(o.IsThisMonth),serverTodayKey:String(o.ServerTodayKey||''),qty:+(o.TotalQtyPcs??o.totalQtyPcs??o.QtyPcs??o.qty)||items.reduce((n,z)=>n+(+z.QtyPcs||+z.qtyPcs||0),0),subtotal:+(o.Subtotal??o.subtotal)||0,discount:+(o.Discount??o.discount)||0,total:+(o.GrandTotal??o.grandTotal??o.Total??o.total)||0,items};
         }
         function mapProduct(x){return {id:String(x.ProductID||''),name:String(x.ProductName||''),price:+(x.PricePerPcs!==''&&x.PricePerPcs!==undefined?x.PricePerPcs:x.PricePerBox)||0,pack:+x.UnitsPerBox||10,sku:String(x.SKU||''),status:String(x.Status||'Active')};}
         async function refreshOnlineData(showMessage=false){
@@ -892,11 +893,12 @@ function renderDynamicForms(){
           return key.slice(0,7)===today.slice(0,7);
         }
         function orderPeriodMatch(order,period){
-          // V6.5.7: utamakan flag periode dari server (Asia/Jakarta), bukan parsing tanggal browser.
-          if(period==='daily' && typeof order?.isToday==='boolean')return order.isToday;
-          if(period==='weekly' && typeof order?.isLast7Days==='boolean')return order.isLast7Days;
-          if(period==='monthly' && typeof order?.isThisMonth==='boolean')return order.isThisMonth;
-          // Fallback hanya untuk cache lama/API lama.
+          // Gunakan flag server hanya bila flag benar-benar dikirim oleh API.
+          // Pada versi sebelumnya field yang TIDAK ADA terkonversi menjadi false,
+          // sehingga fallback tanggal tidak pernah dijalankan.
+          if(period==='daily' && order?.isToday!==null && order?.isToday!==undefined)return order.isToday;
+          if(period==='weekly' && order?.isLast7Days!==null && order?.isLast7Days!==undefined)return order.isLast7Days;
+          if(period==='monthly' && order?.isThisMonth!==null && order?.isThisMonth!==undefined)return order.isThisMonth;
           const source=order?.dateKey||order?.date||order?.createdAt||'';
           const key=dateKeyJakarta(source),today=jakartaTodayKey();
           if(!key)return false;
