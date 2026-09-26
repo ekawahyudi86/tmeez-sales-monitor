@@ -325,7 +325,7 @@
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
                     <div>
                         <p class="text-xs font-medium text-slate-500">Total Omzet Bulan Ini</p>
-                        <h3 class="text-xl font-bold text-slate-900 mt-1">Rp 0</h3>
+                        <h3 id="admin-total-omzet" class="text-xl font-bold text-slate-900 mt-1">Rp 0</h3>
                         <span class="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md mt-2 inline-block">Belum ada transaksi</span>
                     </div>
                     <div class="bg-brand-50 text-brand-600 p-3 rounded-xl">
@@ -336,7 +336,7 @@
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
                     <div>
                         <p class="text-xs font-medium text-slate-500">Kunjungan Toko Total</p>
-                        <h3 class="text-xl font-bold text-slate-900 mt-1">0 Toko</h3>
+                        <h3 id="admin-total-visits" class="text-xl font-bold text-slate-900 mt-1">0 Toko</h3>
                         <span class="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md mt-2 inline-block">Belum ada kunjungan</span>
                     </div>
                     <div class="bg-indigo-50 text-indigo-600 p-3 rounded-xl">
@@ -346,8 +346,8 @@
 
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
                     <div>
-                        <p class="text-xs font-medium text-slate-500">Volume Dus Terjual</p>
-                        <h3 class="text-xl font-bold text-slate-900 mt-1">0 Dus</h3>
+                        <p class="text-xs font-medium text-slate-500">Volume PCS Terjual</p>
+                        <h3 id="admin-total-pcs" class="text-xl font-bold text-slate-900 mt-1">0 PCS</h3>
                         <span class="text-[11px] font-semibold text-brand-600 bg-brand-50 px-2 py-0.5 rounded-md mt-2 inline-block">Target belum ditetapkan</span>
                     </div>
                     <div class="bg-emerald-50 text-emerald-600 p-3 rounded-xl">
@@ -358,7 +358,7 @@
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
                     <div>
                         <p class="text-xs font-medium text-slate-500">Sales Aktif Lapangan</p>
-                        <h3 class="text-xl font-bold text-slate-900 mt-1">0 Orang</h3>
+                        <h3 id="admin-active-sales" class="text-xl font-bold text-slate-900 mt-1">0 Orang</h3>
                         <span class="text-[11px] font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md mt-2 inline-block">Belum ada sales</span>
                     </div>
                     <div class="bg-amber-50 text-amber-600 p-3 rounded-xl">
@@ -375,7 +375,7 @@
                             <i data-lucide="trophy" class="w-5 h-5 text-amber-500"></i>
                             Papan Peringkat Kinerja Sales & Target KPI
                         </h2>
-                        <p class="text-xs text-slate-500">Rekapitulasi pencapaian kunjungan dan volume dus secara harian, mingguan, dan bulanan.</p>
+                        <p class="text-xs text-slate-500">Rekapitulasi pencapaian kunjungan dan volume PCS secara harian, mingguan, dan bulanan.</p>
                     </div>
                     
                     <!-- Admin Filter Tabs -->
@@ -394,7 +394,7 @@
                                 <th class="py-3.5 px-4 text-center">Target Kunjungan</th>
                                 <th class="py-3.5 px-4 text-center">Aktual Kunjungan</th>
                                 <th class="py-3.5 px-4 text-center">Target PCS</th>
-                                <th class="py-3.5 px-4 text-center">Aktual Dus</th>
+                                <th class="py-3.5 px-4 text-center">Aktual PCS</th>
                                 <th class="py-3.5 px-6 text-right">Pencapaian KPI</th>
                             </tr>
                         </thead>
@@ -419,12 +419,12 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="recent-visits-grid"><div class="md:col-span-3 py-6 text-center text-sm text-slate-400">Belum ada kunjungan toko.</div></div>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <section class="bg-white rounded-2xl p-6 border shadow-sm"><h2 class="font-bold mb-4">KPI Operasional Sales</h2><div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center"><div class="bg-slate-50 p-3 rounded-xl"><b>342</b><p class="text-[11px]">Total Visit</p></div><div class="bg-slate-50 p-3 rounded-xl"><b>221</b><p class="text-[11px]">Effective Call</p></div><div class="bg-slate-50 p-3 rounded-xl"><b>64,6%</b><p class="text-[11px]">Strike Rate</p></div><div class="bg-slate-50 p-3 rounded-xl"><b>5,6</b><p class="text-[11px]">Avg Dus/Order</p></div></div></section>
-              <section class="bg-white rounded-2xl p-6 border shadow-sm"><h2 class="font-bold mb-4">Pengaturan Target & Geofence</h2><div class="grid grid-cols-3 gap-3"><label class="text-xs">Target PCS<input type="number" value="150" class="mt-1 w-full border rounded-lg p-2"></label><label class="text-xs">Target Visit<input type="number" value="25" class="mt-1 w-full border rounded-lg p-2"></label><label class="text-xs">Radius GPS (m)<input id="admin-radius" type="number" value="100" class="mt-1 w-full border rounded-lg p-2"></label></div><button onclick="showToast('Pengaturan target tersimpan')" class="mt-3 w-full py-2 bg-brand-600 text-white rounded-lg text-xs font-semibold">Simpan Pengaturan</button></section>
-              <section class="lg:col-span-2 bg-white rounded-2xl p-6 border shadow-sm"><div class="flex justify-between"><div><h2 class="font-bold">Ringkasan Operasional</h2><p class="text-xs text-slate-500">Stok motoris, setoran, piutang, outlet baru dan hasil kunjungan.</p></div><button onclick="exportCsv()" class="px-3 py-2 bg-slate-900 text-white rounded-lg text-xs font-semibold">Export CSV</button></div><div class="mt-4 overflow-x-auto"><table class="w-full text-xs"><thead><tr class="bg-slate-50"><th class="p-2 text-left">Sales</th><th>Visit</th><th>Order</th><th>Strike Rate</th><th>Dus</th><th>Setoran</th><th>Piutang</th></tr></thead><tbody><tr><td colspan="7" class="p-6 text-center text-slate-400">Belum ada data operasional.</td></tr></tbody></table></div></section>
+              <section class="bg-white rounded-2xl p-6 border shadow-sm"><h2 class="font-bold mb-4">KPI Operasional Sales</h2><div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center"><div class="bg-slate-50 p-3 rounded-xl"><b id="admin-kpi-visits">0</b><p class="text-[11px]">Total Visit</p></div><div class="bg-slate-50 p-3 rounded-xl"><b id="admin-kpi-effective">0</b><p class="text-[11px]">Effective Call</p></div><div class="bg-slate-50 p-3 rounded-xl"><b id="admin-kpi-strike">0%</b><p class="text-[11px]">Strike Rate</p></div><div class="bg-slate-50 p-3 rounded-xl"><b id="admin-kpi-duration">0 mnt</b><p class="text-[11px]">Avg Durasi</p></div></div></section>
+              <section class="bg-white rounded-2xl p-6 border shadow-sm"><h2 class="font-bold mb-4">Pengaturan Geofence</h2><p class="text-xs text-slate-500 mb-3">Target kunjungan dan target PCS diatur per Sales melalui Kelola Sales.</p><label class="text-xs">Radius GPS (m)<input id="admin-radius" type="number" value="100" class="mt-1 w-full border rounded-lg p-2"></label><button onclick="saveAdminSettings()" class="mt-3 w-full py-2 bg-brand-600 text-white rounded-lg text-xs font-semibold">Simpan Radius GPS</button></section>
+              <section class="lg:col-span-2 bg-white rounded-2xl p-6 border shadow-sm"><div class="flex justify-between"><div><h2 class="font-bold">Ringkasan Operasional</h2><p class="text-xs text-slate-500">Kunjungan dan penjualan aktual per Sales.</p></div><button onclick="exportCsv()" class="px-3 py-2 bg-slate-900 text-white rounded-lg text-xs font-semibold">Export CSV</button></div><div class="mt-4 overflow-x-auto"><table class="w-full text-xs"><thead><tr class="bg-slate-50"><th class="p-2 text-left">Sales</th><th>Visit</th><th>Order</th><th>Strike Rate</th><th>PCS</th><th>Omzet</th></tr></thead><tbody id="admin-operational-body"><tr><td colspan="6" class="p-6 text-center text-slate-400">Belum ada data operasional.</td></tr></tbody></table></div></section>
 
               <section class="lg:col-span-2 bg-white rounded-2xl p-6 border shadow-sm">
-                <div class="mb-4"><h2 class="font-bold">Master Data Operasional</h2><p class="text-xs text-slate-500">Data tersimpan di perangkat ini dan langsung digunakan pada form Sales.</p></div>
+                <div class="mb-4"><h2 class="font-bold">Master Data Operasional</h2><p class="text-xs text-slate-500">Master data tersimpan online di Google Sheet dan digunakan oleh akun Sales.</p></div>
                 <div class="grid lg:grid-cols-3 gap-5">
                   <div><h3 class="text-sm font-bold mb-2">Tambah Sales</h3><form onsubmit="addSales(event)" class="space-y-2"><input id="m-sales-name" required placeholder="Nama sales" class="w-full border rounded-lg p-2 text-xs"><input id="m-sales-phone" placeholder="No. HP / WhatsApp" class="w-full border rounded-lg p-2 text-xs"><input id="m-sales-area" required placeholder="Area / wilayah" class="w-full border rounded-lg p-2 text-xs"><div class="grid grid-cols-2 gap-2"><input id="m-sales-user" required placeholder="Username" autocomplete="off" class="border rounded-lg p-2 text-xs"><input id="m-sales-pass" required minlength="4" type="password" placeholder="Password awal" autocomplete="new-password" class="border rounded-lg p-2 text-xs"></div><div class="grid grid-cols-2 gap-2"><input id="m-sales-visit" type="number" value="0" placeholder="Target visit/bulan" class="border rounded-lg p-2 text-xs"><input id="m-sales-box" type="number" value="0" placeholder="Target dus/bulan" class="border rounded-lg p-2 text-xs"></div><button class="w-full bg-slate-900 text-white rounded-lg py-2 text-xs font-semibold">Buat Sales & Akun</button></form></div>
                   <div><h3 class="text-sm font-bold mb-2">Toko</h3><form onsubmit="addStoreMaster(event)" class="space-y-2"><input id="m-store-name" required placeholder="Nama toko" class="w-full border rounded-lg p-2 text-xs"><input id="m-store-owner" placeholder="Pemilik / WA" class="w-full border rounded-lg p-2 text-xs"><select id="m-store-sales" required class="w-full border rounded-lg p-2 text-xs"><option value="">Pilih sales penanggung jawab</option></select><div class="grid grid-cols-2 gap-2"><input id="m-store-lat" required type="number" step="any" placeholder="Latitude" class="border rounded-lg p-2 text-xs"><input id="m-store-lng" required type="number" step="any" placeholder="Longitude" class="border rounded-lg p-2 text-xs"></div><button type="button" onclick="fillCurrentStoreGps()" class="w-full border rounded-lg py-2 text-xs font-semibold">Isi GPS Posisi Sekarang</button><button class="w-full bg-brand-600 text-white rounded-lg py-2 text-xs font-semibold">Tambah Toko</button></form><div id="store-list" class="mt-3 space-y-1"></div></div>
@@ -582,27 +582,24 @@
         }
 
         // Admin Filter Switcher Simulation
-        function switchAdminFilter(filter) {
-            ['daily', 'weekly', 'monthly'].forEach(f => {
-                document.getElementById(`admin-filter-${f}`).className = "px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition";
-            });
-            document.getElementById(`admin-filter-${filter}`).className = "px-3 py-1.5 rounded-lg bg-white text-slate-800 shadow-sm transition";
-            showToast(`Menampilkan rekap data filter: ${filter.toUpperCase()}`);
+        let currentAdminPeriod='monthly';
+        function switchAdminFilter(filter){
+          currentAdminPeriod=filter;
+          ['daily','weekly','monthly'].forEach(f=>{const b=document.getElementById(`admin-filter-${f}`);if(b)b.className='px-3 py-1.5 rounded-lg '+(f===filter?'bg-white text-slate-800 shadow-sm':'text-slate-600 hover:text-slate-900')+' transition';});
+          renderAdminDashboard(filter);
         }
 
         const API_URL='https://script.google.com/macros/s/AKfycbyR-riwS3HVUM93sA8D09AR3Orb1kgYbZnZ9HwKSYA8Z1wo0DaJh-Z-sqQhSQvJ53ANCg/exec';
-        const DBKEY='tmeez_sales_monitor_v6_4_cache';
-        const SESSIONKEY='tmeez_sales_monitor_v6_4_session';
+        const DBKEY='tmeez_sales_monitor_v6_4_3_cache';
+        const SESSIONKEY='tmeez_sales_monitor_v6_4_3_session';
         let apiOnline=false;
         let sessionToken='';
-        async function apiGet(action){
-          const q=new URLSearchParams({action});
-          if(sessionToken) q.set('token',sessionToken);
+        async function apiGet(action,params={}){
+          const q=new URLSearchParams({action,...params});
+          if(sessionToken)q.set('token',sessionToken);
           const r=await fetch(API_URL+'?'+q.toString(),{cache:'no-store'});
-          if(!r.ok) throw new Error('HTTP '+r.status);
-          const j=await r.json();
-          if(!j.success) throw new Error(j.message||'API gagal');
-          return j;
+          if(!r.ok)throw new Error('HTTP '+r.status);
+          const j=await r.json();if(!j.success)throw new Error(j.message||'API gagal');return j;
         }
         async function apiPost(payload){
           const body={...payload};
@@ -619,32 +616,32 @@
         function clearSession(){sessionToken='';localStorage.removeItem(SESSIONKEY);}
         function mapSales(x){return {id:String(x.SalesID||''),name:String(x.Name||''),phone:String(x.Phone||''),area:String(x.Area||''),targetVisit:+x.TargetVisit||0,targetBox:+x.TargetBox||0,active:String(x.Status||'Active').toLowerCase()==='active'};}
         function mapStore(x){return {id:String(x.StoreID||''),name:String(x.StoreName||''),owner:String(x.OwnerName||''),wa:String(x.WhatsApp||''),address:String(x.Address||''),lat:+x.Latitude||0,lng:+x.Longitude||0,accuracy:+x.GPSAccuracy||0,photoFileId:String(x.PhotoFileID||''),photoUrl:String(x.PhotoURL||''),createdBySalesId:String(x.CreatedBySalesID||''),createdByName:String(x.CreatedByName||''),createdAt:x.CreatedAt?String(x.CreatedAt):'',status:String(x.Status||'Active'),source:String(x.CreatedBySalesID||'')==='ADMIN'?'admin':'sales'};}
+        function mapVisit(x){return {id:String(x.VisitID||''),storeId:String(x.StoreID||''),store:String(x.StoreName||''),salesId:String(x.SalesID||''),salesName:String(x.SalesName||''),date:String(x.CheckInAt||'').slice(0,10),checkIn:String(x.CheckInAt||''),checkOut:String(x.CheckOutAt||''),lat:+x.CheckInLat||0,lng:+x.CheckInLng||0,accuracy:+x.GPSAccuracy||0,distance:+x.DistanceMeter||0,duration:+x.DurationMinute||0,result:String(x.Result||''),reason:String(x.Notes||'')};}
+        function mapOrderPack(x){const o=x.order||{},items=x.items||[];return {id:String(o.OrderID||''),salesId:String(o.SalesID||''),storeId:String(o.StoreID||''),date:String(o.OrderDate||o.CreatedAt||''),qty:+o.TotalQtyPcs||items.reduce((n,z)=>n+(+z.QtyPcs||0),0),subtotal:+o.Subtotal||0,discount:+o.Discount||0,total:+o.GrandTotal||0,items};}
         function mapProduct(x){return {id:String(x.ProductID||''),name:String(x.ProductName||''),price:+(x.PricePerPcs!==''&&x.PricePerPcs!==undefined?x.PricePerPcs:x.PricePerBox)||0,pack:+x.UnitsPerBox||10,sku:String(x.SKU||''),status:String(x.Status||'Active')};}
         async function refreshOnlineData(showMessage=false){
           try{
             let st,pr;
             if(currentUser?.role==='admin'){
-              const [sa,xst,xpr]=await Promise.all([apiGet('sales'),apiGet('stores'),apiGet('products')]);
-              db.sales=(sa.data||[]).map(mapSales); st=xst; pr=xpr;
+              const [sa,xst,xpr,xvi,xor,xset]=await Promise.all([apiGet('sales'),apiGet('stores'),apiGet('products'),apiGet('visits',{limit:500}),apiGet('orders',{limit:200}),apiGet('settings')]);
+              db.sales=(sa.data||[]).map(mapSales);db.visits=(xvi.data||[]).map(mapVisit);db.orders=(xor.data||[]).map(mapOrderPack);applyOnlineSettings(xset.data||[]);st=xst;pr=xpr;
             }else{
-              [st,pr]=await Promise.all([apiGet('stores'),apiGet('products')]);
+              const [xst,xpr,xvi,xor,xset]=await Promise.all([apiGet('stores'),apiGet('products'),apiGet('visits',{limit:200}),apiGet('orders',{limit:200}),apiGet('settings')]);
+              st=xst;pr=xpr;db.visits=(xvi.data||[]).map(mapVisit);db.orders=(xor.data||[]).map(mapOrderPack);applyOnlineSettings(xset.data||[]);
             }
             db.stores=(st.data||[]).map(mapStore);
-            if(currentUser?.role==='sales'){
-              db.stores=db.stores.filter(x=>String(x.createdBySalesId)===String(currentUser.salesId) && String(x.status).toLowerCase()==='active');
-            }
-            db.products=(pr.data||[]).map(mapProduct);
-            apiOnline=true; saveDb(); renderMaster();renderDynamicForms();refreshVisitKpi();
+            if(currentUser?.role==='sales')db.stores=db.stores.filter(x=>String(x.createdBySalesId)===String(currentUser.salesId)&&String(x.status).toLowerCase()==='active');
+            db.products=(pr.data||[]).map(mapProduct);apiOnline=true;saveDb();renderMaster();renderDynamicForms();refreshVisitKpi();renderAdminDashboard(currentAdminPeriod||'monthly');
             if(showMessage)showToast('Data Google Sheet berhasil disinkronkan');
           }catch(err){apiOnline=false;if(showMessage)showToast('Sinkronisasi gagal: '+err.message);}
         }
 
-        let db={users:[],sales:[],stores:[],products:[],visits:[],settings:{radius:100}};
+        let db={users:[],sales:[],stores:[],products:[],visits:[],orders:[],settings:{radius:100}};
         let currentUser=null;
         function loadDb(){
           const raw=localStorage.getItem(DBKEY);
           if(raw){ try{db=JSON.parse(raw)}catch(e){} }
-          db.users=db.users||[]; db.products=db.products||[]; db.sales=db.sales||[]; db.stores=db.stores||[]; db.visits=db.visits||[]; db.settings=db.settings||{radius:100};
+          db.users=db.users||[]; db.products=db.products||[]; db.sales=db.sales||[]; db.stores=db.stores||[]; db.visits=db.visits||[]; db.orders=db.orders||[]; db.settings=db.settings||{radius:100};
           renderMaster(); renderDynamicForms(); refreshVisitKpi(); refreshOnlineData(false);
         }
         function saveDb(){localStorage.setItem(DBKEY,JSON.stringify(db));}
@@ -673,9 +670,6 @@
         async function addProduct(e){
           e.preventDefault();try{await apiPost({action:'addProduct',productName:document.getElementById('m-product-name').value.trim(),pricePerPcs:+document.getElementById('m-product-price').value||0,unitsPerBox:+document.getElementById('m-product-pack').value||10,unit:'PCS'});e.target.reset();await refreshOnlineData(false);showToast('Produk tersimpan ke Google Sheet');}catch(err){showToast('Gagal menambah produk: '+err.message);}
         }
-        function removeMaster(type,id){showToast('Hapus data online akan diaktifkan pada backend tahap berikutnya.');}
-        function toggleSales(id){showToast('Aktif/nonaktif sales online akan diaktifkan pada backend tahap berikutnya.');}
-        function resetSalesPassword(id){showToast('Reset password online akan diaktifkan pada backend tahap berikutnya.');}
         function renderMaster(){
           const tl=document.getElementById('store-list'),pl=document.getElementById('product-list');
           renderSalesManagement();
@@ -731,8 +725,71 @@ function renderDynamicForms(){
             <div class="text-right text-[11px] mt-2 text-indigo-700">Total: <b class="product-line-total">Rp 0</b></div>
           </div>`).join(''); calculateInvoiceTotal();
         }
+        let onboardingGps=null, onboardingPhoto=null;
+        function captureGps(){
+          if(!navigator.geolocation){showToast('GPS tidak didukung perangkat');return;}
+          const s=document.getElementById('gps-status');if(s)s.innerText='Mengambil lokasi GPS...';
+          navigator.geolocation.getCurrentPosition(pos=>{
+            onboardingGps={lat:pos.coords.latitude,lng:pos.coords.longitude,accuracy:pos.coords.accuracy||0};
+            if(s)s.innerText=`✓ GPS didapat · akurasi ±${Math.round(onboardingGps.accuracy)} m`;
+            showToast('Lokasi GPS berhasil diambil');
+          },err=>{if(s)s.innerText='GPS gagal: '+err.message;showToast('GPS gagal: '+err.message);},{enableHighAccuracy:true,timeout:15000,maximumAge:0});
+        }
+        function triggerCamera(){document.getElementById('store-photo-input')?.click();}
+        function handleStorePhoto(input){
+          const file=input?.files?.[0];if(!file)return;
+          const reader=new FileReader();
+          reader.onload=ev=>{
+            const img=new Image();img.onload=()=>{
+              const max=1280,scale=Math.min(1,max/img.width),c=document.createElement('canvas');
+              c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);
+              c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+              onboardingPhoto=c.toDataURL('image/jpeg',0.72);
+              const s=document.getElementById('photo-status');if(s)s.innerText='✓ Foto siap · '+Math.round(onboardingPhoto.length/1024)+' KB';
+              showToast('Foto toko siap disimpan');
+            };img.src=ev.target.result;
+          };reader.readAsDataURL(file);
+        }
+        async function handleStoreSubmit(e){
+          e.preventDefault();
+          if(!onboardingGps){showToast('Ambil lokasi GPS toko terlebih dahulu');return;}
+          if(!onboardingPhoto){showToast('Ambil foto tampak toko terlebih dahulu');return;}
+          try{
+            await apiPost({action:'addStore',storeName:document.getElementById('store-name').value.trim(),ownerName:document.getElementById('owner-name').value.trim(),whatsapp:document.getElementById('store-wa')?.value||'',address:document.getElementById('store-address')?.value||'',latitude:onboardingGps.lat,longitude:onboardingGps.lng,gpsAccuracy:onboardingGps.accuracy,photoBase64:onboardingPhoto,photoMimeType:'image/jpeg'});
+            e.target.reset();onboardingGps=null;onboardingPhoto=null;
+            const gs=document.getElementById('gps-status');if(gs)gs.innerText='Belum diambil (Tekan tombol di samping)';
+            const ps=document.getElementById('photo-status');if(ps)ps.innerText='Belum ada foto diambil';
+            await refreshOnlineData(false);showToast('Toko berhasil didaftarkan online');
+          }catch(err){showToast('Gagal mendaftarkan toko: '+err.message);}
+        }
+
         function fillCurrentStoreGps(){if(!navigator.geolocation){showToast('GPS tidak tersedia');return;} navigator.geolocation.getCurrentPosition(p=>{document.getElementById('m-store-lat').value=p.coords.latitude.toFixed(7);document.getElementById('m-store-lng').value=p.coords.longitude.toFixed(7);showToast('Koordinat terisi');},e=>showToast('GPS gagal: '+e.message),{enableHighAccuracy:true});}
-        function refreshVisitKpi(){ renderSalesProgress('daily');const today=new Date().toISOString().slice(0,10); let arr=db.visits.filter(v=>v.date===today); if(currentUser?.role==='sales') arr=arr.filter(v=>v.salesId===currentUser.salesId||v.user===currentUser.username); const eff=arr.filter(v=>v.result==='order').length; visitStats={calls:arr.length,effective:eff,newOutlet:arr.filter(v=>v.newOutlet).length}; const a=document.getElementById('kpi-calls'); if(a){a.innerText=arr.length;document.getElementById('kpi-effective').innerText=eff;document.getElementById('kpi-strike').innerText=arr.length?Math.round(eff/arr.length*100)+'%':'0%';document.getElementById('kpi-new').innerText=visitStats.newOutlet;}}
+        function periodMatch(dateStr,period){const d=new Date(dateStr),n=new Date();if(isNaN(d))return false;if(period==='daily')return d.toDateString()===n.toDateString();if(period==='weekly'){const x=new Date(n);x.setDate(n.getDate()-6);x.setHours(0,0,0,0);return d>=x&&d<=n;}return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth();}
+        function renderAdminDashboard(period='monthly'){
+          const visits=(db.visits||[]).filter(v=>periodMatch(v.checkIn||v.date,period));
+          const orders=(db.orders||[]).filter(o=>periodMatch(o.date,period));
+          const set=(id,v)=>{const e=document.getElementById(id);if(e)e.innerText=v;};
+          set('admin-total-omzet',rupiah(orders.reduce((n,o)=>n+o.total,0)));set('admin-total-visits',visits.length+' Toko');set('admin-total-pcs',orders.reduce((n,o)=>n+o.qty,0)+' PCS');set('admin-active-sales',(db.sales||[]).filter(s=>s.active!==false).length+' Orang');
+          const body=document.getElementById('leaderboard-tbody');
+          const rows=(db.sales||[]).map(s=>{const v=visits.filter(x=>x.salesId===s.id),o=orders.filter(x=>x.salesId===s.id),qty=o.reduce((n,x)=>n+x.qty,0);const factor=period==='daily'?1:period==='weekly'?7:25;const tv=period==='monthly'?s.targetVisit:Math.ceil((s.targetVisit||0)/25*factor),tq=period==='monthly'?s.targetBox:Math.ceil((s.targetBox||0)/25*factor);const score=((tv?v.length/tv:0)+(tq?qty/tq:0))/2;return {s,v:v.length,o:o.length,qty,tv,tq,score,omzet:o.reduce((n,x)=>n+x.total,0)}}).sort((a,b)=>b.score-a.score);
+          if(body)body.innerHTML=rows.map((r,i)=>`<tr><td class="py-3 px-6"><b>${i+1}. ${escapeHtml(r.s.name)}</b><br><span class="text-slate-400">${escapeHtml(r.s.area||'-')}</span></td><td class="text-center">${r.tv}</td><td class="text-center">${r.v}</td><td class="text-center">${r.tq}</td><td class="text-center">${r.qty}</td><td class="px-6 text-right font-bold">${Math.round(r.score*100)}%</td></tr>`).join('')||'<tr><td colspan="6" class="py-8 px-6 text-center text-slate-400">Belum ada data kinerja sales.</td></tr>';
+          const ob=document.getElementById('admin-operational-body');if(ob)ob.innerHTML=rows.map(r=>`<tr><td class="p-2"><b>${escapeHtml(r.s.name)}</b></td><td class="text-center">${r.v}</td><td class="text-center">${r.o}</td><td class="text-center">${r.v?Math.round(r.o/r.v*100):0}%</td><td class="text-center">${r.qty}</td><td class="text-right p-2">${rupiah(r.omzet)}</td></tr>`).join('')||'<tr><td colspan="6" class="p-6 text-center text-slate-400">Belum ada data operasional.</td></tr>';
+        }
+        function applyOnlineSettings(rows){
+          const obj={};rows.forEach(x=>obj[String(x.Key)]=x.Value);
+          if(obj.GEOFENCE_RADIUS!==undefined)db.settings.radius=Number(obj.GEOFENCE_RADIUS)||100;
+          const r=document.getElementById('admin-radius');if(r)r.value=db.settings.radius;
+        }
+        async function saveAdminSettings(){try{const radius=+document.getElementById('admin-radius').value||100;await apiPost({action:'updateSettings',geofenceRadius:radius});db.settings.radius=radius;saveDb();showToast('Radius GPS tersimpan online');}catch(err){showToast('Gagal menyimpan pengaturan: '+err.message);}}
+        function renderRecentVisits(){
+          const grid=document.getElementById('recent-visits-grid');if(!grid)return;
+          const rows=(db.visits||[]).slice(0,9);
+          grid.innerHTML=rows.map(v=>`<div class="border rounded-2xl p-4 bg-slate-50/60"><div class="flex justify-between gap-2"><div><b class="text-sm">${escapeHtml(v.store||'-')}</b><p class="text-[11px] text-slate-500">${escapeHtml(v.salesName||'-')}</p></div><span class="text-[10px] px-2 py-1 h-fit rounded-lg ${v.distance<=Number(db.settings.radius||100)?'bg-emerald-100 text-emerald-700':'bg-red-100 text-red-700'}">${Math.round(v.distance||0)} m</span></div><div class="mt-3 text-[11px] text-slate-600">${v.checkIn?new Date(v.checkIn).toLocaleString('id-ID'):'-'}<br>GPS ±${Math.round(v.accuracy||0)} m · ${v.duration||0} menit<br><b>${v.result==='order'?'Ada order':'Tidak order'}</b>${v.reason?' · '+escapeHtml(v.reason):''}</div></div>`).join('')||'<div class="md:col-span-3 py-6 text-center text-sm text-slate-400">Belum ada kunjungan toko.</div>';
+          const total=(db.visits||[]).length,eff=(db.visits||[]).filter(v=>v.result==='order').length,avg=total?Math.round((db.visits||[]).reduce((n,v)=>n+(+v.duration||0),0)/total):0;
+          const set=(id,val)=>{const x=document.getElementById(id);if(x)x.innerText=val;};
+          set('admin-kpi-visits',total);set('admin-kpi-effective',eff);set('admin-kpi-strike',total?Math.round(eff/total*100)+'%':'0%');set('admin-kpi-duration',avg+' mnt');
+        }
+        function refreshVisitKpi(){ renderRecentVisits(); renderSalesProgress('daily');const today=new Date().toISOString().slice(0,10); let arr=db.visits.filter(v=>v.date===today); if(currentUser?.role==='sales') arr=arr.filter(v=>v.salesId===currentUser.salesId||v.user===currentUser.username); const eff=arr.filter(v=>v.result==='order').length; visitStats={calls:arr.length,effective:eff,newOutlet:arr.filter(v=>v.newOutlet).length}; const a=document.getElementById('kpi-calls'); if(a){a.innerText=arr.length;document.getElementById('kpi-effective').innerText=eff;document.getElementById('kpi-strike').innerText=arr.length?Math.round(eff/arr.length*100)+'%':'0%';document.getElementById('kpi-new').innerText=visitStats.newOutlet;}}
 
         function renderSalesProgress(period='daily'){
           const sales=currentUser?.role==='sales'?db.sales.find(x=>x.id===currentUser.salesId):null;
@@ -743,7 +800,7 @@ function renderDynamicForms(){
           const factor=period==='daily'?1:period==='weekly'?7:1;
           const targetVisit=sales ? (period==='monthly'?Number(sales.targetVisit||0):Math.ceil(Number(sales.targetVisit||0)/25*factor)) : 0;
           const targetBox=sales ? (period==='monthly'?Number(sales.targetBox||0):Math.ceil(Number(sales.targetBox||0)/25*factor)) : 0;
-          const sold=arr.reduce((n,v)=>n+Number(v.qty||0),0), visits=arr.length;
+          let ord=(db.orders||[]).filter(o=>!sales||o.salesId===sales.id);if(period==='daily')ord=ord.filter(o=>periodMatch(o.date,'daily'));if(period==='weekly')ord=ord.filter(o=>periodMatch(o.date,'weekly'));if(period==='monthly')ord=ord.filter(o=>periodMatch(o.date,'monthly'));const sold=ord.reduce((n,o)=>n+Number(o.qty||0),0), visits=arr.length;
           document.getElementById('box-progress-text').innerText=`${sold} / ${targetBox} PCS`; document.getElementById('box-progress-bar').style.width=(targetBox?Math.min(100,sold/targetBox*100):0)+'%'; document.getElementById('box-remaining').innerText=targetBox? (sold>=targetBox?'Target tercapai':`Kurang ${targetBox-sold} PCS lagi`) :'Target belum ditetapkan';
           document.getElementById('visit-progress-text').innerText=`${visits} / ${targetVisit} Toko`; document.getElementById('visit-progress-bar').style.width=(targetVisit?Math.min(100,visits/targetVisit*100):0)+'%'; document.getElementById('visit-remaining').innerText=targetVisit? (visits>=targetVisit?'Target tercapai':`Kurang ${targetVisit-visits} toko lagi`) :'Target belum ditetapkan';
         }
@@ -757,14 +814,28 @@ function renderDynamicForms(){
             const opt=sel.options[sel.selectedIndex], slat=parseFloat(opt.dataset.lat), slng=parseFloat(opt.dataset.lng);
             const dist=distanceMeters(pos.coords.latitude,pos.coords.longitude,slat,slng); const radius=parseInt(document.getElementById('admin-radius')?.value||db.settings.radius||100);
             if(dist>radius){document.getElementById('visit-info').innerHTML=`<span class="text-red-600 font-semibold">Check-in ditolak · jarak ${Math.round(dist)} m, batas ${radius} m.</span>`;return;}
-            activeVisit={storeId:sel.value,store:opt.text,checkIn:new Date(),lat:pos.coords.latitude,lng:pos.coords.longitude,distance:dist};
+            activeVisit={storeId:sel.value,store:opt.text,checkIn:new Date(),lat:pos.coords.latitude,lng:pos.coords.longitude,distance:dist,accuracy:pos.coords.accuracy||0};
             document.getElementById('visit-badge').className='text-xs px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 font-semibold'; document.getElementById('visit-badge').innerText='Check-in aktif';
             document.getElementById('visit-info').innerHTML=`<span class="text-emerald-700 font-semibold">✓ Lokasi valid · ${Math.round(dist)} m dari titik toko · ${activeVisit.checkIn.toLocaleTimeString('id-ID')}</span>`;
             document.getElementById('visit-result-panel').classList.remove('hidden'); showToast('Check-in kunjungan berhasil');
           },err=>showToast('GPS gagal: '+err.message),{enableHighAccuracy:true,timeout:15000,maximumAge:0});
         }
         function toggleVisitReason(){document.getElementById('no-order-reason').classList.toggle('hidden',document.getElementById('visit-result').value!=='no_order');}
-        function finishVisit(){ if(!activeVisit){showToast('Belum ada check-in aktif');return;} const result=document.getElementById('visit-result').value, end=new Date(), dur=Math.max(1,Math.round((end-activeVisit.checkIn)/60000)); db.visits.push({id:uid('v'),storeId:activeVisit.storeId,store:activeVisit.store,user:currentUser?.username||'unknown',salesId:currentUser?.salesId||null,salesName:currentUser?.name||'Unknown',date:end.toISOString().slice(0,10),checkIn:activeVisit.checkIn.toISOString(),checkOut:end.toISOString(),lat:activeVisit.lat,lng:activeVisit.lng,distance:Math.round(activeVisit.distance),duration:dur,result,reason:result==='no_order'?document.getElementById('no-order-reason').value:''}); saveDb(); refreshVisitKpi(); document.getElementById('visit-result-panel').classList.add('hidden'); document.getElementById('visit-badge').className='text-xs px-3 py-1 rounded-full bg-slate-100'; document.getElementById('visit-badge').innerText='Belum check-in'; document.getElementById('visit-info').innerHTML=`Kunjungan ${activeVisit.store} selesai · durasi ${dur} menit · hasil: ${result}.`; activeVisit=null; showToast('Kunjungan tersimpan'); }
+        async function finishVisit(){
+          if(!activeVisit){showToast('Belum ada check-in aktif');return;}
+          const result=document.getElementById('visit-result').value,end=new Date(),dur=Math.max(1,Math.round((end-activeVisit.checkIn)/60000));
+          const reason=result==='no_order'?document.getElementById('no-order-reason').value:'';
+          try{
+            await apiPost({action:'saveVisit',storeId:activeVisit.storeId,checkInAt:activeVisit.checkIn.toISOString(),checkOutAt:end.toISOString(),latitude:activeVisit.lat,longitude:activeVisit.lng,gpsAccuracy:activeVisit.accuracy||0,distanceMeter:Math.round(activeVisit.distance),durationMinute:dur,result:result,notes:reason});
+            document.getElementById('visit-result-panel').classList.add('hidden');
+            document.getElementById('visit-badge').className='text-xs px-3 py-1 rounded-full bg-slate-100';
+            document.getElementById('visit-badge').innerText='Belum check-in';
+            document.getElementById('visit-info').innerHTML=`Kunjungan ${escapeHtml(activeVisit.store)} selesai · durasi ${dur} menit · hasil: ${escapeHtml(result)}.`;
+            activeVisit=null;
+            await refreshOnlineData(false);
+            showToast('Kunjungan tersimpan online');
+          }catch(err){showToast('Gagal menyimpan kunjungan: '+err.message);}
+        }
         let lastSavedOrder = null;
         let lastInvoiceFingerprint = '';
 
@@ -921,7 +992,7 @@ function renderDynamicForms(){
 
         function exportCsv(){
           const rows=[['Sales','Toko','Tanggal','Hasil','Durasi Menit','Jarak Meter']];
-          db.visits.forEach(v=>rows.push([v.sales||'',v.store||'',v.date||'',v.result||'',v.duration||'',Math.round(v.distance||0)]));
+          db.visits.forEach(v=>rows.push([v.salesName||'',v.store||'',v.date||'',v.result||'',v.duration||'',Math.round(v.distance||0)]));
           const csv=rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(',')).join('\n');
           const blob=new Blob([csv],{type:'text/csv'}), a=document.createElement('a');
           a.href=URL.createObjectURL(blob); a.download='laporan-sales.csv'; a.click(); URL.revokeObjectURL(a.href);
