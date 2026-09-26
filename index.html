@@ -94,7 +94,7 @@
 
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col">
 
-        <!-- ================= SALES WORKFLOW V6.5.9 ================= -->
+        <!-- ================= SALES WORKFLOW V6.6.0 ================= -->
         <div id="view-sales" class="space-y-6 animate-fadeIn">
           <div class="max-w-3xl mx-auto">
             <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
@@ -184,6 +184,23 @@
 
         <!-- ================= ADMIN DASHBOARD VIEW ================= -->
         <div id="view-admin" class="space-y-6 hidden animate-fadeIn">
+            <section class="bg-amber-50 border border-amber-200 rounded-2xl p-5 shadow-sm">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div><h2 class="font-bold text-amber-900">Diagnostik Data Penjualan</h2><p class="text-xs text-amber-700 mt-1">Menampilkan data Orders & OrderItems yang benar-benar diterima browser.</p></div>
+                <button onclick="runSalesDiagnostics()" class="px-4 py-2 rounded-xl bg-amber-600 text-white text-xs font-bold">Periksa Sekarang</button>
+              </div>
+              <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mt-4 text-xs">
+                <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Frontend</span><b id="diag-front" class="block mt-1">V6.6.0</b></div>
+                <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">API</span><b id="diag-api" class="block mt-1">-</b></div>
+                <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Orders</span><b id="diag-orders" class="block mt-1">0</b></div>
+                <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">OrderItems</span><b id="diag-items" class="block mt-1">0</b></div>
+                <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Total QtyPcs</span><b id="diag-pcs" class="block mt-1">0</b></div>
+              </div>
+              <p id="diag-status" class="text-xs text-amber-800 mt-3">Klik “Periksa Sekarang”.</p>
+              <div class="overflow-x-auto mt-4 bg-white rounded-xl border">
+                <table class="w-full text-[11px] whitespace-nowrap"><thead><tr class="bg-slate-50 text-slate-600"><th class="p-2 text-left">OrderID</th><th class="p-2 text-left">Sales</th><th class="p-2 text-left">OrderDate</th><th class="p-2 text-center">Items</th><th class="p-2 text-center">QtyPcs</th><th class="p-2 text-right">GrandTotal</th><th class="p-2 text-center">Harian</th><th class="p-2 text-center">Mingguan</th><th class="p-2 text-center">Bulanan</th></tr></thead><tbody id="diag-body"><tr><td colspan="9" class="p-5 text-center text-slate-400">Belum diperiksa.</td></tr></tbody></table>
+              </div>
+            </section>
             
             <!-- Dashboard Summary Cards -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -461,8 +478,8 @@
         }
 
         const API_URL='https://script.google.com/macros/s/AKfycbyR-riwS3HVUM93sA8D09AR3Orb1kgYbZnZ9HwKSYA8Z1wo0DaJh-Z-sqQhSQvJ53ANCg/exec';
-        const DBKEY='tmeez_sales_monitor_v6_5_9_cache';
-        const SESSIONKEY='tmeez_sales_monitor_v6_5_9_session';
+        const DBKEY='tmeez_sales_monitor_v6_6_0_cache';
+        const SESSIONKEY='tmeez_sales_monitor_v6_6_0_session';
         let apiOnline=false;
         let sessionToken='';
         async function apiGet(action,params={}){
@@ -908,6 +925,32 @@ function renderDynamicForms(){
           return key.slice(0,7)===today.slice(0,7);
         }
         function periodLabel(period){return period==='daily'?'Hari ini':period==='weekly'?'7 hari terakhir':'Bulan ini';}
+        async function runSalesDiagnostics(){
+          const set=(id,v)=>{const e=document.getElementById(id);if(e)e.innerText=v;};
+          set('diag-front','V6.6.0');set('diag-status','Mengambil data langsung dari API...');
+          try{
+            const [ping,res]=await Promise.all([apiGet('ping'),apiGet('orders',{limit:500})]);
+            set('diag-api',String(ping.version||'-'));
+            const packs=res.data||[];
+            let totalItems=0,totalPcs=0;
+            const rows=packs.map(pack=>{
+              const o=pack.order||pack.Order||pack||{},items=pack.items||pack.Items||[];
+              const itemQty=items.reduce((n,x)=>n+Number(x.QtyPcs??x.qtyPcs??0),0);
+              totalItems+=items.length;totalPcs+=itemQty;
+              const mapped=mapOrderPack(pack);
+              const sales=db.sales.find(s=>String(s.id)===String(mapped.salesId));
+              const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+              const yes=b=>b?'<b class="text-emerald-600">YA</b>':'<b class="text-red-500">TIDAK</b>';
+              return `<tr class="border-t"><td class="p-2">${esc(mapped.id)}</td><td class="p-2">${esc(sales?.name||mapped.salesId)}</td><td class="p-2">${esc(o.OrderDate||o.orderDate||o.CreatedAt||'')}</td><td class="p-2 text-center">${items.length}</td><td class="p-2 text-center font-bold">${itemQty}</td><td class="p-2 text-right">${rupiah(Number(o.GrandTotal??o.grandTotal??0))}</td><td class="p-2 text-center">${yes(orderPeriodMatch(mapped,'daily'))}</td><td class="p-2 text-center">${yes(orderPeriodMatch(mapped,'weekly'))}</td><td class="p-2 text-center">${yes(orderPeriodMatch(mapped,'monthly'))}</td></tr>`;
+            });
+            set('diag-orders',packs.length);set('diag-items',totalItems);set('diag-pcs',totalPcs);
+            const body=document.getElementById('diag-body');if(body)body.innerHTML=rows.join('')||'<tr><td colspan="9" class="p-5 text-center text-red-500">API tidak mengirim order.</td></tr>';
+            set('diag-status',`API ${ping.version||'-'} aktif · ${packs.length} order · ${totalItems} item · ${totalPcs} PCS diterima langsung dari server.`);
+          }catch(err){
+            set('diag-status','GAGAL: '+err.message);set('diag-api','ERROR');
+          }
+        }
+
         function renderAdminDashboard(period='monthly'){
           const visits=(db.visits||[]).filter(v=>periodMatch(v.checkIn||v.date,period));
           const orders=(db.orders||[]).filter(o=>orderPeriodMatch(o,period));
