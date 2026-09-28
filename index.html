@@ -102,7 +102,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
 
     <main class="flex-1 max-w-7xl w-full mx-auto pt-20 px-4 pb-4 sm:pt-20 sm:px-6 sm:pb-6 lg:px-8 lg:pb-8 flex flex-col">
 
-        <!-- ================= SALES WORKFLOW V6.8.1 ================= -->
+        <!-- ================= SALES WORKFLOW V6.8.2 ================= -->
         <div id="view-sales" class="space-y-6 animate-fadeIn">
           <div id="sales-sticky-greeting" class="sticky top-16 z-40 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-2 bg-slate-100/95 backdrop-blur border-b border-slate-200 shadow-sm">
             <div class="max-w-3xl mx-auto flex items-center justify-between gap-3">
@@ -200,7 +200,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
                 <button onclick="runSalesDiagnostics()" class="px-4 py-2 rounded-xl bg-amber-600 text-white text-xs font-bold">Periksa Sekarang</button>
               </div>
               <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mt-4 text-xs">
-                <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Frontend</span><b id="diag-front" class="block mt-1">V6.8.1</b></div>
+                <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Frontend</span><b id="diag-front" class="block mt-1">V6.8.2</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">API</span><b id="diag-api" class="block mt-1">-</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Orders</span><b id="diag-orders" class="block mt-1">0</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">OrderItems</span><b id="diag-items" class="block mt-1">0</b></div>
@@ -493,8 +493,8 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
         }
 
         const API_URL='https://script.google.com/macros/s/AKfycbyR-riwS3HVUM93sA8D09AR3Orb1kgYbZnZ9HwKSYA8Z1wo0DaJh-Z-sqQhSQvJ53ANCg/exec';
-        const DBKEY='tmeez_sales_monitor_v6_8_1_cache';
-        const SESSIONKEY='tmeez_sales_monitor_v6_8_1_session';
+        const DBKEY='tmeez_sales_monitor_v6_8_2_cache';
+        const SESSIONKEY='tmeez_sales_monitor_v6_8_2_session';
         let apiOnline=false;
         let sessionToken='';
         async function apiGet(action,params={}){
@@ -560,11 +560,15 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
           e.preventDefault(); clearSession(); const u=document.getElementById('login-user').value.trim(),p=document.getElementById('login-pass').value;
           try{
             const res=await apiPost({action:'login',username:u,password:p}); sessionToken=res.token||''; const x=res.user||{}; const role=String(x.role||'').toLowerCase();
-            currentUser={username:x.username||u,role:role==='sales'?'sales':'admin',name:x.sales?.Name||x.username||'Administrator',salesId:x.salesId||'',active:true}; saveSession();
+            currentUser={username:x.username||u,role:role==='sales'?'sales':'admin',name:x.sales?.Name||x.username||'Administrator',salesId:x.salesId||'',active:true};
+            // Login manual selalu mulai dari Beranda Sales. Draft lama hanya dipertahankan
+            // selama sesi yang sama (refresh/tutup browser tanpa logout).
+            if(currentUser.role==='sales') clearWorkflowDraft();
+            saveSession();
             if(currentUser.salesId && x.sales){const mapped=mapSales(x.sales); if(!db.sales.some(s=>s.id===mapped.id))db.sales.push(mapped);}
             document.getElementById('login-screen').classList.add('hidden'); switchRole(currentUser.role==='sales'?'sales':'admin');
             document.getElementById('current-user-name').innerText=currentUser.name; document.getElementById('current-user-role').innerText=currentUser.role==='sales'?'Sales · '+(db.sales.find(s=>s.id===currentUser.salesId)?.area||''):String(x.role||'Admin').toUpperCase();
-            await refreshOnlineData(false); renderMaster();renderDynamicForms();refreshVisitKpi(); if(currentUser?.role==='sales')await restoreWorkflowDraft(); showToast('Login online berhasil');
+            await refreshOnlineData(false); renderMaster();renderDynamicForms();refreshVisitKpi(); if(currentUser?.role==='sales')workflowHome(); showToast('Login online berhasil');
           }catch(err){showToast('Login gagal: '+err.message);}
         }
         function uid(prefix){return prefix+Date.now().toString(36)+Math.random().toString(36).slice(2,5)}
@@ -642,9 +646,15 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
         }
         function closeSalesModal(){document.getElementById('sales-modal').classList.add('hidden');}
                 function closeModal(id){document.getElementById(id)?.classList.add('hidden');}
-        function logoutApp(){saveWorkflowDraftNow();clearSession();currentUser=null;location.reload();}
+        function logoutApp(){
+          // Logout adalah reset eksplisit: jangan simpan posisi/draft terakhir.
+          clearWorkflowDraft();
+          activeVisit=null;workflowVisitSaved=false;workflowSubmitting=false;workflowPaymentMethod='';
+          lastSavedOrder=null;lastInvoiceFingerprint='';
+          clearSession();currentUser=null;location.reload();
+        }
         function openPasswordModal(){document.getElementById('password-modal').classList.remove('hidden');}
-        async function changeMyPassword(e){e.preventDefault();const a=document.getElementById('new-password').value,b=document.getElementById('confirm-password').value;if(a!==b){showToast('Konfirmasi password tidak sama');return;}try{await apiPost({action:'changeMyPassword',oldPassword:document.getElementById('old-password').value,newPassword:a});clearSession();showToast('Password berubah. Silakan login kembali.');setTimeout(()=>location.reload(),900);}catch(err){showToast(err.message);}}
+        async function changeMyPassword(e){e.preventDefault();const a=document.getElementById('new-password').value,b=document.getElementById('confirm-password').value;if(a!==b){showToast('Konfirmasi password tidak sama');return;}try{await apiPost({action:'changeMyPassword',oldPassword:document.getElementById('old-password').value,newPassword:a});clearWorkflowDraft();clearSession();showToast('Password berubah. Silakan login kembali.');setTimeout(()=>location.reload(),900);}catch(err){showToast(err.message);}}
         function openStoreModal(id){const x=db.stores.find(s=>s.id===id);if(!x)return;document.getElementById('edit-store-id').value=x.id;document.getElementById('edit-store-name').value=x.name;document.getElementById('edit-store-owner').value=x.owner;document.getElementById('edit-store-wa').value=x.wa;document.getElementById('edit-store-address').value=x.address;document.getElementById('edit-store-lat').value=x.lat;document.getElementById('edit-store-lng').value=x.lng;const sel=document.getElementById('edit-store-sales');sel.innerHTML='<option value="">Pilih Sales</option>'+db.sales.filter(s=>s.active!==false||s.id===x.createdBySalesId).map(s=>`<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('');sel.value=x.createdBySalesId;document.getElementById('edit-store-status').value=x.status||'Active';document.getElementById('store-modal').classList.remove('hidden');}
         async function saveStoreEdit(e){e.preventDefault();try{await apiPost({action:'updateStore',storeId:document.getElementById('edit-store-id').value,storeName:document.getElementById('edit-store-name').value,ownerName:document.getElementById('edit-store-owner').value,whatsapp:document.getElementById('edit-store-wa').value,address:document.getElementById('edit-store-address').value,latitude:+document.getElementById('edit-store-lat').value,longitude:+document.getElementById('edit-store-lng').value,salesId:document.getElementById('edit-store-sales').value,status:document.getElementById('edit-store-status').value});closeModal('store-modal');await refreshOnlineData();showToast('Toko diperbarui');}catch(err){showToast(err.message);}}
         function openProductModal(id){const x=db.products.find(p=>p.id===id);if(!x)return;document.getElementById('edit-product-id').value=x.id;document.getElementById('edit-product-name').value=x.name;document.getElementById('edit-product-sku').value=x.sku||'';document.getElementById('edit-product-price').value=x.price;document.getElementById('edit-product-pack').value=x.pack;document.getElementById('edit-product-status').value=x.status||'Active';document.getElementById('product-modal').classList.remove('hidden');}
@@ -988,7 +998,7 @@ function renderDynamicForms(){
         function periodLabel(period){return period==='daily'?'Hari ini':period==='weekly'?'7 hari terakhir':'Bulan ini';}
         async function runSalesDiagnostics(){
           const set=(id,v)=>{const e=document.getElementById(id);if(e)e.innerText=v;};
-          set('diag-front','V6.8.1');set('diag-status','Mengambil data langsung dari API...');
+          set('diag-front','V6.8.2');set('diag-status','Mengambil data langsung dari API...');
           try{
             const [ping,res]=await Promise.all([apiGet('ping'),apiGet('orders',{limit:500})]);
             set('diag-api',String(ping.version||'-'));
