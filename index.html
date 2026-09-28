@@ -37,6 +37,13 @@
         .wf-dot{width:20px;height:20px;border-radius:999px;background:#e2e8f0;display:inline-flex;align-items:center;justify-content:center;font-weight:700}.pay-btn{padding:16px;border-radius:12px;border:1px solid #cbd5e1;background:white;font-weight:700}.pay-btn:hover{background:#f8fafc}
 </style>
 <link rel="manifest" href="manifest.webmanifest">    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+button,[role="button"],.btn,.pay-btn{transition:transform .12s ease,opacity .12s ease,box-shadow .12s ease,background-color .12s ease!important;-webkit-tap-highlight-color:transparent}
+button:not(:disabled):active,[role="button"]:active,.btn:not(:disabled):active,.pay-btn:not(:disabled):active{transform:scale(.97);opacity:.82}
+button:not(:disabled):hover{filter:brightness(.98)}
+button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not-allowed!important;transform:none!important}
+.pay-btn.ring-2{transform:scale(.98);box-shadow:0 0 0 2px rgb(37 99 235 / .22)}
+</style>
 </head>
 <body class="h-full flex flex-col text-slate-800 antialiased overflow-x-hidden">
 
@@ -95,7 +102,7 @@
 
     <main class="flex-1 max-w-7xl w-full mx-auto pt-20 px-4 pb-4 sm:pt-20 sm:px-6 sm:pb-6 lg:px-8 lg:pb-8 flex flex-col">
 
-        <!-- ================= SALES WORKFLOW V6.8.0 ================= -->
+        <!-- ================= SALES WORKFLOW V6.8.1 ================= -->
         <div id="view-sales" class="space-y-6 animate-fadeIn">
           <div id="sales-sticky-greeting" class="sticky top-16 z-40 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-2 bg-slate-100/95 backdrop-blur border-b border-slate-200 shadow-sm">
             <div class="max-w-3xl mx-auto flex items-center justify-between gap-3">
@@ -193,7 +200,7 @@
                 <button onclick="runSalesDiagnostics()" class="px-4 py-2 rounded-xl bg-amber-600 text-white text-xs font-bold">Periksa Sekarang</button>
               </div>
               <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mt-4 text-xs">
-                <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Frontend</span><b id="diag-front" class="block mt-1">V6.8.0</b></div>
+                <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Frontend</span><b id="diag-front" class="block mt-1">V6.8.1</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">API</span><b id="diag-api" class="block mt-1">-</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Orders</span><b id="diag-orders" class="block mt-1">0</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">OrderItems</span><b id="diag-items" class="block mt-1">0</b></div>
@@ -486,8 +493,8 @@
         }
 
         const API_URL='https://script.google.com/macros/s/AKfycbyR-riwS3HVUM93sA8D09AR3Orb1kgYbZnZ9HwKSYA8Z1wo0DaJh-Z-sqQhSQvJ53ANCg/exec';
-        const DBKEY='tmeez_sales_monitor_v6_8_0_cache';
-        const SESSIONKEY='tmeez_sales_monitor_v6_8_0_session';
+        const DBKEY='tmeez_sales_monitor_v6_8_1_cache';
+        const SESSIONKEY='tmeez_sales_monitor_v6_8_1_session';
         let apiOnline=false;
         let sessionToken='';
         async function apiGet(action,params={}){
@@ -805,17 +812,28 @@ function renderDynamicForms(){
           if(window.lucide)lucide.createIcons();
           if(!restoringWorkflowDraft) scheduleWorkflowDraft();
         }
-        function workflowHome(){activeVisit=null;workflowVisitSaved=false;workflowSubmitting=false;workflowPaymentMethod='';lastSavedOrder=null;lastInvoiceFingerprint='';showSalesStep('home');renderWorkflowToday();}
+        function resetWorkflowPaymentUI(){
+          workflowSubmitting=false;workflowVisitSaved=false;workflowPaymentMethod='';
+          document.querySelectorAll('#sales-step-payment .pay-btn').forEach(b=>{b.disabled=false;b.classList.remove('ring-2','ring-brand-600','bg-brand-50','opacity-50','cursor-not-allowed');});
+          const c=document.getElementById('payment-confirm-btn');if(c){c.disabled=true;c.innerText='Bayar & Selesaikan Kunjungan';c.className='w-full py-3 bg-slate-300 text-white rounded-xl font-bold cursor-not-allowed';}
+          const t=document.getElementById('payment-selected');if(t)t.innerText='Belum memilih metode pembayaran';
+          document.getElementById('payment-due-wrap')?.classList.add('hidden');
+        }
+        function workflowHome(){activeVisit=null;lastSavedOrder=null;lastInvoiceFingerprint='';resetWorkflowPaymentUI();showSalesStep('home');renderWorkflowToday();}
         async function startNextWorkflow(){clearWorkflowDraft();try{await refreshOnlineData(false);}catch(_e){}workflowHome();}
         function startNewStoreWorkflow(){onboardingGps=null;onboardingPhoto=null;showSalesStep('newstore');}
+        function hasVisitedStoreToday(storeId){
+          const today=jakartaTodayKey();
+          return (db.visits||[]).some(v=>String(v.storeId||v.StoreID||'')===String(storeId) && dateKeyJakarta(v.checkIn||v.CheckInAt||v.createdAt||v.CreatedAt)===today);
+        }
         function startExistingVisitWorkflow(){
           const sel=document.getElementById('workflow-store-select');
-          if(sel)sel.innerHTML='<option value="">Pilih toko</option>'+db.stores.filter(x=>String(x.status).toLowerCase()==='active').map(x=>`<option value="${x.id}">${escapeHtml(x.name)}${x.address?' · '+escapeHtml(x.address):''}</option>`).join('');
+          if(sel){const available=db.stores.filter(x=>String(x.status).toLowerCase()==='active'&&!hasVisitedStoreToday(x.id));sel.innerHTML='<option value="">Pilih toko</option>'+available.map(x=>`<option value="${x.id}">${escapeHtml(x.name)}${x.address?' · '+escapeHtml(x.address):''}</option>`).join('');if(!available.length)showToast('Semua toko aktif sudah dikunjungi hari ini');}
           showSalesStep('selectstore');
         }
-        function continueExistingStore(){const id=document.getElementById('workflow-store-select')?.value;if(!id){showToast('Pilih toko terlebih dahulu');return;}const store=db.stores.find(x=>String(x.id)===String(id));if(!store){showToast('Toko tidak ditemukan');return;}prepareWorkflowStore(store);showSalesStep('checkin');}
+        function continueExistingStore(){const id=document.getElementById('workflow-store-select')?.value;if(!id){showToast('Pilih toko terlebih dahulu');return;}if(hasVisitedStoreToday(id)){showToast('Toko ini sudah dikunjungi hari ini. Kunjungan berikutnya dapat dilakukan besok.');return;}const store=db.stores.find(x=>String(x.id)===String(id));if(!store){showToast('Toko tidak ditemukan');return;}prepareWorkflowStore(store);showSalesStep('checkin');}
         function prepareWorkflowStore(store){
-          activeVisit=null;workflowVisitSaved=false;workflowSubmitting=false;workflowPaymentMethod='';lastSavedOrder=null;lastInvoiceFingerprint='';
+          activeVisit=null;lastSavedOrder=null;lastInvoiceFingerprint='';resetWorkflowPaymentUI();
           const vs=document.getElementById('visit-store');if(vs){vs.innerHTML=`<option value="${store.id}" data-lat="${store.lat}" data-lng="${store.lng}" selected>${escapeHtml(store.name)}</option>`;vs.value=store.id;}
           const inv=document.getElementById('invoice-store');if(inv){inv.innerHTML=`<option value="${store.id}" selected>${escapeHtml(store.name)}</option>`;inv.value=store.id;}
           const n=document.getElementById('workflow-store-name');if(n)n.innerText=store.name;
@@ -830,7 +848,7 @@ function renderDynamicForms(){
           const end=new Date(),dur=Math.max(1,Math.round((end-activeVisit.checkIn)/60000)),reason=document.getElementById('no-order-reason')?.value||'Tidak order',note=document.getElementById('visit-note')?.value||'';
           try{await apiPost({action:'saveVisit',storeId:activeVisit.storeId,checkInAt:activeVisit.checkIn.toISOString(),checkOutAt:end.toISOString(),latitude:activeVisit.lat,longitude:activeVisit.lng,gpsAccuracy:activeVisit.accuracy||0,distanceMeter:Math.round(activeVisit.distance),durationMinute:dur,result:'no_order',notes:[reason,note].filter(Boolean).join(' - ')});workflowVisitSaved=true;clearWorkflowDraft();document.getElementById('workflow-order-actions')?.classList.add('hidden');document.getElementById('workflow-success-text').innerText=`${activeVisit.store} · Tidak ada order · ${reason}`;showSalesStep('success');}catch(err){showToast('Gagal menyimpan kunjungan: '+err.message);}
         }
-        function showPaymentStep(){try{validateInvoice();workflowPaymentMethod='';workflowSubmitting=false;document.querySelectorAll('#sales-step-payment .pay-btn').forEach(b=>b.classList.remove('ring-2','ring-brand-600','bg-brand-50'));const t=document.getElementById('payment-selected');if(t)t.innerText='Belum memilih metode pembayaran';const c=document.getElementById('payment-confirm-btn');if(c){c.disabled=true;c.className='w-full py-3 bg-slate-300 text-white rounded-xl font-bold cursor-not-allowed';c.innerText='Bayar & Selesaikan Kunjungan';}showSalesStep('payment');}catch(err){showToast(err.message);}}
+        function showPaymentStep(){try{validateInvoice();resetWorkflowPaymentUI();document.querySelectorAll('#sales-step-payment .pay-btn').forEach(b=>{b.disabled=false;b.classList.remove('ring-2','ring-brand-600','bg-brand-50');});const t=document.getElementById('payment-selected');if(t)t.innerText='Belum memilih metode pembayaran';const c=document.getElementById('payment-confirm-btn');if(c){c.disabled=true;c.className='w-full py-3 bg-slate-300 text-white rounded-xl font-bold cursor-not-allowed';c.innerText='Bayar & Selesaikan Kunjungan';}showSalesStep('payment');}catch(err){showToast(err.message);}}
         function selectPaymentMethod(method,button){
           if(workflowSubmitting||workflowVisitSaved)return;
           workflowPaymentMethod=method;
@@ -970,7 +988,7 @@ function renderDynamicForms(){
         function periodLabel(period){return period==='daily'?'Hari ini':period==='weekly'?'7 hari terakhir':'Bulan ini';}
         async function runSalesDiagnostics(){
           const set=(id,v)=>{const e=document.getElementById(id);if(e)e.innerText=v;};
-          set('diag-front','V6.8.0');set('diag-status','Mengambil data langsung dari API...');
+          set('diag-front','V6.8.1');set('diag-status','Mengambil data langsung dari API...');
           try{
             const [ping,res]=await Promise.all([apiGet('ping'),apiGet('orders',{limit:500})]);
             set('diag-api',String(ping.version||'-'));
