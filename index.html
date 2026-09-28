@@ -102,7 +102,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
 
     <main class="flex-1 max-w-7xl w-full mx-auto pt-20 px-4 pb-4 sm:pt-20 sm:px-6 sm:pb-6 lg:px-8 lg:pb-8 flex flex-col">
 
-        <!-- ================= SALES WORKFLOW V6.9.3 ================= -->
+        <!-- ================= SALES WORKFLOW V6.9.4 ================= -->
         <div id="view-sales" class="space-y-6 animate-fadeIn">
           <div id="sales-sticky-greeting" class="sticky top-16 z-40 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-2 bg-slate-100/95 backdrop-blur border-b border-slate-200 shadow-sm">
             <div class="max-w-3xl mx-auto flex items-center justify-between gap-3">
@@ -141,7 +141,11 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
                 <div class="grid sm:grid-cols-2 gap-4">
                   <button onclick="startNewStoreWorkflow()" class="text-left p-5 rounded-2xl border-2 border-brand-100 bg-brand-50 hover:border-brand-400 transition"><div class="w-11 h-11 rounded-xl bg-brand-600 text-white flex items-center justify-center mb-3"><i data-lucide="store" class="w-5 h-5"></i></div><b>Tambah Toko Baru</b><p class="text-xs text-slate-500 mt-1">Daftarkan toko, GPS dan foto, lalu check-in.</p></button>
                   <button onclick="startExistingVisitWorkflow()" class="text-left p-5 rounded-2xl border-2 border-indigo-100 bg-indigo-50 hover:border-indigo-400 transition"><div class="w-11 h-11 rounded-xl bg-indigo-600 text-white flex items-center justify-center mb-3"><i data-lucide="map-pin" class="w-5 h-5"></i></div><b>Kunjungan Toko</b><p class="text-xs text-slate-500 mt-1">Pilih toko yang sudah terdaftar lalu check-in GPS.</p></button>
-                </div><div class="pt-4 border-t"><div class="flex items-center justify-between gap-2"><div><h3 class="font-bold text-slate-900">Tutup Hari</h3><p class="text-[11px] text-slate-500">Rangkuman barang dan uang hari ini.</p></div><button onclick="loadSalesCloseDay()" class="px-3 py-2 border rounded-xl text-[11px] font-bold">Perbarui</button></div><div class="grid grid-cols-2 gap-2 mt-3 text-xs"><div class="bg-indigo-50 p-3 rounded-xl"><span class="text-slate-500">Sisa Barang</span><b id="sales-stock-summary" class="block text-base">0 PCS</b></div><div class="bg-amber-50 p-3 rounded-xl"><span class="text-slate-500">Piutang Belum Tertagih</span><b id="sales-receivable-summary" class="block text-base">Rp 0</b></div><div class="bg-emerald-50 p-3 rounded-xl"><span class="text-slate-500">Cash Wajib Disetor</span><b id="sales-close-cash" class="block text-base">Rp 0</b><small id="sales-close-cash-detail" class="text-[10px] text-slate-500"></small></div><div class="bg-sky-50 p-3 rounded-xl"><span class="text-slate-500">Non-Cash ke Perusahaan</span><b id="sales-close-noncash" class="block text-base">Rp 0</b><small id="sales-close-noncash-detail" class="text-[10px] text-slate-500"></small></div></div><div id="sales-stock-breakdown" class="mt-2 text-[11px] bg-slate-50 rounded-xl p-3"></div><div class="mt-2"><label class="text-[11px] font-semibold">Cash yang benar-benar disetor</label><input id="sales-deposit-actual" type="number" min="0" placeholder="Rp 0" class="mt-1 w-full border rounded-xl p-3 text-sm"></div><button id="sales-close-day-btn" onclick="saveSalesCloseDay()" class="mt-2 w-full bg-slate-900 text-white rounded-xl py-3 text-sm font-bold">Tutup Hari</button></div>
+                </div><div class="pt-4 border-t"><div class="flex items-center justify-between gap-2"><div><h3 class="font-bold text-slate-900">Tutup Hari</h3><p class="text-[11px] text-slate-500">Rangkuman barang dan uang hari ini.</p></div><button onclick="loadSalesCloseDay()" class="px-3 py-2 border rounded-xl text-[11px] font-bold">Perbarui</button></div><div class="grid grid-cols-2 gap-2 mt-3 text-xs"><div class="bg-indigo-50 p-3 rounded-xl"><span class="text-slate-500">Sisa Barang</span><b id="sales-stock-summary" class="block text-base">0 PCS</b></div><div class="bg-amber-50 p-3 rounded-xl"><span class="text-slate-500">Piutang Belum Tertagih</span><b id="sales-receivable-summary" class="block text-base">Rp 0</b></div><div class="bg-emerald-50 p-3 rounded-xl"><span class="text-slate-500">Cash Wajib Disetor</span><b id="sales-close-cash" class="block text-base">Rp 0</b><small id="sales-close-cash-detail" class="text-[10px] text-slate-500"></small></div><div class="bg-sky-50 p-3 rounded-xl"><span class="text-slate-500">Non-Cash ke Perusahaan</span><b id="sales-close-noncash" class="block text-base">Rp 0</b><small id="sales-close-noncash-detail" class="text-[10px] text-slate-500"></small></div></div><div id="sales-stock-breakdown" class="mt-2 text-[11px] bg-slate-50 rounded-xl p-3"></div><div id="sales-pending-payment-card" class="mt-3 rounded-2xl border border-amber-200 bg-amber-50 p-3">
+  <div class="flex items-center justify-between gap-2"><div><b class="text-xs text-amber-900">Transfer/QRIS Menunggu Verifikasi</b><p class="text-[10px] text-amber-700">Pembayaran toko yang belum dikonfirmasi perusahaan.</p></div><button onclick="refreshOnlineData(true)" class="px-2 py-1 border border-amber-300 bg-white rounded-lg text-[10px] font-bold">↻</button></div>
+  <div class="grid grid-cols-2 gap-2 mt-2"><div class="bg-white/80 rounded-xl p-2"><span class="text-[10px] text-slate-500">Toko</span><b id="sales-pending-store-count" class="block text-base">0</b></div><div class="bg-white/80 rounded-xl p-2"><span class="text-[10px] text-slate-500">Total Nominal</span><b id="sales-pending-total" class="block text-base">Rp 0</b></div></div>
+  <div id="sales-pending-payment-list" class="mt-2 space-y-2"><p class="text-[10px] text-slate-500">Tidak ada pembayaran menunggu verifikasi.</p></div>
+</div><div class="mt-2"><label class="text-[11px] font-semibold">Cash yang benar-benar disetor</label><input id="sales-deposit-actual" type="number" min="0" placeholder="Rp 0" class="mt-1 w-full border rounded-xl p-3 text-sm"></div><button id="sales-close-day-btn" onclick="saveSalesCloseDay()" class="mt-2 w-full bg-slate-900 text-white rounded-xl py-3 text-sm font-bold">Tutup Hari</button></div>
               </div>
 
               <div id="sales-step-newstore" class="sales-step hidden p-5">
@@ -200,7 +204,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
                 <button onclick="runSalesDiagnostics()" class="px-4 py-2 rounded-xl bg-amber-600 text-white text-xs font-bold">Periksa Sekarang</button>
               </div>
               <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mt-4 text-xs">
-                <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Frontend</span><b id="diag-front" class="block mt-1">V6.9.3</b></div>
+                <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Frontend</span><b id="diag-front" class="block mt-1">V6.9.4</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">API</span><b id="diag-api" class="block mt-1">-</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Orders</span><b id="diag-orders" class="block mt-1">0</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">OrderItems</span><b id="diag-items" class="block mt-1">0</b></div>
@@ -363,8 +367,37 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
 <div><h3 class="text-sm font-bold mb-2">Piutang Toko</h3><div class="grid grid-cols-2 gap-2 mb-2"><b id="ops-receivable-total" class="bg-amber-50 rounded-lg p-2 text-xs">Rp 0</b><span id="ops-receivable-count" class="bg-slate-50 rounded-lg p-2 text-xs">0 tagihan</span></div><div id="ops-receivable-list" class="max-h-72 overflow-y-auto space-y-1"></div></div></div></section>
 
               <section id="admin-payment-verification-section" class="lg:col-span-2 bg-white rounded-2xl p-6 border shadow-sm">
-                <div class="flex items-center justify-between gap-3 mb-4"><div><h2 class="font-bold">Verifikasi Pembayaran Non-Cash</h2><p class="text-xs text-slate-500">Transfer/QRIS dari Sales belum dianggap diterima perusahaan sebelum diverifikasi Admin/Monitoring.</p></div><span id="pending-payment-count" class="px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold">0 menunggu</span></div>
-                <div id="pending-payment-list" class="space-y-2"><p class="text-xs text-slate-400">Tidak ada pembayaran menunggu verifikasi.</p></div>
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                  <div>
+                    <h2 class="font-bold">Verifikasi Pembayaran Non-Cash</h2>
+                    <p class="text-xs text-slate-500">Transfer/QRIS belum masuk penerimaan perusahaan sebelum diverifikasi Admin/Monitoring.</p>
+                  </div>
+                  <button onclick="refreshOnlineData(true)" class="border rounded-xl px-3 py-2 text-xs font-bold">↻ Perbarui</button>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+                  <div class="rounded-2xl bg-amber-50 border border-amber-100 p-4">
+                    <p class="text-[11px] text-amber-700">Toko Menunggu</p>
+                    <b id="pending-store-count" class="text-2xl text-amber-900">0</b>
+                    <p class="text-[10px] text-amber-600">toko unik</p>
+                  </div>
+                  <div class="rounded-2xl bg-slate-50 border p-4">
+                    <p class="text-[11px] text-slate-500">Transaksi Menunggu</p>
+                    <b id="pending-payment-count" class="text-2xl text-slate-900">0</b>
+                    <p class="text-[10px] text-slate-400">transaksi</p>
+                  </div>
+                  <div class="col-span-2 rounded-2xl bg-sky-50 border border-sky-100 p-4">
+                    <p class="text-[11px] text-sky-700">Total Uang Menunggu Verifikasi</p>
+                    <b id="pending-payment-total" class="text-2xl text-sky-900">Rp 0</b>
+                    <p class="text-[10px] text-sky-600">Transfer + QRIS yang belum dikonfirmasi masuk</p>
+                  </div>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-2 mb-3">
+                  <input id="pending-payment-search" oninput="renderPendingPayments()" placeholder="Cari nama toko, Sales, atau nomor order..." class="flex-1 border rounded-xl px-3 py-2 text-xs">
+                  <select id="pending-payment-method-filter" onchange="renderPendingPayments()" class="border rounded-xl px-3 py-2 text-xs bg-white">
+                    <option value="">Semua metode</option><option value="transfer">Transfer</option><option value="qris">QRIS</option>
+                  </select>
+                </div>
+                <div id="pending-payment-list" class="space-y-3"><p class="text-xs text-slate-400">Tidak ada pembayaran menunggu verifikasi.</p></div>
               </section>
 
               <section id="admin-sales-management-section" class="lg:col-span-2 bg-white rounded-2xl p-6 border shadow-sm">
@@ -553,8 +586,8 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
         }
 
         const API_URL='https://script.google.com/macros/s/AKfycbyR-riwS3HVUM93sA8D09AR3Orb1kgYbZnZ9HwKSYA8Z1wo0DaJh-Z-sqQhSQvJ53ANCg/exec';
-        const DBKEY='tmeez_sales_monitor_v6_9_3_cache';
-        const SESSIONKEY='tmeez_sales_monitor_v6_9_3_session';
+        const DBKEY='tmeez_sales_monitor_v6_9_4_cache';
+        const SESSIONKEY='tmeez_sales_monitor_v6_9_4_session';
         let apiOnline=false;
         let sessionToken='';
         async function apiGet(action,params={}){
@@ -658,9 +691,44 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
           e.preventDefault();try{await apiPost({action:'addProduct',productName:document.getElementById('m-product-name').value.trim(),pricePerPcs:+document.getElementById('m-product-price').value||0,unitsPerBox:+document.getElementById('m-product-pack').value||10,unit:'PCS'});e.target.reset();await refreshOnlineData(false);showToast('Produk tersimpan ke Google Sheet');}catch(err){showToast('Gagal menambah produk: '+err.message);}
         }
         function renderPendingPayments(){
-          const box=document.getElementById('pending-payment-list'),count=document.getElementById('pending-payment-count');if(!box)return;
-          const rows=db.pendingPayments||[];if(count)count.innerText=rows.length+' menunggu';
-          box.innerHTML=rows.length?rows.map(x=>`<div class="border rounded-xl p-3 bg-amber-50"><div class="flex flex-wrap justify-between gap-2"><div><b>${escapeHtml(x.StoreName||x.StoreID||'Toko')}</b><div class="text-[11px] text-slate-600">${escapeHtml(x.SalesName||x.SalesID||'')} · ${escapeHtml(x.PaymentType||'')} · ${escapeHtml(x.OrderDateDisplay||String(x.OrderDate||''))}</div><div class="text-[10px] text-slate-400">${escapeHtml(x.OrderID||'')}</div></div><b class="text-sm">${rupiah(Number(x.GrandTotal||0))}</b></div><div class="grid grid-cols-2 gap-2 mt-3"><button onclick="verifyNonCashPayment('${escapeHtml(x.OrderID)}')" class="bg-emerald-600 text-white rounded-lg py-2 text-xs font-bold">Verifikasi</button><button onclick="rejectNonCashPayment('${escapeHtml(x.OrderID)}')" class="bg-red-50 text-red-700 border border-red-200 rounded-lg py-2 text-xs font-bold">Tolak</button></div></div>`).join(''):'<p class="text-xs text-slate-400">Tidak ada pembayaran menunggu verifikasi.</p>';
+          const box=document.getElementById('pending-payment-list');if(!box)return;
+          const all=db.pendingPayments||[];
+          const uniqueStores=new Set(all.map(x=>String(x.StoreID||'')).filter(Boolean)).size;
+          const total=all.reduce((n,x)=>n+Number(x.GrandTotal||0),0);
+          const set=(id,val)=>{const e=document.getElementById(id);if(e)e.innerText=val;};
+          set('pending-store-count',uniqueStores);
+          set('pending-payment-count',all.length);
+          set('pending-payment-total',rupiah(total));
+
+          const q=(document.getElementById('pending-payment-search')?.value||'').trim().toLowerCase();
+          const method=(document.getElementById('pending-payment-method-filter')?.value||'').toLowerCase();
+          const rows=all.filter(x=>{
+            const text=[x.StoreName,x.StoreID,x.SalesName,x.SalesID,x.OrderID,x.PaymentType].join(' ').toLowerCase();
+            return (!q||text.includes(q))&&(!method||String(x.PaymentType||'').toLowerCase()===method);
+          });
+
+          box.innerHTML=rows.length?rows.map(x=>`<div class="border rounded-2xl p-4 bg-white hover:bg-slate-50 transition">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+              <div class="min-w-0">
+                <div class="flex flex-wrap items-center gap-2">
+                  <b class="text-base text-slate-900">${escapeHtml(x.StoreName||x.StoreID||'Toko')}</b>
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${String(x.PaymentType||'').toLowerCase()==='qris'?'bg-violet-100 text-violet-700':'bg-sky-100 text-sky-700'}">${escapeHtml(x.PaymentType||'')}</span>
+                </div>
+                <p class="text-xs text-slate-600 mt-1">Sales: <b>${escapeHtml(x.SalesName||x.SalesID||'-')}</b></p>
+                <p class="text-[11px] text-slate-500 mt-1">${escapeHtml(x.OrderDateDisplay||String(x.OrderDate||''))}</p>
+                <p class="text-[10px] text-slate-400 mt-1">Order: ${escapeHtml(x.OrderID||'-')}</p>
+              </div>
+              <div class="sm:text-right shrink-0">
+                <p class="text-[10px] uppercase tracking-wide text-slate-400">Nilai pembayaran</p>
+                <b class="text-xl text-slate-900">${rupiah(Number(x.GrandTotal||0))}</b>
+                <p class="text-[10px] text-amber-600 font-semibold mt-1">Menunggu Verifikasi</p>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2 mt-4">
+              <button onclick="verifyNonCashPayment('${escapeHtml(x.OrderID)}')" class="bg-emerald-600 text-white rounded-xl py-2.5 text-xs font-bold">✓ Verifikasi Pembayaran</button>
+              <button onclick="rejectNonCashPayment('${escapeHtml(x.OrderID)}')" class="bg-red-50 text-red-700 border border-red-200 rounded-xl py-2.5 text-xs font-bold">✕ Tolak</button>
+            </div>
+          </div>`).join(''):'<div class="text-center py-8 text-xs text-slate-400">Tidak ada pembayaran yang sesuai pencarian/filter.</div>';
         }
         async function verifyNonCashPayment(orderId){if(!confirm('Pastikan dana Transfer/QRIS sudah masuk ke rekening perusahaan. Verifikasi pembayaran ini?'))return;try{await apiPost({action:'verifyPayment',orderId});await refreshOnlineData(false);showToast('Pembayaran terverifikasi');}catch(e){showToast(e.message)}}
         async function rejectNonCashPayment(orderId){const note=prompt('Alasan pembayaran ditolak:','Dana belum masuk');if(note===null)return;try{await apiPost({action:'rejectPayment',orderId,note});await refreshOnlineData(false);showToast('Pembayaran ditolak');}catch(e){showToast(e.message)}}
@@ -1007,9 +1075,21 @@ function renderDynamicForms(){
           const g=document.getElementById('sales-greeting');if(g)g.innerText=`${greeting}, ${name}`;
           const d=document.getElementById('sales-greeting-date');if(d)d.innerText=new Intl.DateTimeFormat('id-ID',{timeZone:APP_TIMEZONE,weekday:'long',day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(now)+' WIB';
         }
+        function renderSalesPendingPayments(){
+          if(currentUser?.role!=='sales')return;
+          const sid=String(currentUser.salesId||'');
+          const rows=(db.orders||[]).filter(o=>String(o.salesId)===sid&&['transfer','qris'].includes(String(o.paymentType||'').toLowerCase())&&String(o.paymentStatus||'').toLowerCase()==='menunggu verifikasi');
+          const storeIds=new Set(rows.map(o=>String(o.storeId||'')).filter(Boolean));
+          const total=rows.reduce((n,o)=>n+Number(o.total||0),0);
+          const sc=document.getElementById('sales-pending-store-count'),tt=document.getElementById('sales-pending-total'),box=document.getElementById('sales-pending-payment-list');
+          if(sc)sc.innerText=storeIds.size;if(tt)tt.innerText=rupiah(total);if(!box)return;
+          const storeName=id=>(db.stores.find(s=>String(s.id)===String(id))||{}).name||id||'Toko';
+          box.innerHTML=rows.length?rows.slice().sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))).map(o=>`<div class="bg-white rounded-xl p-2.5 border border-amber-100"><div class="flex justify-between gap-2"><div class="min-w-0"><b class="text-xs text-slate-900">${escapeHtml(storeName(o.storeId))}</b><p class="text-[10px] text-slate-500">${escapeHtml(o.paymentType||'')} · ${escapeHtml(o.dateKey||String(o.date||''))}</p><p class="text-[9px] text-slate-400">Order: ${escapeHtml(o.id||'-')}</p></div><div class="text-right shrink-0"><b class="text-xs">${rupiah(Number(o.total||0))}</b><p class="text-[9px] text-amber-700 font-bold">Menunggu Verifikasi</p></div></div></div>`).join(''):'<p class="text-[10px] text-slate-500">Tidak ada pembayaran menunggu verifikasi.</p>';
+        }
         function renderWorkflowToday(){
           if(currentUser?.role!=='sales')return;
           updateSalesGreeting();
+          renderSalesPendingPayments();
           const sid=String(currentUser.salesId||'');
           const period=currentSalesDashboardPeriod||'monthly';
           const orders=(db.orders||[]).filter(o=>String(o.salesId)===sid&&orderPeriodMatch(o,period));
@@ -1092,7 +1172,7 @@ function renderDynamicForms(){
         function periodLabel(period){return period==='daily'?'Hari ini':period==='weekly'?'7 hari terakhir':'Bulan ini';}
         async function runSalesDiagnostics(){
           const set=(id,v)=>{const e=document.getElementById(id);if(e)e.innerText=v;};
-          set('diag-front','V6.9.3');set('diag-status','Mengambil data langsung dari API...');
+          set('diag-front','V6.9.4');set('diag-status','Mengambil data langsung dari API...');
           try{
             const [ping,res]=await Promise.all([apiGet('ping'),apiGet('orders',{limit:500})]);
             set('diag-api',String(ping.version||'-'));
