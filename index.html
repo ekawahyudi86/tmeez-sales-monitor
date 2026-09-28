@@ -94,7 +94,7 @@
 
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col">
 
-        <!-- ================= SALES WORKFLOW V6.6.2 ================= -->
+        <!-- ================= SALES WORKFLOW V6.7.0 ================= -->
         <div id="view-sales" class="space-y-6 animate-fadeIn">
           <div class="max-w-3xl mx-auto">
             <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
@@ -131,7 +131,7 @@
                 <div class="grid sm:grid-cols-2 gap-4">
                   <button onclick="startNewStoreWorkflow()" class="text-left p-5 rounded-2xl border-2 border-brand-100 bg-brand-50 hover:border-brand-400 transition"><div class="w-11 h-11 rounded-xl bg-brand-600 text-white flex items-center justify-center mb-3"><i data-lucide="store" class="w-5 h-5"></i></div><b>Tambah Toko Baru</b><p class="text-xs text-slate-500 mt-1">Daftarkan toko, GPS dan foto, lalu check-in.</p></button>
                   <button onclick="startExistingVisitWorkflow()" class="text-left p-5 rounded-2xl border-2 border-indigo-100 bg-indigo-50 hover:border-indigo-400 transition"><div class="w-11 h-11 rounded-xl bg-indigo-600 text-white flex items-center justify-center mb-3"><i data-lucide="map-pin" class="w-5 h-5"></i></div><b>Kunjungan Toko</b><p class="text-xs text-slate-500 mt-1">Pilih toko yang sudah terdaftar lalu check-in GPS.</p></button>
-                </div>
+                </div><div class="pt-4 border-t"><h3 class="font-bold text-slate-900">Operasional Hari Ini</h3><div class="grid grid-cols-3 gap-2 mt-3 text-center text-xs"><div class="bg-indigo-50 p-3 rounded-xl"><b id="sales-stock-summary">0 PCS</b><p>Stok Sisa</p></div><div class="bg-emerald-50 p-3 rounded-xl"><b id="sales-deposit-summary">Rp 0</b><p>Setoran</p></div><div class="bg-amber-50 p-3 rounded-xl"><b id="sales-receivable-summary">Rp 0</b><p>Piutang</p></div></div><div class="grid grid-cols-2 gap-2 mt-2"><input id="sales-deposit-actual" type="number" min="0" placeholder="Setoran aktual" class="border rounded-xl p-2 text-xs"><button onclick="saveSalesDeposit()" class="bg-emerald-600 text-white rounded-xl text-xs font-bold">Catat Setoran</button></div></div>
               </div>
 
               <div id="sales-step-newstore" class="sales-step hidden p-5">
@@ -175,7 +175,7 @@
                 <button onclick="showPaymentStep()" class="w-full py-3 bg-indigo-600 text-white rounded-xl font-semibold">Lanjut ke Pembayaran</button>
               </div>
 
-              <div id="sales-step-payment" class="sales-step hidden p-5 space-y-4"><button onclick="showSalesStep('order')" class="text-xs text-slate-500">← Kembali</button><h3 class="text-lg font-bold">Pilih Metode Pembayaran</h3><p class="text-xs text-slate-500">Pilih satu metode pembayaran, lalu tekan tombol konfirmasi. Pemilihan metode tidak akan menambah kunjungan.</p><div class="grid grid-cols-2 gap-3"><button type="button" onclick="selectPaymentMethod('Cash',this)" class="pay-btn">Cash</button><button type="button" onclick="selectPaymentMethod('Transfer',this)" class="pay-btn">Transfer</button><button type="button" onclick="selectPaymentMethod('QRIS',this)" class="pay-btn">QRIS</button><button type="button" onclick="selectPaymentMethod('Lainnya',this)" class="pay-btn">Lainnya</button></div><div id="payment-selected" class="text-sm text-center font-semibold text-slate-600">Belum memilih metode pembayaran</div><button id="payment-confirm-btn" type="button" onclick="confirmWorkflowPayment()" disabled class="w-full py-3 bg-slate-300 text-white rounded-xl font-bold cursor-not-allowed">Bayar & Selesaikan Kunjungan</button></div>
+              <div id="sales-step-payment" class="sales-step hidden p-5 space-y-4"><button onclick="showSalesStep('order')" class="text-xs text-slate-500">← Kembali</button><h3 class="text-lg font-bold">Pilih Metode Pembayaran</h3><p class="text-xs text-slate-500">Pilih satu metode pembayaran, lalu tekan tombol konfirmasi. Pemilihan metode tidak akan menambah kunjungan.</p><div class="grid grid-cols-2 gap-3"><button type="button" onclick="selectPaymentMethod('Cash',this)" class="pay-btn">Cash</button><button type="button" onclick="selectPaymentMethod('Transfer',this)" class="pay-btn">Transfer</button><button type="button" onclick="selectPaymentMethod('QRIS',this)" class="pay-btn">QRIS</button><button type="button" onclick="selectPaymentMethod('Lainnya',this)" class="pay-btn">Lainnya</button><button type="button" onclick="selectPaymentMethod('Tempo',this)" class="pay-btn col-span-2">Tempo / Piutang</button></div><div id="payment-due-wrap" class="hidden"><label class="text-xs font-semibold">Jatuh Tempo<input id="payment-due-date" type="date" class="mt-1 w-full border rounded-xl p-3"></label></div><div id="payment-selected" class="text-sm text-center font-semibold text-slate-600">Belum memilih metode pembayaran</div><button id="payment-confirm-btn" type="button" onclick="confirmWorkflowPayment()" disabled class="w-full py-3 bg-slate-300 text-white rounded-xl font-bold cursor-not-allowed">Bayar & Selesaikan Kunjungan</button></div>
 
               <div id="sales-step-success" class="sales-step hidden p-5 text-center space-y-4"><div class="mx-auto w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center"><i data-lucide="check" class="w-8 h-8"></i></div><div><h3 class="text-xl font-bold">Kunjungan Selesai</h3><p id="workflow-success-text" class="text-sm text-slate-500 mt-1"></p></div><div id="workflow-order-actions" class="hidden grid grid-cols-2 gap-3"><button onclick="downloadLastOrderPdf()" class="py-3 bg-slate-900 text-white rounded-xl text-sm font-semibold">Unduh PDF</button><button onclick="shareLastOrderWhatsApp()" class="py-3 bg-emerald-600 text-white rounded-xl text-sm font-semibold">Share WhatsApp</button></div><button onclick="startNextWorkflow()" class="w-full py-3 border rounded-xl font-semibold">Kunjungan Berikutnya</button><button onclick="logoutApp()" class="w-full py-3 text-red-600 text-sm font-semibold">Logout</button></div>
             </div>
@@ -190,7 +190,7 @@
                 <button onclick="runSalesDiagnostics()" class="px-4 py-2 rounded-xl bg-amber-600 text-white text-xs font-bold">Periksa Sekarang</button>
               </div>
               <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mt-4 text-xs">
-                <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Frontend</span><b id="diag-front" class="block mt-1">V6.6.2</b></div>
+                <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Frontend</span><b id="diag-front" class="block mt-1">V6.7.0</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">API</span><b id="diag-api" class="block mt-1">-</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Orders</span><b id="diag-orders" class="block mt-1">0</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">OrderItems</span><b id="diag-items" class="block mt-1">0</b></div>
@@ -313,6 +313,11 @@
                   <div><h3 class="text-sm font-bold mb-2">Produk</h3><form onsubmit="addProduct(event)" class="space-y-2"><input id="m-product-name" required placeholder="Nama produk" class="w-full border rounded-lg p-2 text-xs"><div class="grid grid-cols-2 gap-2"><input id="m-product-price" required type="number" placeholder="Harga acuan/PCS" class="border rounded-lg p-2 text-xs"><input id="m-product-pack" type="number" value="10" placeholder="Isi/dus (info)" class="border rounded-lg p-2 text-xs"></div><button class="w-full bg-emerald-600 text-white rounded-lg py-2 text-xs font-semibold">Tambah Produk</button></form><div id="product-list" class="mt-3 space-y-1"></div></div>
                 </div>
               </section>
+
+              <section class="lg:col-span-2 bg-white rounded-2xl p-6 border shadow-sm"><div class="mb-4"><h2 class="font-bold">Stok Sales, Setoran & Piutang</h2><p class="text-xs text-slate-500">Kontrol barang yang dibawa Sales, uang setoran, dan tagihan toko.</p></div><div class="grid lg:grid-cols-3 gap-5">
+<div><h3 class="text-sm font-bold mb-2">Stok Sales</h3><select id="ops-stock-sales" class="w-full border rounded-lg p-2 text-xs mb-2"></select><select id="ops-stock-product" class="w-full border rounded-lg p-2 text-xs mb-2"></select><div class="grid grid-cols-3 gap-1"><input id="ops-stock-opening" type="number" min="0" placeholder="Awal" class="border rounded-lg p-2 text-xs"><input id="ops-stock-load" type="number" min="0" placeholder="Dibawa" class="border rounded-lg p-2 text-xs"><input id="ops-stock-return" type="number" min="0" placeholder="Retur" class="border rounded-lg p-2 text-xs"></div><button onclick="saveStockOps()" class="mt-2 w-full bg-indigo-600 text-white rounded-lg py-2 text-xs font-bold">Simpan Stok Hari Ini</button><div id="ops-stock-list" class="mt-3 max-h-56 overflow-y-auto space-y-1"></div></div>
+<div><h3 class="text-sm font-bold mb-2">Setoran Sales</h3><select id="ops-deposit-sales" class="w-full border rounded-lg p-2 text-xs mb-2"></select><input id="ops-deposit-actual" type="number" min="0" placeholder="Setoran aktual (Rp)" class="w-full border rounded-lg p-2 text-xs mb-2"><input id="ops-deposit-note" placeholder="Catatan" class="w-full border rounded-lg p-2 text-xs"><button onclick="saveDepositOps()" class="mt-2 w-full bg-emerald-600 text-white rounded-lg py-2 text-xs font-bold">Catat Setoran Hari Ini</button><div id="ops-deposit-list" class="mt-3 max-h-56 overflow-y-auto space-y-1"></div></div>
+<div><h3 class="text-sm font-bold mb-2">Piutang Toko</h3><div class="grid grid-cols-2 gap-2 mb-2"><b id="ops-receivable-total" class="bg-amber-50 rounded-lg p-2 text-xs">Rp 0</b><span id="ops-receivable-count" class="bg-slate-50 rounded-lg p-2 text-xs">0 tagihan</span></div><div id="ops-receivable-list" class="max-h-72 overflow-y-auto space-y-1"></div></div></div></section>
 
               <section class="lg:col-span-2 bg-white rounded-2xl p-6 border shadow-sm">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4"><div><h2 class="font-bold">Kelola Sales</h2><p class="text-xs text-slate-500">Pilih sales untuk mengubah profil, target, akun login, atau melihat aktivitasnya.</p></div><input id="sales-search" oninput="renderSalesManagement()" placeholder="Cari nama / area / username" class="border rounded-xl px-3 py-2 text-xs w-full sm:w-64"></div>
@@ -478,8 +483,8 @@
         }
 
         const API_URL='https://script.google.com/macros/s/AKfycbyR-riwS3HVUM93sA8D09AR3Orb1kgYbZnZ9HwKSYA8Z1wo0DaJh-Z-sqQhSQvJ53ANCg/exec';
-        const DBKEY='tmeez_sales_monitor_v6_6_2_cache';
-        const SESSIONKEY='tmeez_sales_monitor_v6_6_2_session';
+        const DBKEY='tmeez_sales_monitor_v6_7_0_cache';
+        const SESSIONKEY='tmeez_sales_monitor_v6_7_0_session';
         let apiOnline=false;
         let sessionToken='';
         async function apiGet(action,params={}){
@@ -526,17 +531,17 @@
             }
             db.stores=(st.data||[]).map(mapStore);
             if(currentUser?.role==='sales')db.stores=db.stores.filter(x=>String(x.createdBySalesId)===String(currentUser.salesId)&&String(x.status).toLowerCase()==='active');
-            db.products=(pr.data||[]).map(mapProduct);apiOnline=true;saveDb();renderMaster();renderDynamicForms();refreshVisitKpi();renderAdminDashboard(currentAdminPeriod||'monthly');renderWorkflowToday();
+            db.products=(pr.data||[]).map(mapProduct);try{const [xs,xd,xr]=await Promise.all([apiGet('stock'),apiGet('deposits'),apiGet('receivables')]);db.stock=xs.data||[];db.deposits=xd.data||[];db.receivables=xr.data||[];}catch(e){db.stock=db.stock||[];db.deposits=db.deposits||[];db.receivables=db.receivables||[];}apiOnline=true;saveDb();renderMaster();renderDynamicForms();renderOperations();refreshVisitKpi();renderAdminDashboard(currentAdminPeriod||'monthly');renderWorkflowToday();
             if(showMessage)showToast('Data Google Sheet berhasil disinkronkan');
           }catch(err){apiOnline=false;if(showMessage)showToast('Sinkronisasi gagal: '+err.message);}
         }
 
-        let db={users:[],sales:[],stores:[],products:[],visits:[],orders:[],settings:{radius:100}};
+        let db={users:[],sales:[],stores:[],products:[],visits:[],orders:[],stock:[],deposits:[],receivables:[],settings:{radius:100}};
         let currentUser=null;
         function loadDb(){
           const raw=localStorage.getItem(DBKEY);
           if(raw){ try{db=JSON.parse(raw)}catch(e){} }
-          db.users=db.users||[]; db.products=db.products||[]; db.sales=db.sales||[]; db.stores=db.stores||[]; db.visits=db.visits||[]; db.orders=db.orders||[]; db.settings=db.settings||{radius:100};
+          db.users=db.users||[]; db.products=db.products||[]; db.sales=db.sales||[]; db.stores=db.stores||[]; db.visits=db.visits||[]; db.orders=db.orders||[]; db.stock=db.stock||[];db.deposits=db.deposits||[];db.receivables=db.receivables||[]; db.settings=db.settings||{radius:100};
           renderMaster(); renderDynamicForms(); refreshVisitKpi(); refreshOnlineData(false);
         }
         function saveDb(){localStorage.setItem(DBKEY,JSON.stringify(db));}
@@ -565,6 +570,21 @@
         async function addProduct(e){
           e.preventDefault();try{await apiPost({action:'addProduct',productName:document.getElementById('m-product-name').value.trim(),pricePerPcs:+document.getElementById('m-product-price').value||0,unitsPerBox:+document.getElementById('m-product-pack').value||10,unit:'PCS'});e.target.reset();await refreshOnlineData(false);showToast('Produk tersimpan ke Google Sheet');}catch(err){showToast('Gagal menambah produk: '+err.message);}
         }
+        function renderOperations(){
+          const salesOpts=(db.sales||[]).filter(s=>s.active!==false).map(s=>`<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)}</option>`).join('');
+          ['ops-stock-sales','ops-deposit-sales'].forEach(id=>{const e=document.getElementById(id);if(e){const v=e.value;e.innerHTML='<option value="">Pilih Sales</option>'+salesOpts;if([...e.options].some(o=>o.value===v))e.value=v;}});
+          const pe=document.getElementById('ops-stock-product');if(pe){const v=pe.value;pe.innerHTML='<option value="">Pilih Produk</option>'+(db.products||[]).map(p=>`<option value="${escapeHtml(p.id)}">${escapeHtml(p.name)}</option>`).join('');if([...pe.options].some(o=>o.value===v))pe.value=v;}
+          const sn=id=>(db.sales.find(s=>String(s.id)===String(id))||{}).name||id,pn=id=>(db.products.find(p=>String(p.id)===String(id))||{}).name||id;
+          const sl=document.getElementById('ops-stock-list');if(sl)sl.innerHTML=(db.stock||[]).slice(0,20).map(x=>`<div class="bg-slate-50 rounded-lg p-2 text-[11px]"><b>${escapeHtml(sn(x.SalesID))}</b> · ${escapeHtml(pn(x.ProductID))}<br>Awal ${Number(x.OpeningStock||0)} + Bawa ${Number(x.LoadedStock||0)} − Jual ${Number(x.SoldStock||0)} − Retur ${Number(x.ReturnStock||0)} = <b>${Number(x.ClosingStock||0)} PCS</b></div>`).join('')||'<p class="text-[11px] text-slate-400">Belum ada stok.</p>';
+          const dl=document.getElementById('ops-deposit-list');if(dl)dl.innerHTML=(db.deposits||[]).slice(0,15).map(x=>`<div class="bg-slate-50 rounded-lg p-2 text-[11px]"><b>${escapeHtml(sn(x.SalesID))}</b> · ${String(x.Date).slice(0,10)}<br>Harus ${rupiah(Number(x.ExpectedDeposit||0))} · Aktual <b>${rupiah(Number(x.ActualDeposit||0))}</b> · ${escapeHtml(x.Status||'')}</div>`).join('')||'<p class="text-[11px] text-slate-400">Belum ada setoran.</p>';
+          const open=(db.receivables||[]).filter(x=>Number(x.Balance||0)>0),total=open.reduce((n,x)=>n+Number(x.Balance||0),0);const rt=document.getElementById('ops-receivable-total'),rc=document.getElementById('ops-receivable-count');if(rt)rt.innerText=rupiah(total);if(rc)rc.innerText=open.length+' tagihan';const rl=document.getElementById('ops-receivable-list');if(rl)rl.innerHTML=open.map(x=>`<div class="bg-amber-50 rounded-lg p-2 text-[11px]"><b>${escapeHtml(x.StoreName||x.StoreID)}</b> · ${escapeHtml(x.SalesName||sn(x.SalesID))}<br>Sisa <b>${rupiah(Number(x.Balance||0))}</b> · Jatuh tempo ${escapeHtml(String(x.DueDate||'-').slice(0,10))}<div class="flex gap-1 mt-1"><input id="pay-${x.ReceivableID}" type="number" min="1" placeholder="Bayar" class="min-w-0 flex-1 border rounded p-1"><button onclick="payReceivableOps('${x.ReceivableID}')" class="px-2 bg-amber-600 text-white rounded">Bayar</button></div></div>`).join('')||'<p class="text-[11px] text-slate-400">Tidak ada piutang aktif.</p>';
+          if(currentUser?.role==='sales'){const sid=String(currentUser.salesId||''),stock=(db.stock||[]).filter(x=>String(x.SalesID)===sid).reduce((n,x)=>n+Number(x.ClosingStock||0),0),dep=(db.deposits||[]).filter(x=>String(x.SalesID)===sid&&String(x.Date).slice(0,10)===jakartaTodayKey()).reduce((n,x)=>n+Number(x.ActualDeposit||0),0),rec=(db.receivables||[]).filter(x=>String(x.SalesID)===sid).reduce((n,x)=>n+Number(x.Balance||0),0);const set=(id,v)=>{const e=document.getElementById(id);if(e)e.innerText=v};set('sales-stock-summary',stock+' PCS');set('sales-deposit-summary',rupiah(dep));set('sales-receivable-summary',rupiah(rec));}
+        }
+        async function saveStockOps(){try{await apiPost({action:'saveStock',salesId:document.getElementById('ops-stock-sales').value,productId:document.getElementById('ops-stock-product').value,date:jakartaTodayKey(),openingStock:+document.getElementById('ops-stock-opening').value||0,loadedStock:+document.getElementById('ops-stock-load').value||0,returnStock:+document.getElementById('ops-stock-return').value||0});await refreshOnlineData(false);showToast('Stok Sales tersimpan');}catch(e){showToast(e.message)}}
+        async function saveDepositOps(){try{const r=await apiPost({action:'saveDeposit',salesId:document.getElementById('ops-deposit-sales').value,date:jakartaTodayKey(),actualDeposit:+document.getElementById('ops-deposit-actual').value||0,notes:document.getElementById('ops-deposit-note').value});await refreshOnlineData(false);showToast('Setoran tersimpan · Harus '+rupiah(r.expectedDeposit));}catch(e){showToast(e.message)}}
+        async function saveSalesDeposit(){try{const r=await apiPost({action:'saveDeposit',date:jakartaTodayKey(),actualDeposit:+document.getElementById('sales-deposit-actual').value||0});await refreshOnlineData(false);showToast('Setoran tersimpan · Harus '+rupiah(r.expectedDeposit));}catch(e){showToast(e.message)}}
+        async function payReceivableOps(id){try{const el=document.getElementById('pay-'+id);await apiPost({action:'payReceivable',receivableId:id,amount:+el.value||0,method:'Cash'});await refreshOnlineData(false);showToast('Pembayaran piutang tersimpan');}catch(e){showToast(e.message)}}
+
         function renderStoreMasterList(){
           const tl=document.getElementById('store-list');if(!tl)return;
           const q=(document.getElementById('store-search')?.value||'').trim().toLowerCase();
@@ -810,13 +830,13 @@ function renderDynamicForms(){
           workflowPaymentMethod=method;
           document.querySelectorAll('#sales-step-payment .pay-btn').forEach(b=>b.classList.remove('ring-2','ring-brand-600','bg-brand-50'));
           if(button)button.classList.add('ring-2','ring-brand-600','bg-brand-50');
-          const t=document.getElementById('payment-selected');if(t)t.innerText='Metode dipilih: '+method;
+          const due=document.getElementById('payment-due-wrap');if(due)due.classList.toggle('hidden',method!=='Tempo');const t=document.getElementById('payment-selected');if(t)t.innerText='Metode dipilih: '+method;
           const c=document.getElementById('payment-confirm-btn');if(c){c.disabled=false;c.className='w-full py-3 bg-brand-600 text-white rounded-xl font-bold';}
           scheduleWorkflowDraft();
         }
         async function confirmWorkflowPayment(){
           if(!activeVisit||workflowVisitSaved||workflowSubmitting)return;
-          if(!workflowPaymentMethod){showToast('Pilih metode pembayaran terlebih dahulu');return;}
+          if(!workflowPaymentMethod){showToast('Pilih metode pembayaran terlebih dahulu');return;}if(workflowPaymentMethod==='Tempo'&&!document.getElementById('payment-due-date')?.value){showToast('Isi tanggal jatuh tempo piutang');return;}
           workflowSubmitting=true;
           const confirmBtn=document.getElementById('payment-confirm-btn');
           if(confirmBtn){confirmBtn.disabled=true;confirmBtn.innerText='Menyimpan transaksi...';confirmBtn.className='w-full py-3 bg-slate-400 text-white rounded-xl font-bold cursor-wait';}
@@ -944,7 +964,7 @@ function renderDynamicForms(){
         function periodLabel(period){return period==='daily'?'Hari ini':period==='weekly'?'7 hari terakhir':'Bulan ini';}
         async function runSalesDiagnostics(){
           const set=(id,v)=>{const e=document.getElementById(id);if(e)e.innerText=v;};
-          set('diag-front','V6.6.2');set('diag-status','Mengambil data langsung dari API...');
+          set('diag-front','V6.7.0');set('diag-status','Mengambil data langsung dari API...');
           try{
             const [ping,res]=await Promise.all([apiGet('ping'),apiGet('orders',{limit:500})]);
             set('diag-api',String(ping.version||'-'));
@@ -1126,7 +1146,8 @@ function renderDynamicForms(){
             salesId:currentUser?.salesId||'',
             notes:inv.notes,
             paymentType:workflowPaymentMethod||'Cash',
-            paymentStatus:'Lunas',
+            paymentStatus:workflowPaymentMethod==='Tempo'?'Belum Lunas':'Lunas',
+            dueDate:document.getElementById('payment-due-date')?.value||'',
             items:inv.items.map(x=>({
               productId:x.productId,
               qtyPcs:x.qtyPcs,
