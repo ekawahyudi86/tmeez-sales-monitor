@@ -48,7 +48,7 @@
       </div>
     </div>
 
-    <header class="bg-slate-900 text-white shadow-md z-50 sticky top-0">
+    <header id="app-header" class="bg-slate-900 text-white shadow-md z-50 fixed top-0 left-0 right-0">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center space-x-3">
                 <div class="bg-brand-600 p-2 rounded-xl text-white shadow-lg shadow-brand-500/30 flex items-center justify-center">
@@ -64,6 +64,7 @@
 
             <!-- Role Switcher & User Profile Simulation -->
             <div class="flex items-center space-x-2 sm:space-x-4">
+                <button onclick="refreshOnlineData(true)" title="Sinkronkan Google Sheet" class="shrink-0 px-2.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold shadow-sm"><span class="sm:hidden">↻</span><span class="hidden sm:inline">↻ Sinkronkan</span></button>
                 <div id="role-switcher" class="bg-slate-800 p-1 rounded-xl flex items-center border border-slate-700">
                     <button onclick="switchRole('sales')" id="btn-sales" class="px-3 py-1.5 text-xs font-medium rounded-lg transition-all flex items-center gap-1.5 bg-brand-600 text-white shadow">
                         <i data-lucide="smartphone" class="w-3.5 h-3.5"></i>
@@ -92,10 +93,16 @@
         </div>
     </header>
 
-    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col">
+    <main class="flex-1 max-w-7xl w-full mx-auto pt-20 px-4 pb-4 sm:pt-20 sm:px-6 sm:pb-6 lg:px-8 lg:pb-8 flex flex-col">
 
-        <!-- ================= SALES WORKFLOW V6.7.0 ================= -->
+        <!-- ================= SALES WORKFLOW V6.7.1 ================= -->
         <div id="view-sales" class="space-y-6 animate-fadeIn">
+          <div id="sales-sticky-greeting" class="sticky top-16 z-40 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-2 bg-slate-100/95 backdrop-blur border-b border-slate-200 shadow-sm">
+            <div class="max-w-3xl mx-auto flex items-center justify-between gap-3">
+              <div class="min-w-0"><p id="sales-greeting" class="text-sm sm:text-base font-bold text-slate-900 truncate">Selamat datang</p><p id="sales-greeting-date" class="text-[10px] sm:text-xs text-slate-500"></p></div>
+              <span class="shrink-0 text-[10px] font-semibold text-brand-700 bg-brand-50 border border-brand-100 rounded-lg px-2 py-1">Sales</span>
+            </div>
+          </div>
           <div class="max-w-3xl mx-auto">
             <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
               <div class="px-5 py-4 bg-slate-900 text-white flex items-center justify-between">
@@ -105,10 +112,6 @@
               <div class="px-5 pt-4"><div class="flex gap-2 text-[10px] text-slate-500"><span id="wf-dot-home" class="wf-dot bg-brand-600 text-white">1</span><span>Aktivitas</span><span>›</span><span id="wf-dot-checkin" class="wf-dot">2</span><span>Check-in</span><span>›</span><span id="wf-dot-result" class="wf-dot">3</span><span>Hasil</span><span>›</span><span id="wf-dot-order" class="wf-dot">4</span><span>Order</span></div></div>
 
               <div id="sales-step-home" class="sales-step p-5 space-y-5">
-                <div class="rounded-2xl bg-slate-900 text-white p-5">
-                  <p id="sales-greeting" class="text-xl font-bold">Selamat datang</p>
-                  <p id="sales-greeting-date" class="text-xs text-slate-300 mt-1"></p>
-                </div>
                 <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
                   <div><p class="text-xs font-semibold text-brand-600">DASHBOARD SALES</p><h3 class="text-xl font-bold text-slate-900">Kinerja Saya</h3><p id="sales-dashboard-period-label" class="text-xs text-slate-500 mt-1">Ringkasan bulan ini</p></div>
                   <div class="inline-flex bg-slate-100 p-1 rounded-xl text-xs font-medium">
@@ -190,7 +193,7 @@
                 <button onclick="runSalesDiagnostics()" class="px-4 py-2 rounded-xl bg-amber-600 text-white text-xs font-bold">Periksa Sekarang</button>
               </div>
               <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mt-4 text-xs">
-                <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Frontend</span><b id="diag-front" class="block mt-1">V6.7.0</b></div>
+                <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Frontend</span><b id="diag-front" class="block mt-1">V6.7.1</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">API</span><b id="diag-api" class="block mt-1">-</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Orders</span><b id="diag-orders" class="block mt-1">0</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">OrderItems</span><b id="diag-items" class="block mt-1">0</b></div>
@@ -483,8 +486,8 @@
         }
 
         const API_URL='https://script.google.com/macros/s/AKfycbyR-riwS3HVUM93sA8D09AR3Orb1kgYbZnZ9HwKSYA8Z1wo0DaJh-Z-sqQhSQvJ53ANCg/exec';
-        const DBKEY='tmeez_sales_monitor_v6_7_0_cache';
-        const SESSIONKEY='tmeez_sales_monitor_v6_7_0_session';
+        const DBKEY='tmeez_sales_monitor_v6_7_1_cache';
+        const SESSIONKEY='tmeez_sales_monitor_v6_7_1_session';
         let apiOnline=false;
         let sessionToken='';
         async function apiGet(action,params={}){
@@ -964,7 +967,7 @@ function renderDynamicForms(){
         function periodLabel(period){return period==='daily'?'Hari ini':period==='weekly'?'7 hari terakhir':'Bulan ini';}
         async function runSalesDiagnostics(){
           const set=(id,v)=>{const e=document.getElementById(id);if(e)e.innerText=v;};
-          set('diag-front','V6.7.0');set('diag-status','Mengambil data langsung dari API...');
+          set('diag-front','V6.7.1');set('diag-status','Mengambil data langsung dari API...');
           try{
             const [ping,res]=await Promise.all([apiGet('ping'),apiGet('orders',{limit:500})]);
             set('diag-api',String(ping.version||'-'));
@@ -1256,6 +1259,5 @@ function renderDynamicForms(){
             }, 3000);
         }
     </script>
-<button onclick="refreshOnlineData(true)" title="Sinkronkan Google Sheet" class="fixed bottom-20 right-5 z-40 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full shadow-lg px-4 py-3 text-xs font-bold">↻ Sinkronkan</button>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}</script></body>
 </html>
