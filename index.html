@@ -102,7 +102,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
 
     <main class="flex-1 max-w-7xl w-full mx-auto pt-20 px-4 pb-4 sm:pt-20 sm:px-6 sm:pb-6 lg:px-8 lg:pb-8 flex flex-col">
 
-        <!-- ================= SALES WORKFLOW V6.8.7 ================= -->
+        <!-- ================= SALES WORKFLOW V6.8.8 ================= -->
         <div id="view-sales" class="space-y-6 animate-fadeIn">
           <div id="sales-sticky-greeting" class="sticky top-16 z-40 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-2 bg-slate-100/95 backdrop-blur border-b border-slate-200 shadow-sm">
             <div class="max-w-3xl mx-auto flex items-center justify-between gap-3">
@@ -200,7 +200,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
                 <button onclick="runSalesDiagnostics()" class="px-4 py-2 rounded-xl bg-amber-600 text-white text-xs font-bold">Periksa Sekarang</button>
               </div>
               <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mt-4 text-xs">
-                <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Frontend</span><b id="diag-front" class="block mt-1">V6.8.7</b></div>
+                <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Frontend</span><b id="diag-front" class="block mt-1">V6.8.8</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">API</span><b id="diag-api" class="block mt-1">-</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Orders</span><b id="diag-orders" class="block mt-1">0</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">OrderItems</span><b id="diag-items" class="block mt-1">0</b></div>
@@ -276,7 +276,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
               <div id="admin-store-map" class="w-full rounded-2xl border overflow-hidden bg-slate-100" style="height:430px"></div>
               <div class="flex flex-wrap gap-4 mt-3 text-[11px] text-slate-500">
                 <span><i class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 mr-1"></i>Sudah dikunjungi hari ini</span>
-                <span><i class="inline-block w-2.5 h-2.5 rounded-full bg-amber-500 mr-1"></i>Belum dikunjungi hari ini</span>
+                <span><i class="inline-block w-2.5 h-2.5 rounded-full bg-amber-500 mr-1"></i>Belum dikunjungi hari ini</span><span class="text-slate-400">Nama toko & Sales tampil mulai zoom 13</span>
               </div>
             </section>
 
@@ -514,8 +514,8 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
         }
 
         const API_URL='https://script.google.com/macros/s/AKfycbyR-riwS3HVUM93sA8D09AR3Orb1kgYbZnZ9HwKSYA8Z1wo0DaJh-Z-sqQhSQvJ53ANCg/exec';
-        const DBKEY='tmeez_sales_monitor_v6_8_7_cache';
-        const SESSIONKEY='tmeez_sales_monitor_v6_8_7_session';
+        const DBKEY='tmeez_sales_monitor_v6_8_8_cache';
+        const SESSIONKEY='tmeez_sales_monitor_v6_8_8_session';
         let apiOnline=false;
         let sessionToken='';
         async function apiGet(action,params={}){
@@ -1019,7 +1019,7 @@ function renderDynamicForms(){
         function periodLabel(period){return period==='daily'?'Hari ini':period==='weekly'?'7 hari terakhir':'Bulan ini';}
         async function runSalesDiagnostics(){
           const set=(id,v)=>{const e=document.getElementById(id);if(e)e.innerText=v;};
-          set('diag-front','V6.8.7');set('diag-status','Mengambil data langsung dari API...');
+          set('diag-front','V6.8.8');set('diag-status','Mengambil data langsung dari API...');
           try{
             const [ping,res]=await Promise.all([apiGet('ping'),apiGet('orders',{limit:500})]);
             set('diag-api',String(ping.version||'-'));
@@ -1197,6 +1197,13 @@ function renderDynamicForms(){
             const p=nativeMapWorld(s.lat,s.lng,z),done=storeVisitedTodayForMap(s.id),sales=(db.sales||[]).find(x=>String(x.id)===String(s.createdBySalesId));
             const b=document.createElement('button');b.type='button';b.title=s.name||'Toko';
             b.style.cssText=`position:absolute;z-index:20;left:${p.x-left}px;top:${p.y-top}px;width:20px;height:20px;border-radius:50%;transform:translate(-50%,-50%);background:${done?'#10b981':'#f59e0b'};border:3px solid white;box-shadow:0 2px 8px rgba(15,23,42,.35);cursor:pointer;`;
+            if(z>=13){
+              const label=document.createElement('div');
+              label.className='native-map-pin-label';
+              label.style.cssText=`position:absolute;z-index:19;left:${p.x-left+13}px;top:${p.y-top}px;transform:translateY(-50%);max-width:170px;background:rgba(255,255,255,.94);border:1px solid rgba(203,213,225,.95);border-radius:8px;padding:4px 7px;box-shadow:0 2px 7px rgba(15,23,42,.16);pointer-events:none;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;`;
+              label.innerHTML=`<div style="font-size:10px;font-weight:700;color:#0f172a;overflow:hidden;text-overflow:ellipsis">${escapeHtml(s.name||'Toko')}</div><div style="font-size:9px;color:#64748b;margin-top:2px;overflow:hidden;text-overflow:ellipsis">Sales: ${escapeHtml(sales?.name||s.createdByName||'-')}</div>`;
+              el.appendChild(label);
+            }
             b.onclick=()=>{
               el.querySelectorAll('.native-map-popup').forEach(x=>x.remove());
               const pop=document.createElement('div');pop.className='native-map-popup';pop.style.cssText=`position:absolute;z-index:40;left:${Math.min(w-230,Math.max(8,p.x-left+12))}px;top:${Math.min(hgt-155,Math.max(8,p.y-top-25))}px;width:220px;background:white;border:1px solid #e2e8f0;border-radius:12px;padding:12px;box-shadow:0 10px 30px rgba(15,23,42,.22);font-size:11px;line-height:1.45;`;
