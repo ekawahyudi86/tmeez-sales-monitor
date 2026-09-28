@@ -102,7 +102,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
 
     <main class="flex-1 max-w-7xl w-full mx-auto pt-20 px-4 pb-4 sm:pt-20 sm:px-6 sm:pb-6 lg:px-8 lg:pb-8 flex flex-col">
 
-        <!-- ================= SALES WORKFLOW V6.9.2 ================= -->
+        <!-- ================= SALES WORKFLOW V6.9.3 ================= -->
         <div id="view-sales" class="space-y-6 animate-fadeIn">
           <div id="sales-sticky-greeting" class="sticky top-16 z-40 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-2 bg-slate-100/95 backdrop-blur border-b border-slate-200 shadow-sm">
             <div class="max-w-3xl mx-auto flex items-center justify-between gap-3">
@@ -200,7 +200,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
                 <button onclick="runSalesDiagnostics()" class="px-4 py-2 rounded-xl bg-amber-600 text-white text-xs font-bold">Periksa Sekarang</button>
               </div>
               <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mt-4 text-xs">
-                <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Frontend</span><b id="diag-front" class="block mt-1">V6.9.2</b></div>
+                <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Frontend</span><b id="diag-front" class="block mt-1">V6.9.3</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">API</span><b id="diag-api" class="block mt-1">-</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Orders</span><b id="diag-orders" class="block mt-1">0</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">OrderItems</span><b id="diag-items" class="block mt-1">0</b></div>
@@ -361,6 +361,11 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
 <div><h3 class="text-sm font-bold mb-2">Stok Sales</h3><select id="ops-stock-sales" class="w-full border rounded-lg p-2 text-xs mb-2"></select><select id="ops-stock-product" class="w-full border rounded-lg p-2 text-xs mb-2"></select><div class="grid grid-cols-3 gap-1"><input id="ops-stock-opening" type="number" min="0" placeholder="Awal" class="border rounded-lg p-2 text-xs"><input id="ops-stock-load" type="number" min="0" placeholder="Dibawa" class="border rounded-lg p-2 text-xs"><input id="ops-stock-return" type="number" min="0" placeholder="Retur" class="border rounded-lg p-2 text-xs"></div><button onclick="saveStockOps()" class="mt-2 w-full bg-indigo-600 text-white rounded-lg py-2 text-xs font-bold">Simpan Stok Hari Ini</button><div id="ops-stock-list" class="mt-3 max-h-56 overflow-y-auto space-y-1"></div></div>
 <div><h3 class="text-sm font-bold mb-2">Tutup Hari Sales</h3><select id="ops-deposit-sales" onchange="loadAdminCloseDay()" class="w-full border rounded-lg p-2 text-xs mb-2"></select><button onclick="loadAdminCloseDay()" class="w-full border rounded-lg py-2 text-xs font-bold mb-2">Lihat Rangkuman Hari Ini</button><div id="ops-close-summary" class="bg-slate-50 rounded-xl p-3 text-[11px] mb-2">Pilih Sales untuk melihat rangkuman.</div><input id="ops-deposit-actual" type="number" min="0" placeholder="Cash benar-benar disetor (Rp)" class="w-full border rounded-lg p-2 text-xs mb-2"><input id="ops-deposit-note" placeholder="Catatan tutup hari" class="w-full border rounded-lg p-2 text-xs"><button onclick="saveDepositOps()" class="mt-2 w-full bg-slate-900 text-white rounded-lg py-2 text-xs font-bold">Tutup Hari Sales</button><div id="ops-deposit-list" class="mt-3 max-h-56 overflow-y-auto space-y-1"></div></div>
 <div><h3 class="text-sm font-bold mb-2">Piutang Toko</h3><div class="grid grid-cols-2 gap-2 mb-2"><b id="ops-receivable-total" class="bg-amber-50 rounded-lg p-2 text-xs">Rp 0</b><span id="ops-receivable-count" class="bg-slate-50 rounded-lg p-2 text-xs">0 tagihan</span></div><div id="ops-receivable-list" class="max-h-72 overflow-y-auto space-y-1"></div></div></div></section>
+
+              <section id="admin-payment-verification-section" class="lg:col-span-2 bg-white rounded-2xl p-6 border shadow-sm">
+                <div class="flex items-center justify-between gap-3 mb-4"><div><h2 class="font-bold">Verifikasi Pembayaran Non-Cash</h2><p class="text-xs text-slate-500">Transfer/QRIS dari Sales belum dianggap diterima perusahaan sebelum diverifikasi Admin/Monitoring.</p></div><span id="pending-payment-count" class="px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold">0 menunggu</span></div>
+                <div id="pending-payment-list" class="space-y-2"><p class="text-xs text-slate-400">Tidak ada pembayaran menunggu verifikasi.</p></div>
+              </section>
 
               <section id="admin-sales-management-section" class="lg:col-span-2 bg-white rounded-2xl p-6 border shadow-sm">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4"><div><h2 class="font-bold">Kelola Sales</h2><p class="text-xs text-slate-500">Pilih sales untuk mengubah profil, target, akun login, atau melihat aktivitasnya.</p></div><input id="sales-search" oninput="renderSalesManagement()" placeholder="Cari nama / area / username" class="border rounded-xl px-3 py-2 text-xs w-full sm:w-64"></div>
@@ -548,8 +553,8 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
         }
 
         const API_URL='https://script.google.com/macros/s/AKfycbyR-riwS3HVUM93sA8D09AR3Orb1kgYbZnZ9HwKSYA8Z1wo0DaJh-Z-sqQhSQvJ53ANCg/exec';
-        const DBKEY='tmeez_sales_monitor_v6_9_2_cache';
-        const SESSIONKEY='tmeez_sales_monitor_v6_9_2_session';
+        const DBKEY='tmeez_sales_monitor_v6_9_3_cache';
+        const SESSIONKEY='tmeez_sales_monitor_v6_9_3_session';
         let apiOnline=false;
         let sessionToken='';
         async function apiGet(action,params={}){
@@ -581,32 +586,32 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
           const rawDateKey=o.OrderDateKey||o.orderDateKey||o.CreatedDateKey||''; const dateKey=rawDateKey?dateKeyJakarta(rawDateKey):'';
           const flag=v=>v===undefined||v===null||v===''?null:(v===true||String(v).toLowerCase()==='true');
           const itemQty=items.reduce((n,z)=>n+Number(z.QtyPcs??z.qtyPcs??0),0);
-          return {id:String(o.OrderID||o.orderId||''),salesId:String(o.SalesID||o.salesId||''),storeId:String(o.StoreID||o.storeId||''),date,dateKey,createdAt:o.CreatedAt||o.createdAt||'',isToday:flag(o.IsToday),isLast7Days:flag(o.IsLast7Days),isThisMonth:flag(o.IsThisMonth),serverTodayKey:String(o.ServerTodayKey||''),qty:itemQty>0?itemQty:Number(o.TotalQtyPcs??o.totalQtyPcs??o.QtyPcs??o.qty??0),subtotal:+(o.Subtotal??o.subtotal)||0,discount:+(o.Discount??o.discount)||0,total:+(o.GrandTotal??o.grandTotal??o.Total??o.total)||0,items};
+          return {id:String(o.OrderID||o.orderId||''),salesId:String(o.SalesID||o.salesId||''),storeId:String(o.StoreID||o.storeId||''),date,dateKey,createdAt:o.CreatedAt||o.createdAt||'',isToday:flag(o.IsToday),isLast7Days:flag(o.IsLast7Days),isThisMonth:flag(o.IsThisMonth),serverTodayKey:String(o.ServerTodayKey||''),qty:itemQty>0?itemQty:Number(o.TotalQtyPcs??o.totalQtyPcs??o.QtyPcs??o.qty??0),subtotal:+(o.Subtotal??o.subtotal)||0,discount:+(o.Discount??o.discount)||0,total:+(o.GrandTotal??o.grandTotal??o.Total??o.total)||0,paymentType:String(o.PaymentType||o.paymentType||''),paymentStatus:String(o.PaymentStatus||o.paymentStatus||''),verifiedAt:String(o.PaymentVerifiedAt||''),items};
         }
         function mapProduct(x){return {id:String(x.ProductID||''),name:String(x.ProductName||''),price:+(x.PricePerPcs!==''&&x.PricePerPcs!==undefined?x.PricePerPcs:x.PricePerBox)||0,pack:+x.UnitsPerBox||10,sku:String(x.SKU||''),status:String(x.Status||'Active')};}
         async function refreshOnlineData(showMessage=false){
           try{
             let st,pr;
             if(currentUser?.role==='admin'||currentUser?.role==='monitoring'){
-              const [sa,xst,xpr,xvi,xor,xset]=await Promise.all([apiGet('sales'),apiGet('stores'),apiGet('products'),apiGet('visits',{limit:500}),apiGet('orders',{limit:200}),apiGet('settings')]);
-              db.sales=(sa.data||[]).map(mapSales);db.visits=(xvi.data||[]).map(mapVisit);db.orders=(xor.data||[]).map(mapOrderPack);applyOnlineSettings(xset.data||[]);st=xst;pr=xpr;
+              const [sa,xst,xpr,xvi,xor,xset,xpending]=await Promise.all([apiGet('sales'),apiGet('stores'),apiGet('products'),apiGet('visits',{limit:500}),apiGet('orders',{limit:200}),apiGet('settings'),apiGet('pendingPayments')]);
+              db.sales=(sa.data||[]).map(mapSales);db.visits=(xvi.data||[]).map(mapVisit);db.orders=(xor.data||[]).map(mapOrderPack);db.pendingPayments=xpending.data||[];applyOnlineSettings(xset.data||[]);st=xst;pr=xpr;
             }else{
               const [xst,xpr,xvi,xor,xset]=await Promise.all([apiGet('stores'),apiGet('products'),apiGet('visits',{limit:200}),apiGet('orders',{limit:200}),apiGet('settings')]);
               st=xst;pr=xpr;db.visits=(xvi.data||[]).map(mapVisit);db.orders=(xor.data||[]).map(mapOrderPack);applyOnlineSettings(xset.data||[]);
             }
             db.stores=(st.data||[]).map(mapStore);
             if(currentUser?.role==='sales')db.stores=db.stores.filter(x=>String(x.createdBySalesId)===String(currentUser.salesId)&&String(x.status).toLowerCase()==='active');
-            db.products=(pr.data||[]).map(mapProduct);try{const [xs,xd,xr]=await Promise.all([apiGet('stock'),apiGet('deposits'),apiGet('receivables')]);db.stock=xs.data||[];db.deposits=xd.data||[];db.receivables=xr.data||[];}catch(e){db.stock=db.stock||[];db.deposits=db.deposits||[];db.receivables=db.receivables||[];}apiOnline=true;saveDb();renderMaster();renderDynamicForms();renderOperations();refreshVisitKpi();renderAdminDashboard(currentAdminPeriod||'monthly');renderWorkflowToday();
+            db.products=(pr.data||[]).map(mapProduct);try{const [xs,xd,xr]=await Promise.all([apiGet('stock'),apiGet('deposits'),apiGet('receivables')]);db.stock=xs.data||[];db.deposits=xd.data||[];db.receivables=xr.data||[];}catch(e){db.stock=db.stock||[];db.deposits=db.deposits||[];db.receivables=db.receivables||[];}apiOnline=true;saveDb();renderMaster();renderDynamicForms();renderOperations();renderPendingPayments();refreshVisitKpi();renderAdminDashboard(currentAdminPeriod||'monthly');renderWorkflowToday();
             if(showMessage)showToast('Data Google Sheet berhasil disinkronkan');
           }catch(err){apiOnline=false;if(showMessage)showToast('Sinkronisasi gagal: '+err.message);}
         }
 
-        let db={users:[],sales:[],stores:[],products:[],visits:[],orders:[],stock:[],deposits:[],receivables:[],settings:{radius:100}};
+        let db={users:[],sales:[],stores:[],products:[],visits:[],orders:[],stock:[],deposits:[],receivables:[],pendingPayments:[],settings:{radius:100}};
         let currentUser=null;
         function loadDb(){
           const raw=localStorage.getItem(DBKEY);
           if(raw){ try{db=JSON.parse(raw)}catch(e){} }
-          db.users=db.users||[]; db.products=db.products||[]; db.sales=db.sales||[]; db.stores=db.stores||[]; db.visits=db.visits||[]; db.orders=db.orders||[]; db.stock=db.stock||[];db.deposits=db.deposits||[];db.receivables=db.receivables||[]; db.settings=db.settings||{radius:100};
+          db.users=db.users||[]; db.products=db.products||[]; db.sales=db.sales||[]; db.stores=db.stores||[]; db.visits=db.visits||[]; db.orders=db.orders||[]; db.stock=db.stock||[];db.deposits=db.deposits||[];db.receivables=db.receivables||[]; db.pendingPayments=db.pendingPayments||[]; db.settings=db.settings||{radius:100};
           renderMaster(); renderDynamicForms(); refreshVisitKpi(); refreshOnlineData(false);
         }
         function saveDb(){localStorage.setItem(DBKEY,JSON.stringify(db));}
@@ -652,6 +657,14 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
         async function addProduct(e){if(currentUser?.role==='monitoring'){showToast('Akses Monitoring hanya untuk pemantauan.');return;}
           e.preventDefault();try{await apiPost({action:'addProduct',productName:document.getElementById('m-product-name').value.trim(),pricePerPcs:+document.getElementById('m-product-price').value||0,unitsPerBox:+document.getElementById('m-product-pack').value||10,unit:'PCS'});e.target.reset();await refreshOnlineData(false);showToast('Produk tersimpan ke Google Sheet');}catch(err){showToast('Gagal menambah produk: '+err.message);}
         }
+        function renderPendingPayments(){
+          const box=document.getElementById('pending-payment-list'),count=document.getElementById('pending-payment-count');if(!box)return;
+          const rows=db.pendingPayments||[];if(count)count.innerText=rows.length+' menunggu';
+          box.innerHTML=rows.length?rows.map(x=>`<div class="border rounded-xl p-3 bg-amber-50"><div class="flex flex-wrap justify-between gap-2"><div><b>${escapeHtml(x.StoreName||x.StoreID||'Toko')}</b><div class="text-[11px] text-slate-600">${escapeHtml(x.SalesName||x.SalesID||'')} · ${escapeHtml(x.PaymentType||'')} · ${escapeHtml(x.OrderDateDisplay||String(x.OrderDate||''))}</div><div class="text-[10px] text-slate-400">${escapeHtml(x.OrderID||'')}</div></div><b class="text-sm">${rupiah(Number(x.GrandTotal||0))}</b></div><div class="grid grid-cols-2 gap-2 mt-3"><button onclick="verifyNonCashPayment('${escapeHtml(x.OrderID)}')" class="bg-emerald-600 text-white rounded-lg py-2 text-xs font-bold">Verifikasi</button><button onclick="rejectNonCashPayment('${escapeHtml(x.OrderID)}')" class="bg-red-50 text-red-700 border border-red-200 rounded-lg py-2 text-xs font-bold">Tolak</button></div></div>`).join(''):'<p class="text-xs text-slate-400">Tidak ada pembayaran menunggu verifikasi.</p>';
+        }
+        async function verifyNonCashPayment(orderId){if(!confirm('Pastikan dana Transfer/QRIS sudah masuk ke rekening perusahaan. Verifikasi pembayaran ini?'))return;try{await apiPost({action:'verifyPayment',orderId});await refreshOnlineData(false);showToast('Pembayaran terverifikasi');}catch(e){showToast(e.message)}}
+        async function rejectNonCashPayment(orderId){const note=prompt('Alasan pembayaran ditolak:','Dana belum masuk');if(note===null)return;try{await apiPost({action:'rejectPayment',orderId,note});await refreshOnlineData(false);showToast('Pembayaran ditolak');}catch(e){showToast(e.message)}}
+
         function renderOperations(){
           const salesOpts=(db.sales||[]).filter(s=>s.active!==false).map(s=>`<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)}</option>`).join('');
           ['ops-stock-sales','ops-deposit-sales'].forEach(id=>{const e=document.getElementById(id);if(e){const v=e.value;e.innerHTML='<option value="">Pilih Sales</option>'+salesOpts;if([...e.options].some(o=>o.value===v))e.value=v;}});
@@ -663,9 +676,9 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
           if(currentUser?.role==='sales'){const sid=String(currentUser.salesId||''),stock=(db.stock||[]).filter(x=>String(x.SalesID)===sid).reduce((n,x)=>n+Number(x.ClosingStock||0),0),dep=(db.deposits||[]).filter(x=>String(x.SalesID)===sid&&String(x.Date).slice(0,10)===jakartaTodayKey()).reduce((n,x)=>n+Number(x.ActualDeposit||0),0),rec=(db.receivables||[]).filter(x=>String(x.SalesID)===sid).reduce((n,x)=>n+Number(x.Balance||0),0);const set=(id,v)=>{const e=document.getElementById(id);if(e)e.innerText=v};set('sales-stock-summary',stock+' PCS');set('sales-receivable-summary',rupiah(rec));setTimeout(()=>loadSalesCloseDay(),0);}
         }
         async function saveStockOps(){try{await apiPost({action:'saveStock',salesId:document.getElementById('ops-stock-sales').value,productId:document.getElementById('ops-stock-product').value,date:jakartaTodayKey(),openingStock:+document.getElementById('ops-stock-opening').value||0,loadedStock:+document.getElementById('ops-stock-load').value||0,returnStock:+document.getElementById('ops-stock-return').value||0});await refreshOnlineData(false);showToast('Stok Sales tersimpan');}catch(e){showToast(e.message)}}
-        function closeSummaryHtml(r){return `<div class="space-y-1"><div class="flex justify-between"><span>Penjualan cash</span><b>${rupiah(r.cashSales)}</b></div><div class="flex justify-between"><span>Piutang dibayar cash</span><b>${rupiah(r.cashReceivable)}</b></div><div class="flex justify-between border-t pt-1"><span>Cash wajib disetor</span><b class="text-emerald-700">${rupiah(r.cashRequired)}</b></div><div class="flex justify-between mt-2"><span>Penjualan non-cash</span><b>${rupiah(r.nonCashSales)}</b></div><div class="flex justify-between"><span>Piutang dibayar non-cash</span><b>${rupiah(r.nonCashReceivable)}</b></div><div class="flex justify-between border-t pt-1"><span>Non-cash ke perusahaan</span><b class="text-sky-700">${rupiah(r.nonCashTotal)}</b></div><div class="flex justify-between mt-2"><span>Piutang belum tertagih</span><b class="text-amber-700">${rupiah(r.openReceivable)}</b></div></div>`;}
+        function closeSummaryHtml(r){return `<div class="space-y-1"><div class="flex justify-between"><span>Penjualan cash</span><b>${rupiah(r.cashSales)}</b></div><div class="flex justify-between"><span>Piutang dibayar cash</span><b>${rupiah(r.cashReceivable)}</b></div><div class="flex justify-between border-t pt-1"><span>Cash wajib disetor</span><b class="text-emerald-700">${rupiah(r.cashRequired)}</b></div><div class="flex justify-between mt-2"><span>Penjualan non-cash</span><b>${rupiah(r.nonCashSales)}</b></div><div class="flex justify-between"><span>Piutang dibayar non-cash</span><b>${rupiah(r.nonCashReceivable)}</b></div><div class="flex justify-between border-t pt-1"><span>Non-cash terverifikasi</span><b class="text-sky-700">${rupiah(r.nonCashTotal)}</b></div><div class="flex justify-between"><span>Non-cash menunggu verifikasi</span><b class="text-amber-700">${rupiah(r.pendingNonCash||0)}</b></div><div class="flex justify-between mt-2"><span>Piutang belum tertagih</span><b class="text-amber-700">${rupiah(r.openReceivable)}</b></div></div>`;}
         async function loadAdminCloseDay(){try{const sid=document.getElementById('ops-deposit-sales')?.value;if(!sid){document.getElementById('ops-close-summary').innerHTML='Pilih Sales untuk melihat rangkuman.';return;}const r=await apiGet('closeDaySummary',{salesId:sid,date:jakartaTodayKey()});document.getElementById('ops-close-summary').innerHTML=closeSummaryHtml(r);document.getElementById('ops-deposit-actual').value=r.cashRequired||0;}catch(e){showToast(e.message)}}
-        async function loadSalesCloseDay(){try{const r=await apiGet('closeDaySummary',{date:jakartaTodayKey()});const set=(id,v)=>{const e=document.getElementById(id);if(e)e.innerText=v};set('sales-close-cash',rupiah(r.cashRequired));set('sales-close-noncash',rupiah(r.nonCashTotal));set('sales-receivable-summary',rupiah(r.openReceivable));set('sales-close-cash-detail',`Penjualan ${rupiah(r.cashSales)} + piutang ${rupiah(r.cashReceivable)}`);set('sales-close-noncash-detail',`Penjualan ${rupiah(r.nonCashSales)} + piutang ${rupiah(r.nonCashReceivable)}`);const inp=document.getElementById('sales-deposit-actual'),btn=document.getElementById('sales-close-day-btn');if(r.alreadyClosed){if(inp){inp.value=Number(r.closedRecord?.ActualDeposit||0);inp.disabled=true;}if(btn){btn.disabled=true;btn.innerText='Hari Ini Sudah Ditutup';btn.className='mt-2 w-full bg-slate-300 text-slate-600 rounded-xl py-3 text-sm font-bold cursor-not-allowed';}}else{if(inp){inp.disabled=false;if(!inp.value)inp.value=r.cashRequired||0;}if(btn){btn.disabled=false;btn.innerText='Tutup Hari';btn.className='mt-2 w-full bg-slate-900 text-white rounded-xl py-3 text-sm font-bold';}}const sid=String(currentUser?.salesId||''),rows=(db.stock||[]).filter(x=>String(x.SalesID)===sid&&String(x.DateKey||x.DateDisplay||x.Date).slice(0,10)===jakartaTodayKey());const pn=id=>(db.products.find(p=>String(p.id)===String(id))||{}).name||id;const box=document.getElementById('sales-stock-breakdown');if(box)box.innerHTML='<b>Sisa barang:</b><br>'+(rows.length?rows.map(x=>`${escapeHtml(pn(x.ProductID))}: <b>${Number(x.ClosingStock||0)} PCS</b>`).join('<br>'):'Belum ada pencatatan stok hari ini.');}catch(e){showToast(e.message)}}
+        async function loadSalesCloseDay(){try{const r=await apiGet('closeDaySummary',{date:jakartaTodayKey()});const set=(id,v)=>{const e=document.getElementById(id);if(e)e.innerText=v};set('sales-close-cash',rupiah(r.cashRequired));set('sales-close-noncash',rupiah(r.nonCashTotal));set('sales-receivable-summary',rupiah(r.openReceivable));set('sales-close-cash-detail',`Penjualan ${rupiah(r.cashSales)} + piutang ${rupiah(r.cashReceivable)}`);set('sales-close-noncash-detail',`Terverifikasi ${rupiah(r.nonCashTotal)} · Menunggu ${rupiah(r.pendingNonCash||0)}`);const inp=document.getElementById('sales-deposit-actual'),btn=document.getElementById('sales-close-day-btn');if(r.alreadyClosed){if(inp){inp.value=Number(r.closedRecord?.ActualDeposit||0);inp.disabled=true;}if(btn){btn.disabled=true;btn.innerText='Hari Ini Sudah Ditutup';btn.className='mt-2 w-full bg-slate-300 text-slate-600 rounded-xl py-3 text-sm font-bold cursor-not-allowed';}}else{if(inp){inp.disabled=false;if(!inp.value)inp.value=r.cashRequired||0;}if(btn){btn.disabled=false;btn.innerText='Tutup Hari';btn.className='mt-2 w-full bg-slate-900 text-white rounded-xl py-3 text-sm font-bold';}}const sid=String(currentUser?.salesId||''),rows=(db.stock||[]).filter(x=>String(x.SalesID)===sid&&String(x.DateKey||x.DateDisplay||x.Date).slice(0,10)===jakartaTodayKey());const pn=id=>(db.products.find(p=>String(p.id)===String(id))||{}).name||id;const box=document.getElementById('sales-stock-breakdown');if(box)box.innerHTML='<b>Sisa barang:</b><br>'+(rows.length?rows.map(x=>`${escapeHtml(pn(x.ProductID))}: <b>${Number(x.ClosingStock||0)} PCS</b>`).join('<br>'):'Belum ada pencatatan stok hari ini.');}catch(e){showToast(e.message)}}
         async function saveSalesCloseDay(){try{const r=await apiPost({action:'saveDeposit',date:jakartaTodayKey(),actualDeposit:+document.getElementById('sales-deposit-actual').value||0});await refreshOnlineData(false);await loadSalesCloseDay();showToast(r.alreadyClosed?'Hari ini sudah ditutup sebelumnya.':'Tutup hari tersimpan · '+r.status+' · selisih '+rupiah(r.difference));}catch(e){showToast(e.message)}}
         async function payReceivableOps(id){try{const el=document.getElementById('pay-'+id),m=document.getElementById('pay-method-'+id);await apiPost({action:'payReceivable',receivableId:id,amount:+el.value||0,method:m?.value||'Cash'});await refreshOnlineData(false);showToast('Pembayaran piutang tersimpan');}catch(e){showToast(e.message)}}
 
@@ -958,7 +971,7 @@ function renderDynamicForms(){
               salesId:currentUser?.salesId||'',
               notes:inv.notes,
               paymentType:method,
-              paymentStatus:method==='Tempo'?'Belum Lunas':'Lunas',
+              paymentStatus:method==='Tempo'?'Belum Lunas':(['Transfer','QRIS'].includes(method)?'Menunggu Verifikasi':'Lunas'),
               dueDate:document.getElementById('payment-due-date')?.value||'',
               items:inv.items.map(x=>({productId:x.productId,qtyPcs:x.qtyPcs,unitPricePcs:x.unitPricePcs,discountPerPcs:x.discountPerPcs})),
               visit:{checkInAt:activeVisit.checkIn.toISOString(),checkOutAt:end.toISOString(),latitude:activeVisit.lat,longitude:activeVisit.lng,gpsAccuracy:activeVisit.accuracy||0,distanceMeter:Math.round(activeVisit.distance),durationMinute:dur,notes:'Pembayaran: '+method}
@@ -1079,7 +1092,7 @@ function renderDynamicForms(){
         function periodLabel(period){return period==='daily'?'Hari ini':period==='weekly'?'7 hari terakhir':'Bulan ini';}
         async function runSalesDiagnostics(){
           const set=(id,v)=>{const e=document.getElementById(id);if(e)e.innerText=v;};
-          set('diag-front','V6.9.2');set('diag-status','Mengambil data langsung dari API...');
+          set('diag-front','V6.9.3');set('diag-status','Mengambil data langsung dari API...');
           try{
             const [ping,res]=await Promise.all([apiGet('ping'),apiGet('orders',{limit:500})]);
             set('diag-api',String(ping.version||'-'));
