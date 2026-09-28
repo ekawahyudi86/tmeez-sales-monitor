@@ -102,7 +102,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
 
     <main class="flex-1 max-w-7xl w-full mx-auto pt-20 px-4 pb-4 sm:pt-20 sm:px-6 sm:pb-6 lg:px-8 lg:pb-8 flex flex-col">
 
-        <!-- ================= SALES WORKFLOW V6.8.2 ================= -->
+        <!-- ================= SALES WORKFLOW V6.8.3 ================= -->
         <div id="view-sales" class="space-y-6 animate-fadeIn">
           <div id="sales-sticky-greeting" class="sticky top-16 z-40 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-2 bg-slate-100/95 backdrop-blur border-b border-slate-200 shadow-sm">
             <div class="max-w-3xl mx-auto flex items-center justify-between gap-3">
@@ -200,7 +200,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
                 <button onclick="runSalesDiagnostics()" class="px-4 py-2 rounded-xl bg-amber-600 text-white text-xs font-bold">Periksa Sekarang</button>
               </div>
               <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mt-4 text-xs">
-                <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Frontend</span><b id="diag-front" class="block mt-1">V6.8.2</b></div>
+                <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Frontend</span><b id="diag-front" class="block mt-1">V6.8.3</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">API</span><b id="diag-api" class="block mt-1">-</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Orders</span><b id="diag-orders" class="block mt-1">0</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">OrderItems</span><b id="diag-items" class="block mt-1">0</b></div>
@@ -258,6 +258,27 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
                     </div>
                 </div>
             </div>
+
+            <!-- Peta Persebaran Toko -->
+            <section class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-100">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                <div>
+                  <h2 class="font-bold text-slate-800 flex items-center gap-2"><i data-lucide="map" class="w-5 h-5 text-brand-600"></i>Peta Toko Sales</h2>
+                  <p class="text-xs text-slate-500 mt-1">Persebaran toko berdasarkan GPS saat toko ditambahkan.</p>
+                </div>
+                <select id="admin-map-sales-filter" onchange="renderAdminStoreMap()" class="border rounded-xl px-3 py-2 text-xs bg-white min-w-44"><option value="">Semua Sales</option></select>
+              </div>
+              <div class="flex flex-wrap gap-2 mb-3 text-[11px]">
+                <span id="admin-map-total" class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700">0 toko</span>
+                <span id="admin-map-visited" class="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700">0 sudah dikunjungi hari ini</span>
+                <span id="admin-map-unvisited" class="px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700">0 belum dikunjungi</span>
+              </div>
+              <div id="admin-store-map" class="w-full rounded-2xl border overflow-hidden bg-slate-100" style="height:430px"></div>
+              <div class="flex flex-wrap gap-4 mt-3 text-[11px] text-slate-500">
+                <span><i class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 mr-1"></i>Sudah dikunjungi hari ini</span>
+                <span><i class="inline-block w-2.5 h-2.5 rounded-full bg-amber-500 mr-1"></i>Belum dikunjungi hari ini</span>
+              </div>
+            </section>
 
             <!-- Leaderboard & Multi-Period KPI Tracking Table -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
@@ -493,8 +514,8 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
         }
 
         const API_URL='https://script.google.com/macros/s/AKfycbyR-riwS3HVUM93sA8D09AR3Orb1kgYbZnZ9HwKSYA8Z1wo0DaJh-Z-sqQhSQvJ53ANCg/exec';
-        const DBKEY='tmeez_sales_monitor_v6_8_2_cache';
-        const SESSIONKEY='tmeez_sales_monitor_v6_8_2_session';
+        const DBKEY='tmeez_sales_monitor_v6_8_3_cache';
+        const SESSIONKEY='tmeez_sales_monitor_v6_8_3_session';
         let apiOnline=false;
         let sessionToken='';
         async function apiGet(action,params={}){
@@ -998,7 +1019,7 @@ function renderDynamicForms(){
         function periodLabel(period){return period==='daily'?'Hari ini':period==='weekly'?'7 hari terakhir':'Bulan ini';}
         async function runSalesDiagnostics(){
           const set=(id,v)=>{const e=document.getElementById(id);if(e)e.innerText=v;};
-          set('diag-front','V6.8.2');set('diag-status','Mengambil data langsung dari API...');
+          set('diag-front','V6.8.3');set('diag-status','Mengambil data langsung dari API...');
           try{
             const [ping,res]=await Promise.all([apiGet('ping'),apiGet('orders',{limit:500})]);
             set('diag-api',String(ping.version||'-'));
@@ -1022,6 +1043,50 @@ function renderDynamicForms(){
           }
         }
 
+        let adminStoreMap=null,adminStoreMapLayer=null;
+        function storeVisitedTodayForMap(storeId){
+          const today=jakartaTodayKey();
+          return (db.visits||[]).some(v=>String(v.storeId||'')===String(storeId)&&dateKeyJakarta(v.checkIn||v.date)===today);
+        }
+        function populateAdminMapSalesFilter(){
+          const sel=document.getElementById('admin-map-sales-filter');if(!sel)return;
+          const keep=sel.value;
+          sel.innerHTML='<option value="">Semua Sales</option>'+(db.sales||[]).filter(s=>s.active!==false).map(s=>`<option value="${escapeHtml(String(s.id))}">${escapeHtml(s.name)}</option>`).join('');
+          if([...sel.options].some(o=>o.value===keep))sel.value=keep;
+        }
+        function renderAdminStoreMap(){
+          const el=document.getElementById('admin-store-map');if(!el||currentUser?.role==='sales')return;
+          populateAdminMapSalesFilter();
+          if(typeof L==='undefined'){el.innerHTML='<div class="h-full flex items-center justify-center p-6 text-center text-sm text-slate-500">Peta tidak dapat dimuat. Periksa koneksi internet.</div>';return;}
+          const sid=document.getElementById('admin-map-sales-filter')?.value||'';
+          const stores=(db.stores||[]).filter(s=>{
+            const lat=Number(s.lat),lng=Number(s.lng);
+            return isFinite(lat)&&isFinite(lng)&&lat!==0&&lng!==0&&(!sid||String(s.createdBySalesId)===String(sid));
+          });
+          const visited=stores.filter(s=>storeVisitedTodayForMap(s.id)).length;
+          const set=(id,v)=>{const x=document.getElementById(id);if(x)x.innerText=v;};
+          set('admin-map-total',stores.length+' toko');
+          set('admin-map-visited',visited+' sudah dikunjungi hari ini');
+          set('admin-map-unvisited',(stores.length-visited)+' belum dikunjungi');
+          if(!adminStoreMap){
+            adminStoreMap=L.map(el,{zoomControl:true}).setView([-7.35,112.70],10);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(adminStoreMap);
+            adminStoreMapLayer=L.layerGroup().addTo(adminStoreMap);
+          }
+          adminStoreMapLayer.clearLayers();
+          const bounds=[];
+          stores.forEach(s=>{
+            const done=storeVisitedTodayForMap(s.id),sales=(db.sales||[]).find(x=>String(x.id)===String(s.createdBySalesId));
+            const color=done?'#10b981':'#f59e0b';
+            const m=L.circleMarker([Number(s.lat),Number(s.lng)],{radius:8,color:'#fff',weight:2,fillColor:color,fillOpacity:.95});
+            m.bindPopup(`<div style="min-width:190px"><b>${escapeHtml(s.name||'-')}</b><br><span style="font-size:11px">${escapeHtml(s.address||'Alamat belum diisi')}</span><hr style="margin:6px 0"><span style="font-size:11px"><b>Sales:</b> ${escapeHtml(sales?.name||s.createdByName||'-')}<br><b>Status:</b> ${escapeHtml(s.status||'-')}<br><b>Kunjungan hari ini:</b> ${done?'Sudah':'Belum'}<br><b>Ditambahkan:</b> ${escapeHtml(String(s.createdAt||'-'))}</span></div>`);
+            m.addTo(adminStoreMapLayer);bounds.push([Number(s.lat),Number(s.lng)]);
+          });
+          if(bounds.length===1)adminStoreMap.setView(bounds[0],15);
+          else if(bounds.length>1)adminStoreMap.fitBounds(bounds,{padding:[25,25],maxZoom:16});
+          setTimeout(()=>adminStoreMap?.invalidateSize(),80);
+        }
+
         function renderAdminDashboard(period='monthly'){
           const visits=(db.visits||[]).filter(v=>periodMatch(v.checkIn||v.date,period));
           const orders=(db.orders||[]).filter(o=>orderPeriodMatch(o,period));
@@ -1036,6 +1101,7 @@ function renderDynamicForms(){
           const targetPcs=activeSales.reduce((n,s)=>n+(period==='monthly'?Number(s.targetBox||0):Math.ceil(Number(s.targetBox||0)/25*factor)),0);
           set('admin-pcs-status',targetPcs?(pcs>=targetPcs?'Target PCS tercapai':`${pcs} dari ${targetPcs} PCS`):(pcs?`${pcs} PCS terjual · ${periodLabel(period)}`:'Target belum ditetapkan'));
           set('admin-sales-status',activeSales.length?`${activeSales.length} sales aktif`:'Belum ada sales');
+          setTimeout(()=>renderAdminStoreMap(),0);
 
           const body=document.getElementById('leaderboard-tbody');
           const rows=activeSales.map(s=>{
