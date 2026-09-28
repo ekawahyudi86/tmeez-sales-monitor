@@ -102,7 +102,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
 
     <main class="flex-1 max-w-7xl w-full mx-auto pt-20 px-4 pb-4 sm:pt-20 sm:px-6 sm:pb-6 lg:px-8 lg:pb-8 flex flex-col">
 
-        <!-- ================= SALES WORKFLOW V6.8.5 ================= -->
+        <!-- ================= SALES WORKFLOW V6.8.6 ================= -->
         <div id="view-sales" class="space-y-6 animate-fadeIn">
           <div id="sales-sticky-greeting" class="sticky top-16 z-40 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-2 bg-slate-100/95 backdrop-blur border-b border-slate-200 shadow-sm">
             <div class="max-w-3xl mx-auto flex items-center justify-between gap-3">
@@ -200,7 +200,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
                 <button onclick="runSalesDiagnostics()" class="px-4 py-2 rounded-xl bg-amber-600 text-white text-xs font-bold">Periksa Sekarang</button>
               </div>
               <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mt-4 text-xs">
-                <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Frontend</span><b id="diag-front" class="block mt-1">V6.8.5</b></div>
+                <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Frontend</span><b id="diag-front" class="block mt-1">V6.8.6</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">API</span><b id="diag-api" class="block mt-1">-</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Orders</span><b id="diag-orders" class="block mt-1">0</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">OrderItems</span><b id="diag-items" class="block mt-1">0</b></div>
@@ -266,7 +266,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
                   <h2 class="font-bold text-slate-800 flex items-center gap-2"><i data-lucide="map" class="w-5 h-5 text-brand-600"></i>Peta Toko Sales</h2>
                   <p class="text-xs text-slate-500 mt-1">Persebaran toko berdasarkan GPS saat toko ditambahkan.</p>
                 </div>
-                <select id="admin-map-sales-filter" onchange="renderAdminStoreMap()" class="border rounded-xl px-3 py-2 text-xs bg-white min-w-44"><option value="">Semua Sales</option></select>
+                <div class="flex gap-2"><button type="button" onclick="adminNativeMapFitAll()" class="border rounded-xl px-3 py-2 text-xs bg-white font-semibold">Tampilkan Semua Toko</button><select id="admin-map-sales-filter" onchange="adminNativeMapFitAll()" class="border rounded-xl px-3 py-2 text-xs bg-white min-w-44"><option value="">Semua Sales</option></select></div>
               </div>
               <div class="flex flex-wrap gap-2 mb-3 text-[11px]">
                 <span id="admin-map-total" class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700">0 toko</span>
@@ -514,8 +514,8 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
         }
 
         const API_URL='https://script.google.com/macros/s/AKfycbyR-riwS3HVUM93sA8D09AR3Orb1kgYbZnZ9HwKSYA8Z1wo0DaJh-Z-sqQhSQvJ53ANCg/exec';
-        const DBKEY='tmeez_sales_monitor_v6_8_5_cache';
-        const SESSIONKEY='tmeez_sales_monitor_v6_8_5_session';
+        const DBKEY='tmeez_sales_monitor_v6_8_6_cache';
+        const SESSIONKEY='tmeez_sales_monitor_v6_8_6_session';
         let apiOnline=false;
         let sessionToken='';
         async function apiGet(action,params={}){
@@ -1019,7 +1019,7 @@ function renderDynamicForms(){
         function periodLabel(period){return period==='daily'?'Hari ini':period==='weekly'?'7 hari terakhir':'Bulan ini';}
         async function runSalesDiagnostics(){
           const set=(id,v)=>{const e=document.getElementById(id);if(e)e.innerText=v;};
-          set('diag-front','V6.8.5');set('diag-status','Mengambil data langsung dari API...');
+          set('diag-front','V6.8.6');set('diag-status','Mengambil data langsung dari API...');
           try{
             const [ping,res]=await Promise.all([apiGet('ping'),apiGet('orders',{limit:500})]);
             set('diag-api',String(ping.version||'-'));
@@ -1075,8 +1075,55 @@ function renderDynamicForms(){
           return {center,zoom:5};
         }
         function adminNativeMapZoom(delta){
-          adminNativeMapState.zoom=Math.max(5,Math.min(18,Number(adminNativeMapState.zoom||10)+delta));
+          adminNativeMapState.zoom=Math.max(5,Math.min(19,Number(adminNativeMapState.zoom||10)+delta));
           adminNativeMapState.manual=true;renderAdminStoreMap(true);
+        }
+        function nativeMapLatLngFromWorld(x,y,z){
+          const size=256*Math.pow(2,z);
+          const lng=x/size*360-180;
+          const n=Math.PI-2*Math.PI*y/size;
+          const lat=180/Math.PI*Math.atan(Math.sinh(n));
+          return {lat:Math.max(-85.05112878,Math.min(85.05112878,lat)),lng};
+        }
+        function adminNativeMapFitAll(){
+          adminNativeMapState.center=null;adminNativeMapState.zoom=null;adminNativeMapState.manual=false;
+          renderAdminStoreMap(false);
+        }
+        function bindAdminNativeMapInteractions(el,w,hgt){
+          el.style.touchAction='none';el.style.cursor='grab';
+          let pointers=new Map(),dragStart=null,startCenter=null,pinchStart=null,pinchZoom=null;
+          const centerWorld=()=>nativeMapWorld(adminNativeMapState.center.lat,adminNativeMapState.center.lng,adminNativeMapState.zoom);
+          el.onpointerdown=e=>{
+            if(e.target.closest('button,.native-map-popup'))return;
+            el.setPointerCapture?.(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+            if(pointers.size===1){dragStart={x:e.clientX,y:e.clientY};startCenter=centerWorld();el.style.cursor='grabbing';}
+            else if(pointers.size===2){const a=[...pointers.values()];pinchStart=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);pinchZoom=adminNativeMapState.zoom;}
+          };
+          el.onpointermove=e=>{
+            if(!pointers.has(e.pointerId))return;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+            if(pointers.size===1&&dragStart&&startCenter){
+              const dx=e.clientX-dragStart.x,dy=e.clientY-dragStart.y;
+              adminNativeMapState.center=nativeMapLatLngFromWorld(startCenter.x-dx,startCenter.y-dy,adminNativeMapState.zoom);
+              adminNativeMapState.manual=true;renderAdminStoreMap(true);
+            }else if(pointers.size===2&&pinchStart){
+              const a=[...pointers.values()],d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);
+              const nz=Math.max(5,Math.min(19,Math.round(pinchZoom+Math.log2(Math.max(.25,d/pinchStart)))));
+              if(nz!==adminNativeMapState.zoom){adminNativeMapState.zoom=nz;adminNativeMapState.manual=true;renderAdminStoreMap(true);}
+            }
+          };
+          const end=e=>{pointers.delete(e.pointerId);if(!pointers.size){dragStart=null;startCenter=null;pinchStart=null;el.style.cursor='grab';}};
+          el.onpointerup=end;el.onpointercancel=end;
+          el.onwheel=e=>{
+            e.preventDefault();
+            const oldZ=adminNativeMapState.zoom,newZ=Math.max(5,Math.min(19,oldZ+(e.deltaY<0?1:-1)));
+            if(newZ===oldZ)return;
+            const rect=el.getBoundingClientRect(),mx=e.clientX-rect.left,my=e.clientY-rect.top;
+            const cp=nativeMapWorld(adminNativeMapState.center.lat,adminNativeMapState.center.lng,oldZ);
+            const before={x:cp.x+(mx-w/2),y:cp.y+(my-hgt/2)};
+            const scale=Math.pow(2,newZ-oldZ),after={x:before.x*scale,y:before.y*scale};
+            const centerAfter={x:after.x-(mx-w/2),y:after.y-(my-hgt/2)};
+            adminNativeMapState.zoom=newZ;adminNativeMapState.center=nativeMapLatLngFromWorld(centerAfter.x,centerAfter.y,newZ);adminNativeMapState.manual=true;renderAdminStoreMap(true);
+          };
         }
         function renderAdminStoreMap(keepView=false){
           const el=document.getElementById('admin-store-map');if(!el||currentUser?.role==='sales')return;
@@ -1117,6 +1164,7 @@ function renderDynamicForms(){
           controls.innerHTML='<button type="button" onclick="adminNativeMapZoom(1)" style="width:34px;height:34px;background:white;border:1px solid #cbd5e1;border-radius:9px;font-size:20px;box-shadow:0 2px 8px rgba(0,0,0,.12)">+</button><button type="button" onclick="adminNativeMapZoom(-1)" style="width:34px;height:34px;background:white;border:1px solid #cbd5e1;border-radius:9px;font-size:20px;box-shadow:0 2px 8px rgba(0,0,0,.12)">−</button>';
           el.appendChild(controls);
           const attr=document.createElement('div');attr.style.cssText='position:absolute;z-index:25;right:4px;bottom:3px;background:rgba(255,255,255,.85);padding:2px 5px;font-size:9px;color:#475569;border-radius:4px';attr.innerHTML='© OpenStreetMap contributors';el.appendChild(attr);
+          bindAdminNativeMapInteractions(el,w,hgt);
         }
 
         function renderAdminDashboard(period='monthly'){
