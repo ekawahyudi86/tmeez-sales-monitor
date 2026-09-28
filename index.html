@@ -102,7 +102,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
 
     <main class="flex-1 max-w-7xl w-full mx-auto pt-20 px-4 pb-4 sm:pt-20 sm:px-6 sm:pb-6 lg:px-8 lg:pb-8 flex flex-col">
 
-        <!-- ================= SALES WORKFLOW V6.8.9 ================= -->
+        <!-- ================= SALES WORKFLOW V6.9.0 ================= -->
         <div id="view-sales" class="space-y-6 animate-fadeIn">
           <div id="sales-sticky-greeting" class="sticky top-16 z-40 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-2 bg-slate-100/95 backdrop-blur border-b border-slate-200 shadow-sm">
             <div class="max-w-3xl mx-auto flex items-center justify-between gap-3">
@@ -200,7 +200,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
                 <button onclick="runSalesDiagnostics()" class="px-4 py-2 rounded-xl bg-amber-600 text-white text-xs font-bold">Periksa Sekarang</button>
               </div>
               <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mt-4 text-xs">
-                <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Frontend</span><b id="diag-front" class="block mt-1">V6.8.9</b></div>
+                <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Frontend</span><b id="diag-front" class="block mt-1">V6.9.0</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">API</span><b id="diag-api" class="block mt-1">-</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Orders</span><b id="diag-orders" class="block mt-1">0</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">OrderItems</span><b id="diag-items" class="block mt-1">0</b></div>
@@ -336,7 +336,19 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
               <section class="bg-white rounded-2xl p-6 border shadow-sm"><h2 class="font-bold mb-4">Pengaturan Geofence</h2><p class="text-xs text-slate-500 mb-3">Target kunjungan dan target PCS diatur per Sales melalui Kelola Sales.</p><label class="text-xs">Radius GPS (m)<input id="admin-radius" type="number" value="100" class="mt-1 w-full border rounded-lg p-2"></label><button onclick="saveAdminSettings()" class="mt-3 w-full py-2 bg-brand-600 text-white rounded-lg text-xs font-semibold">Simpan Radius GPS</button></section>
               <section class="lg:col-span-2 bg-white rounded-2xl p-6 border shadow-sm"><div class="flex justify-between"><div><h2 class="font-bold">Ringkasan Operasional</h2><p class="text-xs text-slate-500">Kunjungan dan penjualan aktual per Sales.</p></div><button onclick="exportCsv()" class="px-3 py-2 bg-slate-900 text-white rounded-lg text-xs font-semibold">Export CSV</button></div><div class="mt-4 overflow-x-auto"><table class="w-full text-xs"><thead><tr class="bg-slate-50"><th class="p-2 text-left">Sales</th><th>Visit</th><th>Order</th><th>Strike Rate</th><th>PCS</th><th>Omzet</th></tr></thead><tbody id="admin-operational-body"><tr><td colspan="6" class="p-6 text-center text-slate-400">Belum ada data operasional.</td></tr></tbody></table></div></section>
 
-              <section class="lg:col-span-2 bg-white rounded-2xl p-6 border shadow-sm">
+              <section id="admin-monitoring-users-section" class="lg:col-span-2 bg-white rounded-2xl p-6 border shadow-sm">
+                <div class="mb-4"><h2 class="font-bold">Akun Monitoring</h2><p class="text-xs text-slate-500">Akses satu tingkat di bawah Admin untuk memantau operasional tanpa hak mengubah data utama.</p></div>
+                <div class="grid lg:grid-cols-3 gap-4">
+                  <form onsubmit="addMonitoringAccount(event)" class="space-y-2">
+                    <input id="monitoring-user" required placeholder="Username Monitoring" autocomplete="off" class="w-full border rounded-lg p-2 text-xs">
+                    <input id="monitoring-pass" required minlength="6" type="password" placeholder="Password awal (min. 6)" autocomplete="new-password" class="w-full border rounded-lg p-2 text-xs">
+                    <button class="w-full bg-slate-900 text-white rounded-lg py-2 text-xs font-semibold">Buat Akun Monitoring</button>
+                  </form>
+                  <div class="lg:col-span-2"><div id="monitoring-user-list" class="space-y-2 text-xs text-slate-500">Belum ada akun Monitoring.</div></div>
+                </div>
+              </section>
+
+              <section id="admin-master-data-section" class="lg:col-span-2 bg-white rounded-2xl p-6 border shadow-sm">
                 <div class="mb-4"><h2 class="font-bold">Master Data Operasional</h2><p class="text-xs text-slate-500">Master data tersimpan online di Google Sheet dan digunakan oleh akun Sales.</p></div>
                 <div class="grid lg:grid-cols-3 gap-5">
                   <div><h3 class="text-sm font-bold mb-2">Tambah Sales</h3><form onsubmit="addSales(event)" class="space-y-2"><input id="m-sales-name" required placeholder="Nama sales" class="w-full border rounded-lg p-2 text-xs"><input id="m-sales-phone" placeholder="No. HP / WhatsApp" class="w-full border rounded-lg p-2 text-xs"><input id="m-sales-area" required placeholder="Area / wilayah" class="w-full border rounded-lg p-2 text-xs"><div class="grid grid-cols-2 gap-2"><input id="m-sales-user" required placeholder="Username" autocomplete="off" class="border rounded-lg p-2 text-xs"><input id="m-sales-pass" required minlength="4" type="password" placeholder="Password awal" autocomplete="new-password" class="border rounded-lg p-2 text-xs"></div><div class="grid grid-cols-2 gap-2"><input id="m-sales-visit" type="number" value="0" placeholder="Target visit/bulan" class="border rounded-lg p-2 text-xs"><input id="m-sales-box" type="number" value="0" placeholder="Target dus/bulan" class="border rounded-lg p-2 text-xs"></div><button class="w-full bg-slate-900 text-white rounded-lg py-2 text-xs font-semibold">Buat Sales & Akun</button></form></div>
@@ -345,12 +357,12 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
                 </div>
               </section>
 
-              <section class="lg:col-span-2 bg-white rounded-2xl p-6 border shadow-sm"><div class="mb-4"><h2 class="font-bold">Stok Sales, Tutup Hari & Piutang</h2><p class="text-xs text-slate-500">Kontrol barang Sales, rekonsiliasi tutup hari, dan tagihan toko.</p></div><div class="grid lg:grid-cols-3 gap-5">
+              <section id="admin-operations-section" class="lg:col-span-2 bg-white rounded-2xl p-6 border shadow-sm"><div class="mb-4"><h2 class="font-bold">Stok Sales, Tutup Hari & Piutang</h2><p class="text-xs text-slate-500">Kontrol barang Sales, rekonsiliasi tutup hari, dan tagihan toko.</p></div><div class="grid lg:grid-cols-3 gap-5">
 <div><h3 class="text-sm font-bold mb-2">Stok Sales</h3><select id="ops-stock-sales" class="w-full border rounded-lg p-2 text-xs mb-2"></select><select id="ops-stock-product" class="w-full border rounded-lg p-2 text-xs mb-2"></select><div class="grid grid-cols-3 gap-1"><input id="ops-stock-opening" type="number" min="0" placeholder="Awal" class="border rounded-lg p-2 text-xs"><input id="ops-stock-load" type="number" min="0" placeholder="Dibawa" class="border rounded-lg p-2 text-xs"><input id="ops-stock-return" type="number" min="0" placeholder="Retur" class="border rounded-lg p-2 text-xs"></div><button onclick="saveStockOps()" class="mt-2 w-full bg-indigo-600 text-white rounded-lg py-2 text-xs font-bold">Simpan Stok Hari Ini</button><div id="ops-stock-list" class="mt-3 max-h-56 overflow-y-auto space-y-1"></div></div>
 <div><h3 class="text-sm font-bold mb-2">Tutup Hari Sales</h3><select id="ops-deposit-sales" onchange="loadAdminCloseDay()" class="w-full border rounded-lg p-2 text-xs mb-2"></select><button onclick="loadAdminCloseDay()" class="w-full border rounded-lg py-2 text-xs font-bold mb-2">Lihat Rangkuman Hari Ini</button><div id="ops-close-summary" class="bg-slate-50 rounded-xl p-3 text-[11px] mb-2">Pilih Sales untuk melihat rangkuman.</div><input id="ops-deposit-actual" type="number" min="0" placeholder="Cash benar-benar disetor (Rp)" class="w-full border rounded-lg p-2 text-xs mb-2"><input id="ops-deposit-note" placeholder="Catatan tutup hari" class="w-full border rounded-lg p-2 text-xs"><button onclick="saveDepositOps()" class="mt-2 w-full bg-slate-900 text-white rounded-lg py-2 text-xs font-bold">Tutup Hari Sales</button><div id="ops-deposit-list" class="mt-3 max-h-56 overflow-y-auto space-y-1"></div></div>
 <div><h3 class="text-sm font-bold mb-2">Piutang Toko</h3><div class="grid grid-cols-2 gap-2 mb-2"><b id="ops-receivable-total" class="bg-amber-50 rounded-lg p-2 text-xs">Rp 0</b><span id="ops-receivable-count" class="bg-slate-50 rounded-lg p-2 text-xs">0 tagihan</span></div><div id="ops-receivable-list" class="max-h-72 overflow-y-auto space-y-1"></div></div></div></section>
 
-              <section class="lg:col-span-2 bg-white rounded-2xl p-6 border shadow-sm">
+              <section id="admin-sales-management-section" class="lg:col-span-2 bg-white rounded-2xl p-6 border shadow-sm">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4"><div><h2 class="font-bold">Kelola Sales</h2><p class="text-xs text-slate-500">Pilih sales untuk mengubah profil, target, akun login, atau melihat aktivitasnya.</p></div><input id="sales-search" oninput="renderSalesManagement()" placeholder="Cari nama / area / username" class="border rounded-xl px-3 py-2 text-xs w-full sm:w-64"></div>
                 <div id="sales-list" class="grid md:grid-cols-2 xl:grid-cols-3 gap-3"></div>
               </section>
@@ -431,14 +443,14 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
                 const me=await apiGet('me');
                 const serverUser=me.user||{};
                 currentUser.username=serverUser.username||currentUser.username;
-                currentUser.role=String(serverUser.role||currentUser.role).toLowerCase()==='sales'?'sales':'admin';
+                const sr=String(serverUser.role||currentUser.role).toLowerCase();currentUser.role=['sales','monitoring'].includes(sr)?sr:'admin';
                 currentUser.salesId=serverUser.salesId||currentUser.salesId||'';
 
                 document.getElementById('login-screen').classList.add('hidden');
                 switchRole(currentUser.role==='sales'?'sales':'admin');
                 document.getElementById('current-user-name').innerText=currentUser.name||currentUser.username||'Pengguna';
                 await refreshOnlineData(false);
-                renderMaster();renderDynamicForms();refreshVisitKpi();
+                renderMaster();renderDynamicForms();refreshVisitKpi();applyAccessUI();if(currentUser?.role==='admin')await loadMonitoringUsers();
                 if(currentUser?.role==='sales')await restoreWorkflowDraft();
                 return true;
             }catch(err){
@@ -461,6 +473,21 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
             await restoreSession();
         });
 
+        function applyAccessUI(){
+          const monitoring=currentUser?.role==='monitoring';
+          ['admin-monitoring-users-section','admin-master-data-section','admin-geofence-section','admin-sales-management-section'].forEach(id=>document.getElementById(id)?.classList.toggle('hidden',monitoring));
+          // Monitoring tetap dapat membaca Stok/Tutup Hari/Piutang, tetapi seluruh kontrol perubahan dimatikan.
+          const ops=document.getElementById('admin-operations-section');
+          if(ops){
+            ops.querySelectorAll('input,textarea').forEach(x=>{x.disabled=monitoring;});
+            ops.querySelectorAll('button').forEach(x=>{
+              const txt=(x.innerText||'').toLowerCase();
+              const mutation=txt.includes('simpan stok')||txt.includes('tutup hari')||txt.includes('bayar')||txt.includes('simpan pembayaran');
+              if(mutation)x.classList.toggle('hidden',monitoring);
+            });
+          }
+          const cp=document.getElementById('change-password-btn');if(cp)cp.classList.toggle('hidden',currentUser?.role==='sales');
+        }
         // Role Switcher Simulation
         function switchRole(role) {
             const salesView = document.getElementById('view-sales');
@@ -473,9 +500,10 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
 
             // Security UI: Sales tidak pernah boleh membuka Dashboard Admin.
             if (currentUser?.role === 'sales' && role === 'admin') role = 'sales';
+            if (currentUser?.role === 'monitoring') role = 'admin';
 
-            if (currentUser?.role === 'sales') {
-                document.getElementById('change-password-btn')?.classList.add('hidden');
+            if (currentUser?.role === 'sales' || currentUser?.role === 'monitoring') {
+                if(currentUser?.role==='sales')document.getElementById('change-password-btn')?.classList.add('hidden');
                 if (roleSwitcher) roleSwitcher.classList.add('hidden');
             } else {
                 document.getElementById('change-password-btn')?.classList.remove('hidden');
@@ -495,7 +523,8 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
                 if(btnAdmin) btnAdmin.className = "px-3 py-1.5 text-xs font-medium rounded-lg transition-all flex items-center gap-1.5 bg-brand-600 text-white shadow";
                 if(btnSales) btnSales.className = "px-3 py-1.5 text-xs font-medium rounded-lg transition-all flex items-center gap-1.5 text-slate-300 hover:text-white";
                 userName.innerText = currentUser?.name || "Administrator";
-                userRole.innerText = "Admin / Supervisor";
+                userRole.innerText = currentUser?.role==='monitoring' ? "Monitoring Sales" : "Administrator";
+                applyAccessUI();
             }
         }
 
@@ -514,8 +543,8 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
         }
 
         const API_URL='https://script.google.com/macros/s/AKfycbyR-riwS3HVUM93sA8D09AR3Orb1kgYbZnZ9HwKSYA8Z1wo0DaJh-Z-sqQhSQvJ53ANCg/exec';
-        const DBKEY='tmeez_sales_monitor_v6_8_9_cache';
-        const SESSIONKEY='tmeez_sales_monitor_v6_8_9_session';
+        const DBKEY='tmeez_sales_monitor_v6_9_0_cache';
+        const SESSIONKEY='tmeez_sales_monitor_v6_9_0_session';
         let apiOnline=false;
         let sessionToken='';
         async function apiGet(action,params={}){
@@ -553,7 +582,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
         async function refreshOnlineData(showMessage=false){
           try{
             let st,pr;
-            if(currentUser?.role==='admin'){
+            if(currentUser?.role==='admin'||currentUser?.role==='monitoring'){
               const [sa,xst,xpr,xvi,xor,xset]=await Promise.all([apiGet('sales'),apiGet('stores'),apiGet('products'),apiGet('visits',{limit:500}),apiGet('orders',{limit:200}),apiGet('settings')]);
               db.sales=(sa.data||[]).map(mapSales);db.visits=(xvi.data||[]).map(mapVisit);db.orders=(xor.data||[]).map(mapOrderPack);applyOnlineSettings(xset.data||[]);st=xst;pr=xpr;
             }else{
@@ -581,7 +610,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
           e.preventDefault(); clearSession(); const u=document.getElementById('login-user').value.trim(),p=document.getElementById('login-pass').value;
           try{
             const res=await apiPost({action:'login',username:u,password:p}); sessionToken=res.token||''; const x=res.user||{}; const role=String(x.role||'').toLowerCase();
-            currentUser={username:x.username||u,role:role==='sales'?'sales':'admin',name:x.sales?.Name||x.username||'Administrator',salesId:x.salesId||'',active:true};
+            currentUser={username:x.username||u,role:['sales','monitoring'].includes(role)?role:'admin',name:x.sales?.Name||x.username||(role==='monitoring'?'Monitoring':'Administrator'),salesId:x.salesId||'',active:true};
             // Login manual selalu mulai dari Beranda Sales. Draft lama hanya dipertahankan
             // selama sesi yang sama (refresh/tutup browser tanpa logout).
             if(currentUser.role==='sales') clearWorkflowDraft();
@@ -589,20 +618,33 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
             if(currentUser.salesId && x.sales){const mapped=mapSales(x.sales); if(!db.sales.some(s=>s.id===mapped.id))db.sales.push(mapped);}
             document.getElementById('login-screen').classList.add('hidden'); switchRole(currentUser.role==='sales'?'sales':'admin');
             document.getElementById('current-user-name').innerText=currentUser.name; document.getElementById('current-user-role').innerText=currentUser.role==='sales'?'Sales · '+(db.sales.find(s=>s.id===currentUser.salesId)?.area||''):String(x.role||'Admin').toUpperCase();
-            await refreshOnlineData(false); renderMaster();renderDynamicForms();refreshVisitKpi(); if(currentUser?.role==='sales')workflowHome(); showToast('Login online berhasil');
+            await refreshOnlineData(false); renderMaster();renderDynamicForms();refreshVisitKpi();applyAccessUI();if(currentUser?.role==='admin')loadMonitoringUsers(); if(currentUser?.role==='sales')workflowHome(); showToast('Login online berhasil');
           }catch(err){showToast('Login gagal: '+err.message);}
         }
         function uid(prefix){return prefix+Date.now().toString(36)+Math.random().toString(36).slice(2,5)}
-        async function addSales(e){
+        async function loadMonitoringUsers(){
+          if(currentUser?.role!=='admin')return;
+          try{
+            const r=await apiGet('monitoringUsers'),box=document.getElementById('monitoring-user-list');if(!box)return;
+            const rows=r.data||[];
+            box.innerHTML=rows.length?rows.map(u=>`<div class="border rounded-xl p-3 flex flex-wrap items-center justify-between gap-2"><div><b>${escapeHtml(u.Username)}</b><div class="text-[10px] text-slate-400">Monitoring · ${escapeHtml(u.Status||'-')}</div></div><div class="flex gap-1"><button type="button" onclick="toggleMonitoringAccount('${escapeHtml(u.UserID)}','${String(u.Status).toLowerCase()==='active'?'Inactive':'Active'}')" class="border rounded-lg px-2 py-1">${String(u.Status).toLowerCase()==='active'?'Nonaktifkan':'Aktifkan'}</button><button type="button" onclick="resetMonitoringAccount('${escapeHtml(u.UserID)}')" class="border rounded-lg px-2 py-1">Reset Password</button></div></div>`).join(''):'Belum ada akun Monitoring.';
+          }catch(e){showToast(e.message);}
+        }
+        async function addMonitoringAccount(e){
+          e.preventDefault();try{await apiPost({action:'addMonitoring',username:document.getElementById('monitoring-user').value.trim(),password:document.getElementById('monitoring-pass').value});e.target.reset();await loadMonitoringUsers();showToast('Akun Monitoring berhasil dibuat');}catch(err){showToast(err.message);}
+        }
+        async function toggleMonitoringAccount(userId,status){try{await apiPost({action:'setMonitoringStatus',userId,status});await loadMonitoringUsers();showToast('Status Monitoring diperbarui');}catch(e){showToast(e.message);}}
+        async function resetMonitoringAccount(userId){const p=prompt('Password baru Monitoring (minimal 6 karakter):');if(!p)return;try{await apiPost({action:'resetMonitoringPassword',userId,password:p});showToast('Password Monitoring berhasil direset');}catch(e){showToast(e.message);}}
+        async function addSales(e){if(currentUser?.role==='monitoring'){showToast('Akses Monitoring hanya untuk pemantauan.');return;}
           e.preventDefault(); const username=document.getElementById('m-sales-user').value.trim();
           try{await apiPost({action:'addSales',name:document.getElementById('m-sales-name').value.trim(),phone:document.getElementById('m-sales-phone').value.trim(),area:document.getElementById('m-sales-area').value.trim(),username,password:document.getElementById('m-sales-pass').value,targetVisit:+document.getElementById('m-sales-visit').value||0,targetBox:+document.getElementById('m-sales-box').value||0});
             db.users.push({username,role:'sales'}); e.target.reset();document.getElementById('m-sales-visit').value=0;document.getElementById('m-sales-box').value=0;await refreshOnlineData(false);showToast('Sales tersimpan ke Google Sheet');
           }catch(err){showToast('Gagal menambah sales: '+err.message);}
         }
-        async function addStoreMaster(e){
+        async function addStoreMaster(e){if(currentUser?.role==='monitoring'){showToast('Akses Monitoring hanya untuk pemantauan.');return;}
           e.preventDefault(); try{await apiPost({action:'addStore',storeName:document.getElementById('m-store-name').value.trim(),ownerName:document.getElementById('m-store-owner').value.trim(),latitude:+document.getElementById('m-store-lat').value,longitude:+document.getElementById('m-store-lng').value,salesId:document.getElementById('m-store-sales')?.value||''});e.target.reset();await refreshOnlineData(false);showToast('Toko tersimpan ke Google Sheet');}catch(err){showToast('Gagal menambah toko: '+err.message);}
         }
-        async function addProduct(e){
+        async function addProduct(e){if(currentUser?.role==='monitoring'){showToast('Akses Monitoring hanya untuk pemantauan.');return;}
           e.preventDefault();try{await apiPost({action:'addProduct',productName:document.getElementById('m-product-name').value.trim(),pricePerPcs:+document.getElementById('m-product-price').value||0,unitsPerBox:+document.getElementById('m-product-pack').value||10,unit:'PCS'});e.target.reset();await refreshOnlineData(false);showToast('Produk tersimpan ke Google Sheet');}catch(err){showToast('Gagal menambah produk: '+err.message);}
         }
         function renderOperations(){
@@ -679,10 +721,10 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
         async function saveStoreEdit(e){e.preventDefault();try{await apiPost({action:'updateStore',storeId:document.getElementById('edit-store-id').value,storeName:document.getElementById('edit-store-name').value,ownerName:document.getElementById('edit-store-owner').value,whatsapp:document.getElementById('edit-store-wa').value,address:document.getElementById('edit-store-address').value,latitude:+document.getElementById('edit-store-lat').value,longitude:+document.getElementById('edit-store-lng').value,salesId:document.getElementById('edit-store-sales').value,status:document.getElementById('edit-store-status').value});closeModal('store-modal');await refreshOnlineData();showToast('Toko diperbarui');}catch(err){showToast(err.message);}}
         function openProductModal(id){const x=db.products.find(p=>p.id===id);if(!x)return;document.getElementById('edit-product-id').value=x.id;document.getElementById('edit-product-name').value=x.name;document.getElementById('edit-product-sku').value=x.sku||'';document.getElementById('edit-product-price').value=x.price;document.getElementById('edit-product-pack').value=x.pack;document.getElementById('edit-product-status').value=x.status||'Active';document.getElementById('product-modal').classList.remove('hidden');}
         async function saveProductEdit(e){e.preventDefault();try{await apiPost({action:'updateProduct',productId:document.getElementById('edit-product-id').value,productName:document.getElementById('edit-product-name').value,sku:document.getElementById('edit-product-sku').value,pricePerPcs:+document.getElementById('edit-product-price').value,unitsPerBox:+document.getElementById('edit-product-pack').value,status:document.getElementById('edit-product-status').value});closeModal('product-modal');await refreshOnlineData();showToast('Produk diperbarui');}catch(err){showToast(err.message);}}
-        async function saveSalesEdit(){const id=document.getElementById('edit-sales-id').value;try{await apiPost({action:'updateSales',salesId:id,name:document.getElementById('edit-sales-name').value,phone:document.getElementById('edit-sales-phone').value,area:document.getElementById('edit-sales-area').value,username:document.getElementById('edit-sales-user').value,targetVisit:+document.getElementById('edit-sales-visit').value,targetPcs:+document.getElementById('edit-sales-box').value});await refreshOnlineData();openSalesModal(id);showToast('Data Sales diperbarui');}catch(err){showToast(err.message);}}
-        async function toggleSalesFromModal(){const id=document.getElementById('edit-sales-id').value,s=db.sales.find(x=>x.id===id);try{await apiPost({action:'setSalesStatus',salesId:id,status:s?.active===false?'Active':'Inactive'});await refreshOnlineData();openSalesModal(id);}catch(err){showToast(err.message);}}
-        async function resetSalesPasswordFromModal(){const id=document.getElementById('edit-sales-id').value;const p=prompt('Masukkan password baru (minimal 6 karakter):');if(!p)return;try{await apiPost({action:'resetSalesPassword',salesId:id,newPassword:p});showToast('Password Sales berhasil diubah');}catch(err){showToast(err.message);}}
-        async function transferSalesStoresFromModal(){const from=document.getElementById('edit-sales-id').value,to=document.getElementById('transfer-sales-target').value;if(!to){showToast('Pilih Sales pengganti');return;}if(!confirm('Alihkan semua toko Sales ini ke Sales pengganti? Histori lama tidak akan diubah.'))return;try{const r=await apiPost({action:'transferSalesStores',fromSalesId:from,toSalesId:to});await refreshOnlineData();openSalesModal(from);showToast(r.message);}catch(err){showToast(err.message);}}
+        async function saveSalesEdit(){if(currentUser?.role==='monitoring'){showToast('Akses Monitoring hanya untuk pemantauan.');return;}const id=document.getElementById('edit-sales-id').value;try{await apiPost({action:'updateSales',salesId:id,name:document.getElementById('edit-sales-name').value,phone:document.getElementById('edit-sales-phone').value,area:document.getElementById('edit-sales-area').value,username:document.getElementById('edit-sales-user').value,targetVisit:+document.getElementById('edit-sales-visit').value,targetPcs:+document.getElementById('edit-sales-box').value});await refreshOnlineData();openSalesModal(id);showToast('Data Sales diperbarui');}catch(err){showToast(err.message);}}
+        async function toggleSalesFromModal(){if(currentUser?.role==='monitoring'){showToast('Akses Monitoring hanya untuk pemantauan.');return;}const id=document.getElementById('edit-sales-id').value,s=db.sales.find(x=>x.id===id);try{await apiPost({action:'setSalesStatus',salesId:id,status:s?.active===false?'Active':'Inactive'});await refreshOnlineData();openSalesModal(id);}catch(err){showToast(err.message);}}
+        async function resetSalesPasswordFromModal(){if(currentUser?.role==='monitoring'){showToast('Akses Monitoring hanya untuk pemantauan.');return;}const id=document.getElementById('edit-sales-id').value;const p=prompt('Masukkan password baru (minimal 6 karakter):');if(!p)return;try{await apiPost({action:'resetSalesPassword',salesId:id,newPassword:p});showToast('Password Sales berhasil diubah');}catch(err){showToast(err.message);}}
+        async function transferSalesStoresFromModal(){if(currentUser?.role==='monitoring'){showToast('Akses Monitoring hanya untuk pemantauan.');return;}const from=document.getElementById('edit-sales-id').value,to=document.getElementById('transfer-sales-target').value;if(!to){showToast('Pilih Sales pengganti');return;}if(!confirm('Alihkan semua toko Sales ini ke Sales pengganti? Histori lama tidak akan diubah.'))return;try{const r=await apiPost({action:'transferSalesStores',fromSalesId:from,toSalesId:to});await refreshOnlineData();openSalesModal(from);showToast(r.message);}catch(err){showToast(err.message);}}
 
 function renderDynamicForms(){
           const ms=document.getElementById('m-store-sales');
@@ -1032,7 +1074,7 @@ function renderDynamicForms(){
         function periodLabel(period){return period==='daily'?'Hari ini':period==='weekly'?'7 hari terakhir':'Bulan ini';}
         async function runSalesDiagnostics(){
           const set=(id,v)=>{const e=document.getElementById(id);if(e)e.innerText=v;};
-          set('diag-front','V6.8.9');set('diag-status','Mengambil data langsung dari API...');
+          set('diag-front','V6.9.0');set('diag-status','Mengambil data langsung dari API...');
           try{
             const [ping,res]=await Promise.all([apiGet('ping'),apiGet('orders',{limit:500})]);
             set('diag-api',String(ping.version||'-'));
@@ -1268,7 +1310,7 @@ function renderDynamicForms(){
           if(obj.GEOFENCE_RADIUS!==undefined)db.settings.radius=Number(obj.GEOFENCE_RADIUS)||100;
           const r=document.getElementById('admin-radius');if(r)r.value=db.settings.radius;
         }
-        async function saveAdminSettings(){try{const radius=+document.getElementById('admin-radius').value||100;await apiPost({action:'updateSettings',geofenceRadius:radius});db.settings.radius=radius;saveDb();showToast('Radius GPS tersimpan online');}catch(err){showToast('Gagal menyimpan pengaturan: '+err.message);}}
+        async function saveAdminSettings(){if(currentUser?.role==='monitoring'){showToast('Akses Monitoring hanya untuk pemantauan.');return;}try{const radius=+document.getElementById('admin-radius').value||100;await apiPost({action:'updateSettings',geofenceRadius:radius});db.settings.radius=radius;saveDb();showToast('Radius GPS tersimpan online');}catch(err){showToast('Gagal menyimpan pengaturan: '+err.message);}}
         function renderRecentVisits(){
           const grid=document.getElementById('recent-visits-grid');if(!grid)return;
           const rows=(db.visits||[]).slice(0,9);
