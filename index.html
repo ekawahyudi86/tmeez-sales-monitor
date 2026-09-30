@@ -49,7 +49,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
 
     <div id="login-screen" class="fixed inset-0 z-[100] bg-slate-950/95 flex items-center justify-center p-4">
       <div class="bg-white w-full max-w-md rounded-3xl p-7 shadow-2xl">
-        <div class="text-center mb-6"><div class="w-14 h-14 mx-auto bg-brand-600 text-white rounded-2xl flex items-center justify-center mb-3"><i data-lucide="bar-chart-3"></i></div><h2 class="text-xl font-bold">Tmeez Sales Monitor</h2><p class="text-xs text-slate-500 mt-1">Masuk sebagai Admin, Supervisor, atau Sales</p></div>
+        <div class="text-center mb-6"><div class="w-14 h-14 mx-auto bg-brand-600 text-white rounded-2xl flex items-center justify-center mb-3"><i data-lucide="bar-chart-3"></i></div><h2 class="text-xl font-bold">Tmeez Sales Monitor</h2><p class="text-xs text-slate-500 mt-1">Masuk sebagai Admin, Monitoring, Sales, atau Staff</p></div>
         <form onsubmit="loginApp(event)" class="space-y-3"><input id="login-user" required placeholder="Username" class="w-full border rounded-xl px-4 py-3 text-sm"><input id="login-pass" required type="password" placeholder="Password" class="w-full border rounded-xl px-4 py-3 text-sm"><button class="w-full py-3 bg-brand-600 text-white rounded-xl font-semibold text-sm">Masuk</button></form>
         <p class="text-[11px] text-slate-400 mt-4 text-center">Akun awal Admin: admin / admin123 · akun Sales dibuat oleh Admin</p>
       </div>
@@ -197,6 +197,13 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
         </div>
 
         <!-- ================= ADMIN DASHBOARD VIEW ================= -->
+        <div id="view-staff" class="hidden animate-fadeIn max-w-xl mx-auto w-full space-y-4">
+          <section class="bg-white rounded-3xl p-6 border shadow-sm mt-4"><div class="text-center"><div class="w-14 h-14 mx-auto rounded-2xl bg-brand-50 flex items-center justify-center text-brand-700 text-2xl">✓</div><h2 id="staff-welcome" class="mt-3 text-xl font-bold">Absensi Karyawan</h2><p id="staff-date" class="text-xs text-slate-500 mt-1"></p></div>
+          <div class="mt-5 bg-slate-50 rounded-2xl p-4"><div class="flex justify-between"><span class="text-xs text-slate-500">Jadwal</span><b class="text-sm">07.00–15.00</b></div><div class="flex justify-between mt-2"><span class="text-xs text-slate-500">Status</span><b id="staff-att-status" class="text-sm">Belum Absen</b></div><div id="staff-att-detail" class="text-xs text-slate-600 mt-3"></div></div>
+          <div class="grid grid-cols-2 gap-3 mt-4"><button id="staff-att-in" onclick="startAttendance('in')" class="py-3 rounded-xl bg-emerald-600 text-white font-bold">Absen Masuk</button><button id="staff-att-out" onclick="startAttendance('out')" class="py-3 rounded-xl bg-slate-900 text-white font-bold">Absen Pulang</button></div><p class="text-[11px] text-center text-slate-400 mt-3">GPS + selfie wajib. Absensi hanya dapat dilakukan di area tempat kerja.</p></section>
+          <section class="bg-white rounded-2xl p-5 border"><div class="flex justify-between items-center"><h3 class="font-bold">Slip Gaji Saya</h3><button onclick="loadMyPayroll()" class="text-xs border rounded-lg px-3 py-2">Perbarui</button></div><div id="staff-payroll-list" class="mt-3 text-xs text-slate-500">Belum ada slip gaji final.</div></section>
+        </div>
+
         <div id="view-admin" class="space-y-6 hidden animate-fadeIn">
             <details class="bg-amber-50 border border-amber-200 rounded-2xl p-5 shadow-sm"><summary class="cursor-pointer font-bold text-amber-900 text-sm">Diagnostik Data Penjualan <span class="font-normal text-amber-700">— buka jika diperlukan</span></summary><section class="mt-4">
               <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -411,6 +418,12 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4"><div><h2 class="font-bold">Kelola Sales</h2><p class="text-xs text-slate-500">Pilih sales untuk mengubah profil, target, akun login, atau melihat aktivitasnya.</p></div><input id="sales-search" oninput="renderSalesManagement()" placeholder="Cari nama / area / username" class="border rounded-xl px-3 py-2 text-xs w-full sm:w-64"></div>
                 <div id="sales-list" class="grid md:grid-cols-2 xl:grid-cols-3 gap-3"></div>
               </section>
+              <section id="admin-hr-section" class="lg:col-span-2 bg-white rounded-2xl p-6 border shadow-sm"><div class="flex flex-col sm:flex-row justify-between gap-3"><div><h2 class="font-bold">Karyawan, Absensi & Payroll</h2><p class="text-xs text-slate-500">Kelola Staff, lokasi absensi, gaji dan payroll bulanan.</p></div><button onclick="loadHrAdmin()" class="border rounded-xl px-3 py-2 text-xs font-bold">Perbarui</button></div>
+                <div class="grid lg:grid-cols-3 gap-4 mt-4"><div class="border rounded-xl p-4"><h3 class="text-sm font-bold">Tambah Staff</h3><input id="hr-name" placeholder="Nama" class="mt-2 w-full border rounded-lg p-2 text-xs"><input id="hr-position" placeholder="Jabatan / bagian" class="mt-2 w-full border rounded-lg p-2 text-xs"><input id="hr-user" placeholder="Username" class="mt-2 w-full border rounded-lg p-2 text-xs"><input id="hr-pass" type="password" placeholder="Password awal" class="mt-2 w-full border rounded-lg p-2 text-xs"><button onclick="addStaffAdmin()" class="mt-2 w-full bg-slate-900 text-white rounded-lg py-2 text-xs font-bold">Buat Akun Staff</button></div>
+                <div class="border rounded-xl p-4"><h3 class="text-sm font-bold">Lokasi Absensi</h3><div id="hr-office-location" class="text-xs text-slate-500 mt-2">Belum dimuat</div><input id="hr-radius" type="number" value="100" class="mt-2 w-full border rounded-lg p-2 text-xs" placeholder="Radius meter"><button onclick="saveOfficeLocation()" class="mt-2 w-full bg-brand-600 text-white rounded-lg py-2 text-xs font-bold">Gunakan GPS Posisi Ini</button><p class="text-[10px] text-slate-400 mt-2">Jadwal tetap: Senin–Sabtu 07.00–15.00, toleransi 10 menit.</p></div>
+                <div class="border rounded-xl p-4"><h3 class="text-sm font-bold">Generate Payroll</h3><input id="hr-period" type="month" class="mt-2 w-full border rounded-lg p-2 text-xs"><button onclick="generatePayrollAdmin()" class="mt-2 w-full bg-emerald-600 text-white rounded-lg py-2 text-xs font-bold">Hitung Payroll</button><p class="text-[10px] text-slate-400 mt-2">Sembako Rp125.000. Komisi Sales otomatis dari PCS.</p></div></div>
+                <div class="mt-5"><h3 class="text-sm font-bold mb-2">Daftar Karyawan & Gaji</h3><div id="hr-employees" class="overflow-x-auto text-xs"></div></div><div class="mt-5"><h3 class="text-sm font-bold mb-2">Payroll</h3><div id="hr-payroll" class="overflow-x-auto text-xs"></div></div>
+              </section>
             </div>
         </div>
 
@@ -492,7 +505,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
                 currentUser.salesId=serverUser.salesId||currentUser.salesId||'';
 
                 document.getElementById('login-screen').classList.add('hidden');
-                switchRole(currentUser.role==='sales'?'sales':'admin');
+                switchRole(currentUser.role==='sales'?'sales':currentUser.role==='staff'?'staff':'admin');
                 document.getElementById('current-user-name').innerText=currentUser.name||currentUser.username||'Pengguna';
                 await refreshOnlineData(false);
                 renderMaster();renderDynamicForms();refreshVisitKpi();applyAccessUI();if(currentUser?.role==='admin')await loadMonitoringUsers();
@@ -542,6 +555,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
         function switchRole(role) {
             const salesView = document.getElementById('view-sales');
             const adminView = document.getElementById('view-admin');
+            const staffView = document.getElementById('view-staff');
             const btnSales = document.getElementById('btn-sales');
             const btnAdmin = document.getElementById('btn-admin');
             const roleSwitcher = document.getElementById('role-switcher');
@@ -551,8 +565,9 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
             // Security UI: Sales tidak pernah boleh membuka Dashboard Admin.
             if (currentUser?.role === 'sales' && role === 'admin') role = 'sales';
             if (currentUser?.role === 'monitoring') role = 'admin';
+            if (currentUser?.role === 'staff') role = 'staff';
 
-            if (currentUser?.role === 'sales' || currentUser?.role === 'monitoring') {
+            if (currentUser?.role === 'sales' || currentUser?.role === 'monitoring' || currentUser?.role === 'staff') {
                 if(currentUser?.role==='sales')document.getElementById('change-password-btn')?.classList.add('hidden');
                 if (roleSwitcher) roleSwitcher.classList.add('hidden');
             } else {
@@ -560,7 +575,11 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
                 if (roleSwitcher) roleSwitcher.classList.remove('hidden');
             }
 
-            if (role === 'sales') {
+            if (role === 'staff') {
+                salesView.classList.add('hidden'); adminView.classList.add('hidden'); staffView.classList.remove('hidden');
+                userName.innerText=currentUser?.name||'Staff'; userRole.innerText='Staff'; loadAttendanceToday(); loadMyPayroll();
+            } else if (role === 'sales') {
+                staffView.classList.add('hidden');
                 salesView.classList.remove('hidden');
                 adminView.classList.add('hidden');
                 if(btnSales) btnSales.className = "px-3 py-1.5 text-xs font-medium rounded-lg transition-all flex items-center gap-1.5 bg-brand-600 text-white shadow";
@@ -568,6 +587,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
                 userName.innerText = currentUser?.name || "Sales";
                 userRole.innerText = currentUser?.role==='sales' ? "Sales Lapangan" : "Tampilan Sales";
             } else {
+                staffView.classList.add('hidden');
                 salesView.classList.add('hidden');
                 adminView.classList.remove('hidden');
                 if(btnAdmin) btnAdmin.className = "px-3 py-1.5 text-xs font-medium rounded-lg transition-all flex items-center gap-1.5 bg-brand-600 text-white shadow";
@@ -630,6 +650,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
         }
         function mapProduct(x){return {id:String(x.ProductID||''),name:String(x.ProductName||''),price:+(x.PricePerPcs!==''&&x.PricePerPcs!==undefined?x.PricePerPcs:x.PricePerBox)||0,pack:+x.UnitsPerBox||10,sku:String(x.SKU||''),status:String(x.Status||'Active')};}
         async function refreshOnlineData(showMessage=false){
+          if(currentUser?.role==='staff'){apiOnline=true;return;}
           try{
             let st,pr;
             if(currentUser?.role==='admin'||currentUser?.role==='monitoring'){
@@ -660,15 +681,15 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
           e.preventDefault(); clearSession(); const u=document.getElementById('login-user').value.trim(),p=document.getElementById('login-pass').value;
           try{
             const res=await apiPost({action:'login',username:u,password:p}); sessionToken=res.token||''; const x=res.user||{}; const role=String(x.role||'').toLowerCase();
-            currentUser={username:x.username||u,role:['sales','monitoring'].includes(role)?role:'admin',name:x.sales?.Name||x.username||(role==='monitoring'?'Monitoring':'Administrator'),salesId:x.salesId||'',active:true};
+            currentUser={username:x.username||u,role:['sales','monitoring','staff'].includes(role)?role:'admin',name:x.sales?.Name||x.employee?.Name||x.username||(role==='monitoring'?'Monitoring':'Administrator'),salesId:x.salesId||'',employeeId:x.employeeId||x.employee?.EmployeeID||'',active:true};
             // Login manual selalu mulai dari Beranda Sales. Draft lama hanya dipertahankan
             // selama sesi yang sama (refresh/tutup browser tanpa logout).
             if(currentUser.role==='sales') clearWorkflowDraft();
             saveSession();
             if(currentUser.salesId && x.sales){const mapped=mapSales(x.sales); if(!db.sales.some(s=>s.id===mapped.id))db.sales.push(mapped);}
-            document.getElementById('login-screen').classList.add('hidden'); switchRole(currentUser.role==='sales'?'sales':'admin');
+            document.getElementById('login-screen').classList.add('hidden'); switchRole(currentUser.role==='sales'?'sales':currentUser.role==='staff'?'staff':'admin');
             document.getElementById('current-user-name').innerText=currentUser.name; document.getElementById('current-user-role').innerText=currentUser.role==='sales'?'Sales · '+(db.sales.find(s=>s.id===currentUser.salesId)?.area||''):String(x.role||'Admin').toUpperCase();
-            await refreshOnlineData(false); renderMaster();renderDynamicForms();refreshVisitKpi();applyAccessUI();if(currentUser?.role==='admin')loadMonitoringUsers(); if(currentUser?.role==='sales')workflowHome(); showToast('Login online berhasil');
+            await refreshOnlineData(false); renderMaster();renderDynamicForms();refreshVisitKpi();applyAccessUI();if(currentUser?.role==='admin'){loadMonitoringUsers();loadHrAdmin();} if(currentUser?.role==='sales')workflowHome(); if(currentUser?.role==='staff'){loadAttendanceToday();loadMyPayroll();} if(currentUser?.role==='sales')loadAttendanceToday(); showToast('Login online berhasil');
           }catch(err){showToast('Login gagal: '+err.message);}
         }
         function uid(prefix){return prefix+Date.now().toString(36)+Math.random().toString(36).slice(2,5)}
@@ -1744,5 +1765,23 @@ function renderDynamicForms(){
             }, 3000);
         }
     </script>
-<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}</script></body>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}
+        let attendancePhotoData='';
+        function getGpsNow(){return new Promise((resolve,reject)=>{if(!navigator.geolocation)return reject(new Error('GPS tidak didukung.'));navigator.geolocation.getCurrentPosition(p=>resolve({latitude:p.coords.latitude,longitude:p.coords.longitude,accuracy:p.coords.accuracy}),e=>reject(new Error('GPS gagal: '+e.message)),{enableHighAccuracy:true,timeout:30000,maximumAge:0});});}
+        function captureSelfie(){return new Promise((resolve,reject)=>{const i=document.createElement('input');i.type='file';i.accept='image/*';i.capture='user';i.onchange=()=>{const f=i.files?.[0];if(!f)return reject(new Error('Foto selfie wajib.'));const img=new Image(),r=new FileReader();r.onload=()=>img.src=r.result;img.onload=()=>{const max=900,scale=Math.min(1,max/img.width),c=document.createElement('canvas');c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);c.getContext('2d').drawImage(img,0,0,c.width,c.height);resolve(c.toDataURL('image/jpeg',.72));};r.readAsDataURL(f)};i.click();});}
+        async function startAttendance(kind){try{showToast('Mengambil GPS...');const gps=await getGpsNow();showToast('Ambil selfie untuk absensi');const photo=await captureSelfie();const r=await apiPost({action:kind==='in'?'attendanceCheckIn':'attendanceCheckOut',...gps,photoBase64:photo,photoMime:'image/jpeg'});showToast(r.message);await loadAttendanceToday();}catch(e){showToast(e.message)}}
+        async function loadAttendanceToday(){if(!['sales','staff'].includes(currentUser?.role))return;try{const r=await apiGet('attendanceToday'),a=r.data||null,stat=a?.Status||'Belum Absen',detail=a?`Masuk: <b>${escapeHtml(String(a.CheckIn||'-').slice(11,16))}</b>${a.CheckOut?` · Pulang: <b>${escapeHtml(String(a.CheckOut).slice(11,16))}</b>`:''}${Number(a.LateMinutes||0)>0?` · Terlambat ${Number(a.LateMinutes)} menit`:''}`:'Silakan Absen Masuk dari lokasi tempat kerja.';['sales-att-status','staff-att-status'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerText=stat});['sales-att-detail','staff-att-detail'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML=detail});['sales-att-in','staff-att-in'].forEach(id=>{const e=document.getElementById(id);if(e)e.disabled=!!a});['sales-att-out','staff-att-out'].forEach(id=>{const e=document.getElementById(id);if(e)e.disabled=!a||!!a.CheckOut});const sw=document.getElementById('staff-welcome');if(sw)sw.innerText='Halo, '+(currentUser?.name||'Staff');const sd=document.getElementById('staff-date');if(sd)sd.innerText=new Intl.DateTimeFormat('id-ID',{dateStyle:'full',timeZone:'Asia/Jakarta'}).format(new Date());}catch(e){showToast(e.message)}}
+        async function loadMyPayroll(){if(!['sales','staff'].includes(currentUser?.role))return;try{const r=await apiGet('payroll'),box=document.getElementById('staff-payroll-list');if(!box)return;box.innerHTML=(r.data||[]).slice().reverse().map(p=>`<div class="border rounded-xl p-3 mb-2"><div class="flex justify-between"><b>${escapeHtml(p.Period)}</b><b>${rupiah(p.TakeHomePay)}</b></div><div class="text-[10px] text-slate-500 mt-1">Gaji ${rupiah(p.BasicSalaryPaid)} · Transport ${rupiah(p.TransportPaid)} · Sembako ${rupiah(p.GroceryAllowance)}${Number(p.Commission||0)?' · Komisi '+rupiah(p.Commission):''} · ${escapeHtml(p.Status)}</div></div>`).join('')||'Belum ada slip gaji final.';}catch(e){showToast(e.message)}}
+        let hrEmployees=[];
+        async function loadHrAdmin(){if(currentUser?.role!=='admin')return;try{const [e,a,p]=await Promise.all([apiGet('employees'),apiGet('attendanceSettings'),apiGet('payroll',{period:document.getElementById('hr-period')?.value||''})]);hrEmployees=e.data||[];const st=a.data||{},loc=document.getElementById('hr-office-location');if(loc)loc.innerHTML=st.officeLat?`GPS: <b>${st.officeLat.toFixed(6)}, ${st.officeLng.toFixed(6)}</b><br>Radius: ${st.radius} m`:'Titik tempat kerja belum diatur.';if(document.getElementById('hr-radius'))document.getElementById('hr-radius').value=st.radius||100;renderHrEmployees();renderHrPayroll(p.data||[]);}catch(e){showToast(e.message)}}
+        function renderHrEmployees(){const b=document.getElementById('hr-employees');if(!b)return;b.innerHTML='<table class="w-full"><thead><tr class="bg-slate-50"><th class="p-2 text-left">Karyawan</th><th>Jenis</th><th>Gaji Pokok</th><th>Transport</th><th></th></tr></thead><tbody>'+hrEmployees.map(e=>`<tr class="border-t"><td class="p-2"><b>${escapeHtml(e.Name)}</b><br><span class="text-[10px] text-slate-400">${escapeHtml(e.Position||'')}</span></td><td>${escapeHtml(e.EmployeeType||'')}</td><td><input id="bs-${e.EmployeeID}" type="number" value="${Number(e.BasicSalary||0)}" class="w-28 border rounded p-1"></td><td><input id="tr-${e.EmployeeID}" type="number" value="${Number(e.TransportAllowance||0)}" class="w-28 border rounded p-1"></td><td><button onclick="saveEmployeePay('${e.EmployeeID}')" class="border rounded px-2 py-1">Simpan</button></td></tr>`).join('')+'</tbody></table>';}
+        async function saveEmployeePay(id){try{const e=hrEmployees.find(x=>String(x.EmployeeID)===String(id));await apiPost({action:'updateEmployeeCompensation',employeeId:id,basicSalary:+document.getElementById('bs-'+id).value,transportAllowance:+document.getElementById('tr-'+id).value,position:e?.Position||'',status:e?.Status||'Active'});showToast('Gaji disimpan');await loadHrAdmin();}catch(e){showToast(e.message)}}
+        async function addStaffAdmin(){try{await apiPost({action:'addStaff',name:document.getElementById('hr-name').value,position:document.getElementById('hr-position').value,username:document.getElementById('hr-user').value,password:document.getElementById('hr-pass').value});['hr-name','hr-position','hr-user','hr-pass'].forEach(id=>document.getElementById(id).value='');showToast('Staff dibuat');await loadHrAdmin();}catch(e){showToast(e.message)}}
+        async function saveOfficeLocation(){try{const g=await getGpsNow();await apiPost({action:'updateAttendanceSettings',officeLat:g.latitude,officeLng:g.longitude,radius:+document.getElementById('hr-radius').value||100});showToast('Lokasi tempat kerja disimpan');await loadHrAdmin();}catch(e){showToast(e.message)}}
+        async function generatePayrollAdmin(){const period=document.getElementById('hr-period').value;if(!period)return showToast('Pilih bulan payroll');try{const r=await apiPost({action:'generatePayroll',period});showToast(r.message);await loadHrAdmin();}catch(e){showToast(e.message)}}
+        function renderHrPayroll(rows){const b=document.getElementById('hr-payroll');if(!b)return;b.innerHTML='<table class="w-full whitespace-nowrap"><thead><tr class="bg-slate-50"><th class="p-2 text-left">Nama</th><th>Hadir Dibayar</th><th>PCS</th><th>Komisi</th><th>Bonus</th><th>Lembur</th><th>Lain-lain</th><th>THP</th><th>Status</th><th></th></tr></thead><tbody>'+rows.map(p=>`<tr class="border-t"><td class="p-2"><b>${escapeHtml(p.EmployeeName)}</b></td><td>${Number(p.PaidDays||0)}/${Number(p.WorkDays||0)}</td><td>${Number(p.SalesQtyPcs||0)}</td><td>${rupiah(p.Commission)}</td><td><input id="bo-${p.PayrollID}" type="number" value="${Number(p.Bonus||0)}" class="w-24 border rounded p-1" ${String(p.Status)!=='Draft'?'disabled':''}></td><td><input id="ov-${p.PayrollID}" type="number" value="${Number(p.Overtime||0)}" class="w-24 border rounded p-1" ${String(p.Status)!=='Draft'?'disabled':''}></td><td><input id="ot-${p.PayrollID}" type="number" value="${Number(p.OtherAdjustment||0)}" class="w-24 border rounded p-1" ${String(p.Status)!=='Draft'?'disabled':''}></td><td><b>${rupiah(p.TakeHomePay)}</b></td><td>${escapeHtml(p.Status)}</td><td>${String(p.Status)==='Draft'?`<button onclick="savePayrollManual('${p.PayrollID}')" class="border rounded px-2 py-1">Simpan</button> <button onclick="finalizePayrollAdmin('${p.PayrollID}')" class="bg-slate-900 text-white rounded px-2 py-1">Final</button>`:String(p.Status)==='Final'?`<button onclick="paidPayrollAdmin('${p.PayrollID}')" class="bg-emerald-600 text-white rounded px-2 py-1">Dibayar</button>`:''}</td></tr>`).join('')+'</tbody></table>';}
+        async function savePayrollManual(id){try{await apiPost({action:'updatePayrollManual',payrollId:id,bonus:+document.getElementById('bo-'+id).value,overtime:+document.getElementById('ov-'+id).value,otherAdjustment:+document.getElementById('ot-'+id).value});showToast('Payroll disimpan');await loadHrAdmin();}catch(e){showToast(e.message)}}
+        async function finalizePayrollAdmin(id){if(!confirm('Finalisasi dan kunci payroll ini?'))return;try{await apiPost({action:'finalizePayroll',payrollId:id});showToast('Payroll difinalisasi');await loadHrAdmin();}catch(e){showToast(e.message)}}
+        async function paidPayrollAdmin(id){try{await apiPost({action:'markPayrollPaid',payrollId:id});showToast('Payroll ditandai dibayar');await loadHrAdmin();}catch(e){showToast(e.message)}}
+</script></body>
 </html>
