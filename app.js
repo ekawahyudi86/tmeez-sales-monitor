@@ -119,6 +119,17 @@
         function mapOrderPack(x){const o=x.order||{},items=x.items||[];return {id:String(o.OrderID||''),salesId:String(o.SalesID||''),storeId:String(o.StoreID||''),date:String(o.OrderDate||o.CreatedAt||''),qty:+o.TotalQtyPcs||items.reduce((n,z)=>n+(+z.QtyPcs||0),0),subtotal:+o.Subtotal||0,discount:+o.Discount||0,total:+o.GrandTotal||0,items};}
         function mapProduct(x){return {id:String(x.ProductID||''),name:String(x.ProductName||''),price:+(x.PricePerPcs!==''&&x.PricePerPcs!==undefined?x.PricePerPcs:x.PricePerBox)||0,pack:+x.UnitsPerBox||10,sku:String(x.SKU||''),status:String(x.Status||'Active')};}
         async function refreshOnlineData(showMessage=false){
+          if(currentUser?.role==='staff'){
+            try{
+              await Promise.all([loadAttendanceToday(),loadMyAttendanceHistory(),loadMyPayroll()]);
+              apiOnline=true;
+              if(showMessage)showToast('Data karyawan berhasil disinkronkan');
+            }catch(err){
+              apiOnline=false;
+              if(showMessage)showToast('Sinkronisasi gagal: '+(err.message||err));
+            }
+            return;
+          }
           try{
             let st,pr;
             if(currentUser?.role==='admin'){
