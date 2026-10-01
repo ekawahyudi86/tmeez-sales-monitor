@@ -199,10 +199,20 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
 
         <!-- ================= ADMIN DASHBOARD VIEW ================= -->
         <div id="view-staff" class="hidden animate-fadeIn max-w-xl mx-auto w-full space-y-4">
-          <section class="bg-white rounded-3xl p-6 border shadow-sm mt-4"><div class="text-center"><div class="w-14 h-14 mx-auto rounded-2xl bg-brand-50 flex items-center justify-center text-brand-700 text-2xl">✓</div><h2 id="staff-welcome" class="mt-3 text-xl font-bold">Absensi Karyawan</h2><p id="staff-date" class="text-xs text-slate-500 mt-1"></p></div>
-          <div class="mt-5 bg-slate-50 rounded-2xl p-4"><div class="flex justify-between"><span class="text-xs text-slate-500">Jadwal</span><b class="text-sm">07.00–15.00</b></div><div class="flex justify-between mt-2"><span class="text-xs text-slate-500">Status</span><b id="staff-att-status" class="text-sm">Belum Absen</b></div><div id="staff-att-detail" class="text-xs text-slate-600 mt-3"></div></div>
-          <div class="grid grid-cols-2 gap-3 mt-4"><button id="staff-att-in" onclick="startAttendance('in')" class="py-3 rounded-xl bg-emerald-600 text-white font-bold">Absen Masuk</button><button id="staff-att-out" onclick="startAttendance('out')" class="py-3 rounded-xl bg-slate-900 text-white font-bold">Absen Pulang</button></div><p class="text-[11px] text-center text-slate-400 mt-3">GPS + selfie wajib. Absensi hanya dapat dilakukan di area tempat kerja.</p></section>
-          <section class="bg-white rounded-2xl p-5 border"><div class="flex justify-between items-center"><h3 class="font-bold">Slip Gaji Saya</h3><button onclick="loadMyPayroll()" class="text-xs border rounded-lg px-3 py-2">Perbarui</button></div><div id="staff-payroll-list" class="mt-3 text-xs text-slate-500">Belum ada slip gaji final.</div></section>
+          <section class="bg-white rounded-3xl p-6 border shadow-sm mt-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="text-center flex-1"><div class="w-14 h-14 mx-auto rounded-2xl bg-brand-50 flex items-center justify-center text-brand-700 text-2xl">✓</div><h2 id="staff-welcome" class="mt-3 text-xl font-bold">Absensi Karyawan</h2><p id="staff-date" class="text-xs text-slate-500 mt-1"></p></div>
+              <button onclick="logoutApp()" class="shrink-0 px-3 py-2 rounded-xl bg-red-50 text-red-600 border border-red-100 text-xs font-bold">Logout</button>
+            </div>
+            <div class="mt-5 bg-slate-50 rounded-2xl p-4"><div class="flex justify-between"><span class="text-xs text-slate-500">Jadwal</span><b class="text-sm">07.00–15.00</b></div><div class="flex justify-between mt-2"><span class="text-xs text-slate-500">Status</span><b id="staff-att-status" class="text-sm">Belum Absen</b></div><div id="staff-att-detail" class="text-xs text-slate-600 mt-3"></div></div>
+            <div class="grid grid-cols-2 gap-3 mt-4"><button id="staff-att-in" onclick="startAttendance('in')" class="py-3 rounded-xl bg-emerald-600 text-white font-bold">Absen Masuk</button><button id="staff-att-out" onclick="startAttendance('out')" class="py-3 rounded-xl bg-slate-900 text-white font-bold">Absen Pulang</button></div><p class="text-[11px] text-center text-slate-400 mt-3">GPS + selfie wajib. Absensi hanya dapat dilakukan di area tempat kerja.</p>
+          </section>
+          <section class="bg-white rounded-2xl p-5 border">
+            <div class="flex items-center justify-between gap-3"><div><h3 class="font-bold">Riwayat Absensi Saya</h3><p class="text-[11px] text-slate-500">Data lengkap absensi yang tersimpan di sistem.</p></div><button onclick="loadMyAttendanceHistory()" class="text-xs border rounded-lg px-3 py-2">Perbarui</button></div>
+            <div class="grid grid-cols-[1fr_auto] gap-2 mt-3"><input id="staff-att-period" type="month" class="border rounded-lg p-2 text-xs"><button onclick="loadMyAttendanceHistory()" class="bg-slate-900 text-white rounded-lg px-3 text-xs font-bold">Tampilkan</button></div>
+            <div id="staff-att-history" class="mt-3 text-xs text-slate-500">Belum dimuat.</div>
+          </section>
+          <section class="bg-white rounded-2xl p-5 border"><div class="flex justify-between items-center"><div><h3 class="font-bold">Slip Gaji Saya</h3><p class="text-[11px] text-slate-500">Hanya payroll yang sudah Final/Dibayar.</p></div><button onclick="loadMyPayroll()" class="text-xs border rounded-lg px-3 py-2">Perbarui</button></div><div id="staff-payroll-list" class="mt-3 text-xs text-slate-500">Belum ada slip gaji final.</div></section>
         </div>
 
         <div id="view-admin" class="space-y-6 hidden animate-fadeIn">
@@ -435,6 +445,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
             </div>
         </div>
 
+        <div id="attendance-detail-modal" class="hidden fixed inset-0 z-[94] bg-slate-950/60 p-4 overflow-y-auto"><div class="max-w-lg mx-auto bg-white rounded-2xl shadow-2xl my-6"><div class="p-5 border-b flex justify-between items-center"><div><h2 class="font-bold">Detail Absensi</h2><p id="attendance-detail-sub" class="text-xs text-slate-500"></p></div><button onclick="closeAttendanceDetailModal()" class="w-9 h-9 rounded-lg bg-slate-100">✕</button></div><div id="attendance-detail-body" class="p-5"></div></div></div>
         <div id="payroll-modal" class="hidden fixed inset-0 z-[95] bg-slate-950/60 p-4 overflow-y-auto"><div class="max-w-2xl mx-auto bg-white rounded-2xl shadow-2xl my-6"><div class="p-5 border-b flex justify-between"><div><h2 class="font-bold">Slip Gaji</h2><p id="payroll-modal-sub" class="text-xs text-slate-500"></p></div><button onclick="closePayrollModal()" class="w-9 h-9 rounded-lg bg-slate-100">✕</button></div><div id="payroll-modal-body" class="p-5"></div></div></div>
 
         <div id="sales-modal" class="hidden fixed inset-0 z-[80] bg-slate-950/60 p-4 overflow-y-auto">
@@ -587,7 +598,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
 
             if (role === 'staff') {
                 salesView.classList.add('hidden'); adminView.classList.add('hidden'); staffView.classList.remove('hidden');
-                userName.innerText=currentUser?.name||'Staff'; userRole.innerText='Staff'; loadAttendanceToday(); loadMyPayroll();
+                userName.innerText=currentUser?.name||'Staff'; userRole.innerText='Staff'; loadAttendanceToday(); loadMyAttendanceHistory(); loadMyPayroll();
             } else if (role === 'sales') {
                 staffView.classList.add('hidden');
                 salesView.classList.remove('hidden');
@@ -699,7 +710,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
             if(currentUser.salesId && x.sales){const mapped=mapSales(x.sales); if(!db.sales.some(s=>s.id===mapped.id))db.sales.push(mapped);}
             document.getElementById('login-screen').classList.add('hidden'); switchRole(currentUser.role==='sales'?'sales':currentUser.role==='staff'?'staff':'admin');
             document.getElementById('current-user-name').innerText=currentUser.name; document.getElementById('current-user-role').innerText=currentUser.role==='sales'?'Sales · '+(db.sales.find(s=>s.id===currentUser.salesId)?.area||''):String(x.role||'Admin').toUpperCase();
-            await refreshOnlineData(false); renderMaster();renderDynamicForms();refreshVisitKpi();applyAccessUI();if(currentUser?.role==='admin'){loadMonitoringUsers();loadHrAdmin();} if(currentUser?.role==='sales')workflowHome(); if(currentUser?.role==='staff'){loadAttendanceToday();loadMyPayroll();} if(currentUser?.role==='sales')loadAttendanceToday(); showToast('Login online berhasil');
+            await refreshOnlineData(false); renderMaster();renderDynamicForms();refreshVisitKpi();applyAccessUI();if(currentUser?.role==='admin'){loadMonitoringUsers();loadHrAdmin();} if(currentUser?.role==='sales')workflowHome(); if(currentUser?.role==='staff'){loadAttendanceToday();loadMyAttendanceHistory();loadMyPayroll();} if(currentUser?.role==='sales')loadAttendanceToday(); showToast('Login online berhasil');
           }catch(err){showToast('Login gagal: '+err.message);}
         }
         function uid(prefix){return prefix+Date.now().toString(36)+Math.random().toString(36).slice(2,5)}
@@ -1838,6 +1849,39 @@ function renderDynamicForms(){
           return {startKey:start.toISOString().slice(0,10),endKey:end.toISOString().slice(0,10),label:`${fmt(start)} – ${fmt(end)}`};
         }
         function payrollPeriodLabelUi(p){return p?.PeriodLabel||payrollPeriodBoundsUi(p?.Period)?.label||p?.Period||'-';}
+        function currentPayrollPeriodUi(){
+          const d=new Date(), y=d.getFullYear(), m=d.getMonth()+1, day=d.getDate();
+          const yy=day<=25?y:y+(m===12?1:0), mm=day<=25?m:m===12?1:m+1;
+          return `${yy}-${String(mm).padStart(2,'0')}`;
+        }
+        function setStaffAttendancePeriodDefault(){const el=document.getElementById('staff-att-period');if(el&&!el.value)el.value=currentPayrollPeriodUi();}
+        async function loadMyAttendanceHistory(){
+          if(currentUser?.role!=='staff')return;
+          setStaffAttendancePeriodDefault();
+          const box=document.getElementById('staff-att-history'); if(box)box.innerHTML='<div class="py-4 text-center text-slate-400">Memuat riwayat absensi...</div>';
+          try{
+            const period=document.getElementById('staff-att-period')?.value||'';
+            const r=await apiGet('attendance',period?{period}:{}),rows=(r.data||[]).slice().sort((a,b)=>String(b.Date||'').localeCompare(String(a.Date||'')));
+            window.myAttendanceRows=rows;
+            if(!box)return;
+            if(!rows.length){box.innerHTML='<div class="py-5 text-center text-slate-400">Belum ada data absensi pada periode ini.</div>';return;}
+            box.innerHTML=rows.map((a,i)=>{
+              const date=String(a.Date||a.CreatedAt||'').slice(0,10), status=a.Status||'-';
+              const badge=status==='Hadir'?'bg-emerald-50 text-emerald-700':status==='Terlambat'?'bg-amber-50 text-amber-700':status==='Alpha'?'bg-red-50 text-red-700':'bg-slate-100 text-slate-700';
+              return `<button onclick="openAttendanceDetail(${i})" class="w-full text-left border rounded-xl p-3 mb-2 hover:bg-slate-50"><div class="flex items-center justify-between gap-2"><div><b>${escapeHtml(date)}</b><div class="text-[10px] text-slate-500 mt-1">Masuk ${escapeHtml(String(a.CheckIn||'').slice(11,16)||'-')} · Pulang ${escapeHtml(String(a.CheckOut||'').slice(11,16)||'-')}</div></div><span class="px-2 py-1 rounded-lg text-[10px] font-bold ${badge}">${escapeHtml(status)}</span></div><div class="grid grid-cols-3 gap-2 mt-2 text-[10px] text-slate-500"><span>Terlambat<br><b class="text-slate-700">${Number(a.LateMinutes||0)} m</b></span><span>Pulang cepat<br><b class="text-slate-700">${Number(a.EarlyLeaveMinutes||0)} m</b></span><span>Jarak masuk<br><b class="text-slate-700">${a.CheckInDistance!==''&&a.CheckInDistance!==undefined?Math.round(Number(a.CheckInDistance))+' m':'-'}</b></span></div></button>`;
+            }).join('');
+          }catch(e){if(box)box.innerHTML='<div class="py-4 text-center text-red-500">'+escapeHtml(e.message||'Gagal memuat absensi.')+'</div>';}
+        }
+        function openAttendanceDetail(index){
+          const a=(window.myAttendanceRows||[])[index];if(!a)return;
+          const date=String(a.Date||a.CreatedAt||'').slice(0,10),fmt=v=>escapeHtml(String(v||'-'));
+          const photo=(url,label)=>url?`<a href="${escapeHtml(String(url))}" target="_blank" rel="noopener" class="inline-flex px-3 py-2 rounded-lg bg-indigo-50 text-indigo-700 text-[11px] font-bold">${label}</a>`:'<span class="text-[11px] text-slate-400">Tidak ada</span>';
+          const row=(label,val)=>`<div class="flex justify-between gap-4 py-2 border-b last:border-0"><span class="text-xs text-slate-500">${label}</span><b class="text-xs text-right">${val}</b></div>`;
+          document.getElementById('attendance-detail-sub').innerText=date;
+          document.getElementById('attendance-detail-body').innerHTML=`<div class="rounded-xl bg-slate-50 p-3 mb-4"><div class="text-xs text-slate-500">Status</div><div class="text-lg font-bold mt-1">${fmt(a.Status)}</div></div><div>${row('Tanggal',fmt(date))}${row('Jam Masuk',fmt(String(a.CheckIn||'').slice(11,19)||'-'))}${row('Jam Pulang',fmt(String(a.CheckOut||'').slice(11,19)||'-'))}${row('Keterlambatan',Number(a.LateMinutes||0)+' menit')}${row('Pulang lebih awal',Number(a.EarlyLeaveMinutes||0)+' menit')}${row('GPS Masuk',fmt(a.CheckInLat)+', '+fmt(a.CheckInLng))}${row('Akurasi GPS Masuk',a.CheckInAccuracy!==''&&a.CheckInAccuracy!==undefined?Math.round(Number(a.CheckInAccuracy))+' m':'-')}${row('Jarak Masuk',a.CheckInDistance!==''&&a.CheckInDistance!==undefined?Math.round(Number(a.CheckInDistance))+' m':'-')}${row('GPS Pulang',fmt(a.CheckOutLat)+', '+fmt(a.CheckOutLng))}${row('Akurasi GPS Pulang',a.CheckOutAccuracy!==''&&a.CheckOutAccuracy!==undefined?Math.round(Number(a.CheckOutAccuracy))+' m':'-')}${row('Jarak Pulang',a.CheckOutDistance!==''&&a.CheckOutDistance!==undefined?Math.round(Number(a.CheckOutDistance))+' m':'-')}${row('Keterangan',fmt(a.Notes))}${a.CorrectionReason?row('Koreksi Admin',fmt(a.CorrectionReason)):''}</div><div class="mt-4"><div class="text-xs font-bold mb-2">Foto Absensi</div><div class="flex gap-2">${photo(a.CheckInPhotoURL,'Foto Masuk')}${photo(a.CheckOutPhotoURL,'Foto Pulang')}</div></div>`;
+          document.getElementById('attendance-detail-modal').classList.remove('hidden');
+        }
+        function closeAttendanceDetailModal(){document.getElementById('attendance-detail-modal')?.classList.add('hidden')}
         async function loadMyPayroll(){if(!['sales','staff'].includes(currentUser?.role))return;try{const r=await apiGet('payroll'),box=document.getElementById('staff-payroll-list');window.myPayrollRows=r.data||[];if(box)box.innerHTML=(window.myPayrollRows).slice().reverse().map(p=>`<button onclick="openPayrollSlip('${p.PayrollID}')" class="w-full text-left border rounded-xl p-3 mb-2 hover:bg-slate-50"><div class="flex justify-between"><b>${escapeHtml(payrollPeriodLabelUi(p))}</b><b>${rupiah(p.TakeHomePay)}</b></div><div class="text-[10px] text-slate-500 mt-1">Gaji ${rupiah(p.BasicSalaryPaid)} · Transport ${rupiah(p.TransportPaid)} · Sembako ${rupiah(p.GroceryAllowance)}${Number(p.Commission||0)?' · Komisi '+rupiah(p.Commission):''} · ${escapeHtml(p.Status)}</div></button>`).join('')||'Belum ada slip gaji final.';}catch(e){showToast(e.message)}}
         async function showMyPayrollModal(){await loadMyPayroll();const rows=(window.myPayrollRows||[]).slice().reverse(),m=document.getElementById('payroll-modal'),b=document.getElementById('payroll-modal-body');m.classList.remove('hidden');document.getElementById('payroll-modal-sub').innerText='Pilih periode slip gaji';b.innerHTML=rows.map(p=>`<button onclick="openPayrollSlip('${p.PayrollID}')" class="w-full border rounded-xl p-3 mb-2 flex justify-between"><span>${escapeHtml(payrollPeriodLabelUi(p))} · ${escapeHtml(p.Status)}</span><b>${rupiah(p.TakeHomePay)}</b></button>`).join('')||'Belum ada slip final.';}
         function closePayrollModal(){document.getElementById('payroll-modal')?.classList.add('hidden')}
