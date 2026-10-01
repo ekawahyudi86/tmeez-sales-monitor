@@ -197,22 +197,50 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
           </div>
         </div>
 
-        <!-- ================= ADMIN DASHBOARD VIEW ================= -->
-        <div id="view-staff" class="hidden animate-fadeIn max-w-xl mx-auto w-full space-y-4">
-          <section class="bg-white rounded-3xl p-6 border shadow-sm mt-4">
-            <div class="flex items-start justify-between gap-3">
-              <div class="text-center flex-1"><div class="w-14 h-14 mx-auto rounded-2xl bg-brand-50 flex items-center justify-center text-brand-700 text-2xl">✓</div><h2 id="staff-welcome" class="mt-3 text-xl font-bold">Absensi Karyawan</h2><p id="staff-date" class="text-xs text-slate-500 mt-1"></p></div>
-              <button onclick="logoutApp()" class="shrink-0 px-3 py-2 rounded-xl bg-red-50 text-red-600 border border-red-100 text-xs font-bold">Logout</button>
+        <!-- ================= STAFF / EMPLOYEE DASHBOARD ================= -->
+        <div id="view-staff" class="hidden animate-fadeIn w-full max-w-4xl mx-auto pb-8">
+          <div class="rounded-[2rem] bg-gradient-to-br from-slate-900 via-slate-800 to-brand-900 text-white p-5 sm:p-7 shadow-xl overflow-hidden relative">
+            <div class="absolute -right-16 -top-16 w-40 h-40 rounded-full bg-white/10"></div>
+            <div class="absolute -left-12 -bottom-20 w-40 h-40 rounded-full bg-brand-400/10"></div>
+            <div class="relative flex items-start justify-between gap-4">
+              <div class="min-w-0">
+                <div class="text-xs text-white/60 font-medium mb-1" id="staff-date">-</div>
+                <h1 id="staff-welcome" class="text-2xl sm:text-3xl font-black tracking-tight truncate">Halo, Karyawan</h1>
+                <p id="staff-role-label" class="text-sm text-white/70 mt-1">Dashboard Karyawan</p>
+              </div>
+              <button onclick="logoutApp()" class="shrink-0 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 text-xs font-bold flex items-center gap-2"><i data-lucide="log-out" class="w-4 h-4"></i>Keluar</button>
             </div>
-            <div class="mt-5 bg-slate-50 rounded-2xl p-4"><div class="flex justify-between"><span class="text-xs text-slate-500">Jadwal</span><b class="text-sm">07.00–15.00</b></div><div class="flex justify-between mt-2"><span class="text-xs text-slate-500">Status</span><b id="staff-att-status" class="text-sm">Belum Absen</b></div><div id="staff-att-detail" class="text-xs text-slate-600 mt-3"></div></div>
-            <div class="grid grid-cols-2 gap-3 mt-4"><button id="staff-att-in" onclick="startAttendance('in')" class="py-3 rounded-xl bg-emerald-600 text-white font-bold">Absen Masuk</button><button id="staff-att-out" onclick="startAttendance('out')" class="py-3 rounded-xl bg-slate-900 text-white font-bold">Absen Pulang</button></div><p class="text-[11px] text-center text-slate-400 mt-3">GPS + selfie wajib. Absensi hanya dapat dilakukan di area tempat kerja.</p>
+            <div class="relative grid grid-cols-2 sm:grid-cols-4 gap-2 mt-6">
+              <div class="rounded-2xl bg-white/10 border border-white/10 p-3"><div class="text-[10px] text-white/55">Status</div><b id="staff-dash-status" class="block mt-1 text-sm">Belum Absen</b></div>
+              <div class="rounded-2xl bg-white/10 border border-white/10 p-3"><div class="text-[10px] text-white/55">Masuk</div><b id="staff-dash-in" class="block mt-1 text-sm">--:--</b></div>
+              <div class="rounded-2xl bg-white/10 border border-white/10 p-3"><div class="text-[10px] text-white/55">Pulang</div><b id="staff-dash-out" class="block mt-1 text-sm">--:--</b></div>
+              <div class="rounded-2xl bg-white/10 border border-white/10 p-3"><div class="text-[10px] text-white/55">Terlambat</div><b id="staff-dash-late" class="block mt-1 text-sm">0 menit</b></div>
+            </div>
+          </div>
+
+          <div id="staff-home-panel" class="mt-5 space-y-4">
+            <section class="bg-white rounded-[1.75rem] border shadow-sm p-5 sm:p-6">
+              <div class="flex items-center justify-between gap-3 mb-4"><div><h2 class="font-black text-lg">Absensi Hari Ini</h2><p class="text-xs text-slate-500 mt-1">GPS dan selfie digunakan untuk mencatat kehadiran.</p></div><span id="staff-home-badge" class="px-3 py-1.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold">Belum Absen</span></div>
+              <div id="staff-att-detail" class="rounded-2xl bg-slate-50 border p-4 text-xs text-slate-600">Silakan Absen Masuk dari lokasi tempat kerja.</div>
+              <div class="grid grid-cols-2 gap-3 mt-4"><button id="staff-att-in" onclick="startAttendance('in')" class="py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-sm">Absen Masuk</button><button id="staff-att-out" onclick="startAttendance('out')" class="py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold shadow-sm">Absen Pulang</button></div>
+            </section>
+            <section class="grid sm:grid-cols-2 gap-3">
+              <button onclick="showStaffPanel('attendance')" class="bg-white border rounded-[1.5rem] p-5 text-left hover:shadow-md transition"><div class="w-11 h-11 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center"><i data-lucide="calendar-days" class="w-5 h-5"></i></div><h3 class="font-bold mt-4">Riwayat Absensi</h3><p class="text-xs text-slate-500 mt-1">Lihat kehadiran dan detail GPS.</p><span class="text-xs font-bold text-indigo-600 inline-flex mt-3">Buka riwayat →</span></button>
+              <button onclick="showStaffPanel('payroll')" class="bg-white border rounded-[1.5rem] p-5 text-left hover:shadow-md transition"><div class="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center"><i data-lucide="wallet-cards" class="w-5 h-5"></i></div><h3 class="font-bold mt-4">Slip Gaji</h3><p class="text-xs text-slate-500 mt-1">Lihat slip gaji yang sudah final/dibayar.</p><span class="text-xs font-bold text-emerald-600 inline-flex mt-3">Buka slip →</span></button>
+            </section>
+          </div>
+
+          <section id="staff-attendance-panel" class="hidden mt-5 bg-white rounded-[1.75rem] border shadow-sm p-5 sm:p-6">
+            <div class="flex items-center gap-3 mb-5"><button onclick="showStaffPanel('home')" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center"><i data-lucide="arrow-left" class="w-4 h-4"></i></button><div><h2 class="font-black text-lg">Riwayat Absensi Saya</h2><p class="text-xs text-slate-500">Ketuk tanggal untuk melihat detail absensi.</p></div></div>
+            <div class="grid grid-cols-[1fr_auto] gap-2 mb-4"><input id="staff-att-period" type="month" class="border rounded-xl p-3 text-sm"><button onclick="loadMyAttendanceHistory()" class="bg-slate-900 text-white rounded-xl px-4 text-xs font-bold">Tampilkan</button></div>
+            <div id="staff-att-history" class="text-xs text-slate-500">Belum dimuat.</div>
           </section>
-          <section class="bg-white rounded-2xl p-5 border">
-            <div class="flex items-center justify-between gap-3"><div><h3 class="font-bold">Riwayat Absensi Saya</h3><p class="text-[11px] text-slate-500">Data lengkap absensi yang tersimpan di sistem.</p></div><button onclick="loadMyAttendanceHistory()" class="text-xs border rounded-lg px-3 py-2">Perbarui</button></div>
-            <div class="grid grid-cols-[1fr_auto] gap-2 mt-3"><input id="staff-att-period" type="month" class="border rounded-lg p-2 text-xs"><button onclick="loadMyAttendanceHistory()" class="bg-slate-900 text-white rounded-lg px-3 text-xs font-bold">Tampilkan</button></div>
-            <div id="staff-att-history" class="mt-3 text-xs text-slate-500">Belum dimuat.</div>
+
+          <section id="staff-payroll-panel" class="hidden mt-5 bg-white rounded-[1.75rem] border shadow-sm p-5 sm:p-6">
+            <div class="flex items-center gap-3 mb-5"><button onclick="showStaffPanel('home')" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center"><i data-lucide="arrow-left" class="w-4 h-4"></i></button><div><h2 class="font-black text-lg">Slip Gaji Saya</h2><p class="text-xs text-slate-500">Hanya payroll yang sudah Final/Dibayar.</p></div></div>
+            <div class="flex justify-end mb-3"><button onclick="loadMyPayroll()" class="text-xs border rounded-xl px-3 py-2 font-bold">Perbarui</button></div>
+            <div id="staff-payroll-list" class="text-xs text-slate-500">Belum ada slip gaji final.</div>
           </section>
-          <section class="bg-white rounded-2xl p-5 border"><div class="flex justify-between items-center"><div><h3 class="font-bold">Slip Gaji Saya</h3><p class="text-[11px] text-slate-500">Hanya payroll yang sudah Final/Dibayar.</p></div><button onclick="loadMyPayroll()" class="text-xs border rounded-lg px-3 py-2">Perbarui</button></div><div id="staff-payroll-list" class="mt-3 text-xs text-slate-500">Belum ada slip gaji final.</div></section>
         </div>
 
         <div id="view-admin" class="space-y-6 hidden animate-fadeIn">
@@ -222,7 +250,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
                 <button onclick="runSalesDiagnostics()" class="px-4 py-2 rounded-xl bg-amber-600 text-white text-xs font-bold">Periksa Sekarang</button>
               </div>
               <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mt-4 text-xs">
-                <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Frontend</span><b id="diag-front" class="block mt-1">V6.9.4</b></div>
+                <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Frontend</span><b id="diag-front" class="block mt-1">V6.12.8</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">API</span><b id="diag-api" class="block mt-1">-</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">Orders</span><b id="diag-orders" class="block mt-1">0</b></div>
                 <div class="bg-white rounded-xl p-3 border"><span class="text-slate-500">OrderItems</span><b id="diag-items" class="block mt-1">0</b></div>
@@ -522,7 +550,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
                 const me=await apiGet('me');
                 const serverUser=me.user||{};
                 currentUser.username=serverUser.username||currentUser.username;
-                const sr=String(serverUser.role||currentUser.role).toLowerCase();currentUser.role=['sales','monitoring'].includes(sr)?sr:'admin';
+                const sr=String(serverUser.role||currentUser.role).toLowerCase();currentUser.role=['sales','monitoring','staff'].includes(sr)?sr:'admin';
                 currentUser.salesId=serverUser.salesId||currentUser.salesId||'';
 
                 document.getElementById('login-screen').classList.add('hidden');
@@ -598,7 +626,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
 
             if (role === 'staff') {
                 salesView.classList.add('hidden'); adminView.classList.add('hidden'); staffView.classList.remove('hidden');
-                userName.innerText=currentUser?.name||'Staff'; userRole.innerText='Staff'; loadAttendanceToday(); loadMyAttendanceHistory(); loadMyPayroll();
+                userName.innerText=currentUser?.name||'Staff'; userRole.innerText='Staff'; showStaffPanel('home'); loadAttendanceToday(); loadMyAttendanceHistory(); loadMyPayroll();
             } else if (role === 'sales') {
                 staffView.classList.add('hidden');
                 salesView.classList.remove('hidden');
@@ -1838,7 +1866,23 @@ function renderDynamicForms(){
           }catch(e){showToast(e.message||'Absensi gagal.'); await loadAttendanceToday();}
           finally{attendanceBusy=false; await loadAttendanceToday();}
         }
-        async function loadAttendanceToday(){if(!['sales','staff'].includes(currentUser?.role))return;try{const r=await apiGet('attendanceToday'),a=r.data||null,stat=a?.Status||'Belum Absen',detail=a?`Masuk: <b>${escapeHtml(String(a.CheckIn||'-').slice(11,16))}</b>${a.CheckOut?` · Pulang: <b>${escapeHtml(String(a.CheckOut).slice(11,16))}</b>`:''}${Number(a.LateMinutes||0)>0?` · Terlambat ${Number(a.LateMinutes)} menit`:''}${a.CheckInAccuracy?` · GPS ±${Math.round(Number(a.CheckInAccuracy))} m`:''}`:'Silakan Absen Masuk dari lokasi tempat kerja.';['sales-att-status','staff-att-status'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerText=stat});['sales-att-detail','staff-att-detail'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML=detail});['sales-att-in','staff-att-in'].forEach(id=>{const e=document.getElementById(id);if(e)e.disabled=!!a});['sales-att-out','staff-att-out'].forEach(id=>{const e=document.getElementById(id);if(e)e.disabled=!a||!!a.CheckOut});const sw=document.getElementById('staff-welcome');if(sw)sw.innerText='Halo, '+(currentUser?.name||'Staff');const sd=document.getElementById('staff-date');if(sd)sd.innerText=new Intl.DateTimeFormat('id-ID',{dateStyle:'full',timeZone:'Asia/Jakarta'}).format(new Date());}catch(e){showToast(e.message)}}
+        async function loadAttendanceToday(){if(!['sales','staff'].includes(currentUser?.role))return;try{const r=await apiGet('attendanceToday'),a=r.data||null,stat=a?.Status||'Belum Absen',detail=a?`Masuk: <b>${escapeHtml(String(a.CheckIn||'-').slice(11,16))}</b>${a.CheckOut?` · Pulang: <b>${escapeHtml(String(a.CheckOut).slice(11,16))}</b>`:''}${Number(a.LateMinutes||0)>0?` · Terlambat ${Number(a.LateMinutes)} menit`:''}${a.CheckInAccuracy?` · GPS ±${Math.round(Number(a.CheckInAccuracy))} m`:''}`:'Silakan Absen Masuk dari lokasi tempat kerja.';updateStaffDashboardAttendance(a);['sales-att-status','staff-att-status'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerText=stat});['sales-att-detail','staff-att-detail'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML=detail});['sales-att-in','staff-att-in'].forEach(id=>{const e=document.getElementById(id);if(e)e.disabled=!!a});['sales-att-out','staff-att-out'].forEach(id=>{const e=document.getElementById(id);if(e)e.disabled=!a||!!a.CheckOut});const sw=document.getElementById('staff-welcome');if(sw)sw.innerText='Halo, '+(currentUser?.name||'Staff');const sd=document.getElementById('staff-date');if(sd)sd.innerText=new Intl.DateTimeFormat('id-ID',{dateStyle:'full',timeZone:'Asia/Jakarta'}).format(new Date());}catch(e){showToast(e.message)}}
+        function showStaffPanel(panel){
+          if(currentUser?.role!=='staff')return;
+          const home=document.getElementById('staff-home-panel'),att=document.getElementById('staff-attendance-panel'),pay=document.getElementById('staff-payroll-panel');
+          [home,att,pay].forEach(x=>x?.classList.add('hidden'));
+          if(panel==='attendance'){att?.classList.remove('hidden');loadMyAttendanceHistory();}
+          else if(panel==='payroll'){pay?.classList.remove('hidden');loadMyPayroll();}
+          else home?.classList.remove('hidden');
+          lucide.createIcons();
+          window.scrollTo({top:0,behavior:'smooth'});
+        }
+        function updateStaffDashboardAttendance(a){
+          const status=a?.Status||'Belum Absen', tin=a?.CheckIn?String(a.CheckIn).slice(11,16):'--:--', tout=a?.CheckOut?String(a.CheckOut).slice(11,16):'--:--', late=Number(a?.LateMinutes||0);
+          const set=(id,v)=>{const e=document.getElementById(id);if(e)e.innerText=v;};
+          set('staff-dash-status',status);set('staff-dash-in',tin);set('staff-dash-out',tout);set('staff-dash-late',late+' menit');set('staff-home-badge',status);
+          const badge=document.getElementById('staff-home-badge');if(badge){badge.className='px-3 py-1.5 rounded-full text-[10px] font-bold '+(status==='Hadir'?'bg-emerald-50 text-emerald-700':status==='Terlambat'?'bg-amber-50 text-amber-700':'bg-slate-100 text-slate-600');}
+        }
         function payrollPeriodBoundsUi(period){
           const m=/^(\d{4})-(\d{2})$/.exec(String(period||''));
           if(!m)return null;
