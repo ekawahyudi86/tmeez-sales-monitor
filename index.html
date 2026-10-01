@@ -51,7 +51,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
       <div class="bg-white w-full max-w-md rounded-3xl p-7 shadow-2xl">
         <div class="text-center mb-6"><div class="w-14 h-14 mx-auto bg-brand-600 text-white rounded-2xl flex items-center justify-center mb-3"><i data-lucide="bar-chart-3"></i></div><h2 class="text-xl font-bold">Tmeez Sales Monitor</h2><p class="text-xs text-slate-500 mt-1">Masuk sebagai Admin, Monitoring, Sales, atau Staff</p></div>
         <form onsubmit="loginApp(event)" class="space-y-3"><input id="login-user" required placeholder="Username" class="w-full border rounded-xl px-4 py-3 text-sm"><input id="login-pass" required type="password" placeholder="Password" class="w-full border rounded-xl px-4 py-3 text-sm"><button class="w-full py-3 bg-brand-600 text-white rounded-xl font-semibold text-sm">Masuk</button></form>
-        <p class="text-[11px] text-slate-400 mt-4 text-center">Akun awal Admin: admin / admin123 · akun Sales dibuat oleh Admin</p>
+        <p class="text-[11px] text-slate-400 mt-4 text-center">Akun Admin dan Sales dikelola oleh Administrator.</p>
       </div>
     </div>
 
@@ -1778,9 +1778,56 @@ function renderDynamicForms(){
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}
         let attendancePhotoData='';
         function getGpsNow(){return new Promise((resolve,reject)=>{if(!navigator.geolocation)return reject(new Error('GPS tidak didukung.'));navigator.geolocation.getCurrentPosition(p=>resolve({latitude:p.coords.latitude,longitude:p.coords.longitude,accuracy:p.coords.accuracy}),e=>reject(new Error('GPS gagal: '+e.message)),{enableHighAccuracy:true,timeout:30000,maximumAge:0});});}
-        function captureSelfie(){return new Promise((resolve,reject)=>{const i=document.createElement('input');i.type='file';i.accept='image/*';i.capture='user';i.onchange=()=>{const f=i.files?.[0];if(!f)return reject(new Error('Foto selfie wajib.'));const img=new Image(),r=new FileReader();r.onload=()=>img.src=r.result;img.onload=()=>{const max=900,scale=Math.min(1,max/img.width),c=document.createElement('canvas');c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);c.getContext('2d').drawImage(img,0,0,c.width,c.height);resolve(c.toDataURL('image/jpeg',.72));};r.readAsDataURL(f)};i.click();});}
-        async function startAttendance(kind){try{showToast('Mengambil GPS...');const gps=await getGpsNow();showToast('Ambil selfie untuk absensi');const photo=await captureSelfie();const r=await apiPost({action:kind==='in'?'attendanceCheckIn':'attendanceCheckOut',...gps,photoBase64:photo,photoMime:'image/jpeg'});showToast(r.message);await loadAttendanceToday();}catch(e){showToast(e.message)}}
-        async function loadAttendanceToday(){if(!['sales','staff'].includes(currentUser?.role))return;try{const r=await apiGet('attendanceToday'),a=r.data||null,stat=a?.Status||'Belum Absen',detail=a?`Masuk: <b>${escapeHtml(String(a.CheckIn||'-').slice(11,16))}</b>${a.CheckOut?` · Pulang: <b>${escapeHtml(String(a.CheckOut).slice(11,16))}</b>`:''}${Number(a.LateMinutes||0)>0?` · Terlambat ${Number(a.LateMinutes)} menit`:''}`:'Silakan Absen Masuk dari lokasi tempat kerja.';['sales-att-status','staff-att-status'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerText=stat});['sales-att-detail','staff-att-detail'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML=detail});['sales-att-in','staff-att-in'].forEach(id=>{const e=document.getElementById(id);if(e)e.disabled=!!a});['sales-att-out','staff-att-out'].forEach(id=>{const e=document.getElementById(id);if(e)e.disabled=!a||!!a.CheckOut});const sw=document.getElementById('staff-welcome');if(sw)sw.innerText='Halo, '+(currentUser?.name||'Staff');const sd=document.getElementById('staff-date');if(sd)sd.innerText=new Intl.DateTimeFormat('id-ID',{dateStyle:'full',timeZone:'Asia/Jakarta'}).format(new Date());}catch(e){showToast(e.message)}}
+        let selfieStream=null; let selfieResolve=null; let selfieReject=null; let attendanceBusy=false;
+        function stopSelfieCamera(){
+          if(selfieStream){selfieStream.getTracks().forEach(t=>t.stop());selfieStream=null;}
+          const video=document.getElementById('selfie-video'); if(video)video.srcObject=null;
+          const modal=document.getElementById('selfie-modal'); if(modal){modal.classList.add('hidden');modal.classList.remove('flex');}
+        }
+        function cancelSelfieCamera(){
+          const reject=selfieReject; selfieResolve=null; selfieReject=null; stopSelfieCamera();
+          if(reject)reject(new Error('Selfie dibatalkan.'));
+        }
+        async function captureSelfie(){
+          return new Promise(async (resolve,reject)=>{
+            selfieResolve=resolve; selfieReject=reject;
+            const modal=document.getElementById('selfie-modal'),video=document.getElementById('selfie-video'),status=document.getElementById('selfie-modal-status');
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+            try{
+              if(!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) throw new Error('Kamera langsung membutuhkan HTTPS.');
+              selfieStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'user'},width:{ideal:1280},height:{ideal:1280}},audio:false});
+              video.srcObject=selfieStream; await video.play();
+              status.innerText='Arahkan kamera ke wajah, lalu tekan Ambil Selfie.';
+            }catch(e){
+              stopSelfieCamera();
+              const i=document.createElement('input'); i.type='file'; i.accept='image/*'; i.capture='user';
+              i.onchange=()=>{const f=i.files?.[0];if(!f)return reject(new Error('Foto selfie wajib.'));const img=new Image(),r=new FileReader();r.onload=()=>img.src=r.result;img.onload=()=>{const max=900,scale=Math.min(1,max/img.width),c=document.createElement('canvas');c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);c.getContext('2d').drawImage(img,0,0,c.width,c.height);resolve(c.toDataURL('image/jpeg',.72));};r.readAsDataURL(f)}; i.click();
+            }
+          });
+        }
+        function takeSelfiePhoto(){
+          const video=document.getElementById('selfie-video');
+          if(!video?.videoWidth)return showToast('Kamera belum siap. Tunggu sebentar.');
+          const max=900,scale=Math.min(1,max/video.videoWidth),c=document.createElement('canvas');
+          c.width=Math.round(video.videoWidth*scale);c.height=Math.round(video.videoHeight*scale);
+          const ctx=c.getContext('2d');ctx.drawImage(video,0,0,c.width,c.height);
+          const data=c.toDataURL('image/jpeg',.78),resolve=selfieResolve;
+          selfieResolve=null; selfieReject=null; stopSelfieCamera(); if(resolve)resolve(data);
+        }
+        async function startAttendance(kind){
+          if(attendanceBusy)return;
+          const buttons=['sales-att-in','sales-att-out','staff-att-in','staff-att-out'].map(id=>document.getElementById(id)).filter(Boolean);
+          attendanceBusy=true; buttons.forEach(b=>b.disabled=true);
+          try{
+            showToast('Mengambil GPS...'); const gps=await getGpsNow();
+            showToast('Kamera selfie dibuka'); const photo=await captureSelfie();
+            const clientTxnId='ATT-'+currentUser.employeeId+'-'+kind+'-'+Date.now()+'-'+Math.random().toString(36).slice(2,8);
+            const r=await apiPost({action:kind==='in'?'attendanceCheckIn':'attendanceCheckOut',clientTxnId,...gps,photoBase64:photo,photoMime:'image/jpeg'});
+            showToast(r.message); await loadAttendanceToday();
+          }catch(e){showToast(e.message||'Absensi gagal.'); await loadAttendanceToday();}
+          finally{attendanceBusy=false; await loadAttendanceToday();}
+        }
+        async function loadAttendanceToday(){if(!['sales','staff'].includes(currentUser?.role))return;try{const r=await apiGet('attendanceToday'),a=r.data||null,stat=a?.Status||'Belum Absen',detail=a?`Masuk: <b>${escapeHtml(String(a.CheckIn||'-').slice(11,16))}</b>${a.CheckOut?` · Pulang: <b>${escapeHtml(String(a.CheckOut).slice(11,16))}</b>`:''}${Number(a.LateMinutes||0)>0?` · Terlambat ${Number(a.LateMinutes)} menit`:''}${a.CheckInAccuracy?` · GPS ±${Math.round(Number(a.CheckInAccuracy))} m`:''}`:'Silakan Absen Masuk dari lokasi tempat kerja.';['sales-att-status','staff-att-status'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerText=stat});['sales-att-detail','staff-att-detail'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML=detail});['sales-att-in','staff-att-in'].forEach(id=>{const e=document.getElementById(id);if(e)e.disabled=!!a});['sales-att-out','staff-att-out'].forEach(id=>{const e=document.getElementById(id);if(e)e.disabled=!a||!!a.CheckOut});const sw=document.getElementById('staff-welcome');if(sw)sw.innerText='Halo, '+(currentUser?.name||'Staff');const sd=document.getElementById('staff-date');if(sd)sd.innerText=new Intl.DateTimeFormat('id-ID',{dateStyle:'full',timeZone:'Asia/Jakarta'}).format(new Date());}catch(e){showToast(e.message)}}
         function payrollPeriodBoundsUi(period){
           const m=/^(\d{4})-(\d{2})$/.exec(String(period||''));
           if(!m)return null;
@@ -1820,5 +1867,23 @@ function renderDynamicForms(){
         async function reopenPayrollAdmin(id){const reason=prompt('Alasan membuka kembali payroll ini');if(!reason)return;try{const r=await apiPost({action:'reopenPayroll',payrollId:id,reason});showToast(r.message);await loadHrAdmin()}catch(e){showToast(e.message)}}
         async function paidPayrollAdmin(id){if(!confirm('Tandai payroll ini sudah dibayar?'))return;try{await apiPost({action:'markPayrollPaid',payrollId:id});showToast('Payroll ditandai dibayar');await loadHrAdmin()}catch(e){showToast(e.message)}}
         async function archiveYearAdmin(){const year=document.getElementById('hr-archive-year').value;if(!year)return showToast('Isi tahun arsip');if(!confirm('Arsipkan transaksi tahun '+year+' ke Google Sheet baru? Data tahun tersebut akan dibersihkan dari database aktif.'))return;try{const r=await apiPost({action:'archiveYear',year});document.getElementById('hr-archive-status').innerHTML=`Berhasil. <a class="underline text-brand-700" href="${r.url}" target="_blank">Buka Arsip</a>`;showToast(r.message)}catch(e){showToast(e.message)}}
-</script></body>
+</script>
+<!-- Modal Selfie Absensi -->
+<div id="selfie-modal" class="fixed inset-0 z-[9999] hidden bg-black/80 p-4 items-center justify-center">
+  <div class="w-full max-w-md bg-white rounded-3xl overflow-hidden shadow-2xl">
+    <div class="p-4 flex items-center justify-between border-b">
+      <div><h3 class="font-bold text-base">Selfie Absensi</h3><p id="selfie-modal-status" class="text-xs text-slate-500 mt-1">Kamera depan sedang disiapkan...</p></div>
+      <button type="button" onclick="cancelSelfieCamera()" class="w-9 h-9 rounded-full bg-slate-100 font-bold">×</button>
+    </div>
+    <div class="bg-black aspect-[3/4] relative flex items-center justify-center">
+      <video id="selfie-video" class="w-full h-full object-cover" autoplay playsinline muted></video>
+      <div class="absolute inset-0 pointer-events-none border-2 border-white/30 rounded-xl m-6"></div>
+    </div>
+    <div class="p-4 grid grid-cols-2 gap-3">
+      <button type="button" onclick="cancelSelfieCamera()" class="py-3 rounded-xl border font-bold">Batal</button>
+      <button type="button" id="selfie-take-btn" onclick="takeSelfiePhoto()" class="py-3 rounded-xl bg-emerald-600 text-white font-bold">Ambil Selfie</button>
+    </div>
+  </div>
+</div>
+</body>
 </html>
