@@ -666,29 +666,15 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
 
         const API_URL='https://script.google.com/macros/s/AKfycbyR-riwS3HVUM93sA8D09AR3Orb1kgYbZnZ9HwKSYA8Z1wo0DaJh-Z-sqQhSQvJ53ANCg/exec';
         const DBKEY='tmeez_sales_monitor_v6_15_route_cache';
-        const SESSIONKEY='tmeez_sales_monitor_v6_17_session';
+        const SESSIONKEY='tmeez_sales_monitor_v6_15_route_session';
         let apiOnline=false;
         let sessionToken='';
-        function handleSessionFailure(message){
-          const m=String(message||'');
-          if(/sesi (tidak valid|telah berakhir|sudah tidak berlaku)|silakan login kembali/i.test(m)){
-            clearSession();
-            currentUser=null;
-            const screen=document.getElementById('login-screen');
-            if(screen)screen.classList.remove('hidden');
-            showToast('Sesi berakhir. Silakan login kembali.');
-            return true;
-          }
-          return false;
-        }
         async function apiGet(action,params={}){
           const q=new URLSearchParams({action,...params});
           if(sessionToken)q.set('token',sessionToken);
           const r=await fetch(API_URL+'?'+q.toString(),{cache:'no-store'});
           if(!r.ok)throw new Error('HTTP '+r.status);
-          const j=await r.json();
-          if(!j.success){ const msg=j.message||'API gagal'; handleSessionFailure(msg); throw new Error(msg); }
-          return j;
+          const j=await r.json();if(!j.success)throw new Error(j.message||'API gagal');return j;
         }
         async function apiPost(payload){
           const body={...payload};
@@ -696,7 +682,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
           const r=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)});
           if(!r.ok) throw new Error('HTTP '+r.status);
           const j=await r.json();
-          if(!j.success){ const msg=j.message||'API gagal'; handleSessionFailure(msg); throw new Error(msg); }
+          if(!j.success) throw new Error(j.message||'API gagal');
           return j;
         }
         function saveSession(){
