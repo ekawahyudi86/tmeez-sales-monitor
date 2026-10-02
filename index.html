@@ -1921,15 +1921,27 @@ async function syncEmployeeData(){
 let salesLocationWatchId=null,salesLocationLastSentAt=0,salesLocationLastLat=null,salesLocationLastLng=null,salesLocationBusy=false;
 async function sendSalesLocation(pos){
   if(currentUser?.role!=='sales'||salesLocationBusy)return;
-  const lat=Number(pos.coords.latitude),lng=Number(pos.coords.longitude),acc=Number(pos.coords.accuracy||0);
+  const lat=Number(pos?.coords?.latitude),lng=Number(pos?.coords?.longitude),acc=Number(pos?.coords?.accuracy||0);
+  if(!Number.isFinite(lat)||!Number.isFinite(lng))return;
   const nowMs=Date.now(); const moved=salesLocationLastLat==null?Infinity:distanceMeters(salesLocationLastLat,salesLocationLastLng,lat,lng);
+  // Titik pertama setelah Absen Masuk selalu dikirim. Berikutnya minimal 1 menit atau berpindah 50 m.
   if(nowMs-salesLocationLastSentAt<60000 && moved<50)return;
   salesLocationBusy=true;
-  try{const clientTxnId='LOC-'+currentUser.employeeId+'-'+nowMs+'-'+Math.random().toString(36).slice(2,8);await apiPost({action:'recordSalesLocation',clientTxnId,latitude:lat,longitude:lng,accuracy:acc});salesLocationLastSentAt=nowMs;salesLocationLastLat=lat;salesLocationLastLng=lng;}catch(e){if(!String(e.message||e).includes('sudah pulang'))console.warn('Tracking lokasi:',e.message||e);}finally{salesLocationBusy=false;}
+  try{
+    const clientTxnId='LOC-'+currentUser.employeeId+'-'+nowMs+'-'+Math.random().toString(36).slice(2,8);
+    const r=await apiPost({action:'recordSalesLocation',clientTxnId,latitude:lat,longitude:lng,accuracy:acc});
+    salesLocationLastSentAt=nowMs;salesLocationLastLat=lat;salesLocationLastLng=lng;
+    if(r?.stopped){stopSalesLocationTracking();}
+  }catch(e){
+    if(String(e.message||e).includes('sudah pulang'))stopSalesLocationTracking();
+    else console.warn('Tracking lokasi:',e.message||e);
+  }finally{salesLocationBusy=false;}
 }
 function startSalesLocationTracking(){
   if(currentUser?.role!=='sales'||salesLocationWatchId!==null||!navigator.geolocation)return;
-  salesLocationWatchId=navigator.geolocation.watchPosition(sendSalesLocation,()=>{}, {enableHighAccuracy:true,maximumAge:15000,timeout:30000});
+  // Kirim titik pertama segera, jangan menunggu perpindahan GPS dari watchPosition.
+  navigator.geolocation.getCurrentPosition(pos=>sendSalesLocation(pos),err=>console.warn('GPS tracking awal:',err?.message||err),{enableHighAccuracy:true,maximumAge:0,timeout:30000});
+  salesLocationWatchId=navigator.geolocation.watchPosition(sendSalesLocation,err=>console.warn('GPS tracking:',err?.message||err),{enableHighAccuracy:true,maximumAge:15000,timeout:30000});
 }
 function stopSalesLocationTracking(){if(salesLocationWatchId!==null){navigator.geolocation.clearWatch(salesLocationWatchId);salesLocationWatchId=null;}salesLocationLastSentAt=0;salesLocationLastLat=null;salesLocationLastLng=null;}
 async function loadAttendanceToday(){if(!['sales','staff'].includes(currentUser?.role))return;try{const r=await apiGet('attendanceToday'),a=r.data||null;if(currentUser?.role==='sales'){if(a&&!a.CheckOut)startSalesLocationTracking();else if(a?.CheckOut)stopSalesLocationTracking();}const stat=a?.Status||'Belum Absen',detail=a?`Masuk: <b>${escapeHtml(attClockV615(a.CheckIn))}</b>${a.CheckOut?` · Pulang: <b>${escapeHtml(attClockV615(a.CheckOut))}</b>`:''}${Number(a.LateMinutes||0)>0?` · Terlambat ${Number(a.LateMinutes)} menit`:''}${a.CheckInAccuracy?` · GPS ±${Math.round(Number(a.CheckInAccuracy))} m`:''}`:'Silakan Absen Masuk dari lokasi tempat kerja.';updateStaffDashboardAttendance(a);['sales-att-status','staff-att-status'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerText=stat});['sales-att-detail','staff-att-detail'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML=detail});['sales-att-in','staff-att-in'].forEach(id=>{const e=document.getElementById(id);if(e)e.disabled=!!a});['sales-att-out','staff-att-out'].forEach(id=>{const e=document.getElementById(id);if(e)e.disabled=!a||!!a.CheckOut});const sw=document.getElementById('staff-welcome');if(sw)sw.innerText='Halo, '+(currentUser?.name||'Staff');const sd=document.getElementById('staff-date');if(sd)sd.innerText=new Intl.DateTimeFormat('id-ID',{dateStyle:'full',timeZone:'Asia/Jakarta'}).format(new Date());}catch(e){showToast(e.message);if(employeeSyncActive)throw e}}
@@ -2013,10 +2025,14 @@ async function openSalesRoute(employeeId,date){
   try{
     const r=await apiGet('salesRoute',{employeeId,date}); const d=r.data||{},a=d.attendance||null,pts=Array.isArray(d.points)?d.points:[];
     document.getElementById('sales-route-sub').innerText=`${d.employee?.Name||employeeId} · ${date}`;
-    const distance=calcRouteDistance(pts);
-    document.getElementById('sales-route-summary').innerHTML=`<div class="rounded-xl bg-slate-50 p-3"><div class="text-[10px] text-slate-500">Masuk</div><b>${escapeHtml(attClockV615(a?.CheckIn)||'-')}</b></div><div class="rounded-xl bg-slate-50 p-3"><div class="text-[10px] text-slate-500">Pulang</div><b>${escapeHtml(attClockV615(a?.CheckOut)||'-')}</b></div><div class="rounded-xl bg-slate-50 p-3"><div class="text-[10px] text-slate-500">Titik GPS</div><b>${pts.length}</b></div><div class="rounded-xl bg-slate-50 p-3"><div class="text-[10px] text-slate-500">Jarak jejak</div><b>${distance>=0?(distance/1000).toFixed(2)+' km':'-'}</b></div>`;
-    renderSalesRouteMap(pts,a);
-    document.getElementById('sales-route-points').innerHTML=pts.length?pts.map((p,i)=>`<div class="flex justify-between border-t py-1"><span>${i+1}. ${escapeHtml(String(p.RecordedAt||''))}</span><span>${Number(p.Latitude).toFixed(6)}, ${Number(p.Longitude).toFixed(6)} · ±${Math.round(Number(p.Accuracy||0))} m</span></div>`).join(''):'<div class="text-slate-500">Belum ada titik perjalanan. Pastikan Sales membuka aplikasi setelah Absen Masuk.</div>';
+    const routePts=[];
+    if(a?.CheckInLat&&a?.CheckInLng)routePts.push({Latitude:a.CheckInLat,Longitude:a.CheckInLng,Accuracy:a.CheckInAccuracy,RecordedAt:a.CheckIn,RouteLabel:'Absen Masuk'});
+    pts.forEach(p=>routePts.push({...p,RouteLabel:'Titik GPS'}));
+    if(a?.CheckOutLat&&a?.CheckOutLng)routePts.push({Latitude:a.CheckOutLat,Longitude:a.CheckOutLng,Accuracy:a.CheckOutAccuracy,RecordedAt:a.CheckOut,RouteLabel:'Absen Pulang'});
+    const distance=calcRouteDistance(routePts);
+    document.getElementById('sales-route-summary').innerHTML=`<div class="rounded-xl bg-slate-50 p-3"><div class="text-[10px] text-slate-500">Masuk</div><b>${escapeHtml(attClockV615(a?.CheckIn)||'-')}</b></div><div class="rounded-xl bg-slate-50 p-3"><div class="text-[10px] text-slate-500">Pulang</div><b>${escapeHtml(attClockV615(a?.CheckOut)||'-')}</b></div><div class="rounded-xl bg-slate-50 p-3"><div class="text-[10px] text-slate-500">Titik GPS</div><b>${routePts.length}</b></div><div class="rounded-xl bg-slate-50 p-3"><div class="text-[10px] text-slate-500">Jarak jejak</div><b>${distance>=0?(distance/1000).toFixed(2)+' km':'-'}</b></div>`;
+    renderSalesRouteMap(routePts,a);
+    document.getElementById('sales-route-points').innerHTML=routePts.length?routePts.map((p,i)=>`<div class="flex justify-between border-t py-1"><span>${i+1}. ${escapeHtml(String(p.RouteLabel||'Titik GPS'))} · ${escapeHtml(attClockV615(p.RecordedAt)||'-')}</span><span>${Number(p.Latitude).toFixed(6)}, ${Number(p.Longitude).toFixed(6)} · ±${Math.round(Number(p.Accuracy||0))} m</span></div>`).join(''):'<div class="text-slate-500">Belum ada titik perjalanan. Pastikan Sales membuka aplikasi setelah Absen Masuk.</div>';
   }catch(e){document.getElementById('sales-route-sub').innerText='Gagal memuat perjalanan';document.getElementById('sales-route-summary').innerHTML=`<div class="col-span-full text-red-600">${escapeHtml(e.message||String(e))}</div>`;}
 }
 function closeSalesRoute(){document.getElementById('sales-route-modal')?.classList.add('hidden');if(salesRouteMap){salesRouteMap.remove();salesRouteMap=null;salesRouteLine=null;salesRouteMarkers=[];}}
@@ -2026,11 +2042,9 @@ function renderSalesRouteMap(pts,a){
   if(salesRouteMap){salesRouteMap.remove();}
   salesRouteMap=L.map('sales-route-map'); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(salesRouteMap);
   const latlngs=pts.map(p=>[Number(p.Latitude),Number(p.Longitude)]).filter(x=>Number.isFinite(x[0])&&Number.isFinite(x[1]));
-  if(a?.CheckInLat&&a?.CheckInLng)latlngs.unshift([Number(a.CheckInLat),Number(a.CheckInLng)]);
-  if(a?.CheckOutLat&&a?.CheckOutLng)latlngs.push([Number(a.CheckOutLat),Number(a.CheckOutLng)]);
   if(!latlngs.length){salesRouteMap.setView([-7.25,112.75],10);return;}
   salesRouteLine=L.polyline(latlngs,{weight:4}).addTo(salesRouteMap);
-  latlngs.forEach((ll,i)=>{const m=L.circleMarker(ll,{radius:i===0?8:(i===latlngs.length-1?8:4)}).addTo(salesRouteMap);m.bindPopup(i===0?'📍 Absen Masuk':(i===latlngs.length-1?'🏁 Absen Pulang':`Titik GPS ${i}`));salesRouteMarkers.push(m);});
+  latlngs.forEach((ll,i)=>{const p=pts[i]||{},m=L.circleMarker(ll,{radius:i===0?8:(i===latlngs.length-1?8:4)}).addTo(salesRouteMap);m.bindPopup(i===0?'📍 Absen Masuk':(i===latlngs.length-1?'🏁 Absen Pulang':`Titik GPS ${i}`));salesRouteMarkers.push(m);});
   salesRouteMap.fitBounds(salesRouteLine.getBounds(),{padding:[20,20]});
 }
 function renderHrAttendance(rows){const b=document.getElementById('hr-attendance');if(!b)return;const em={};hrEmployees.forEach(e=>em[e.EmployeeID]=e);b.innerHTML='<table class="w-full whitespace-nowrap"><thead><tr class="bg-slate-50"><th class="p-2 text-left">Tanggal</th><th>Karyawan</th><th>Masuk</th><th>Pulang</th><th>Status</th><th>Terlambat</th><th>Pulang Cepat</th><th>GPS</th><th>Perjalanan</th><th>Koreksi</th></tr></thead><tbody>'+rows.slice().reverse().map(a=>{const e=em[a.EmployeeID]||{};const isSales=!!e.SalesID;return `<tr class="border-t"><td class="p-2">${escapeHtml(String(a.Date||'').slice(0,10))}</td><td>${escapeHtml(e.Name||a.EmployeeID)}</td><td>${escapeHtml(attClockV615(a.CheckIn)||'-')}</td><td>${escapeHtml(attClockV615(a.CheckOut)||'-')}</td><td><b>${escapeHtml(a.Status||'-')}</b></td><td>${Number.isFinite(Number(a.LateMinutes))&&Number(a.LateMinutes)>=0?Math.round(Number(a.LateMinutes)):'-'} menit</td><td>${Number.isFinite(Number(a.EarlyLeaveMinutes))&&Number(a.EarlyLeaveMinutes)>=0?Math.round(Number(a.EarlyLeaveMinutes)):'-'} menit</td><td>${a.CheckInDistance!==''&&a.CheckInDistance!==undefined?Number(a.CheckInDistance)+' m':'-'}</td><td>${isSales?`<button onclick="openSalesRoute('${String(a.EmployeeID).replace(/'/g,"\\'")}','${String(a.Date||'').slice(0,10)}')" class="px-2 py-1 rounded-lg bg-indigo-50 text-indigo-700 font-bold">Lihat rute</button>`:'-'}</td><td>${a.CorrectionReason?escapeHtml(a.CorrectionReason):'-'}</td></tr>`}).join('')+'</tbody></table>'+(rows.length?'':'Belum ada data absensi pada periode ini.')}
