@@ -169,8 +169,8 @@
         }
         function uid(prefix){return prefix+Date.now().toString(36)+Math.random().toString(36).slice(2,5)}
         async function addSales(e){
-          e.preventDefault(); const username=document.getElementById('m-sales-user').value.trim();
-          try{await apiPost({action:'addSales',name:document.getElementById('m-sales-name').value.trim(),phone:document.getElementById('m-sales-phone').value.trim(),area:document.getElementById('m-sales-area').value.trim(),username,password:document.getElementById('m-sales-pass').value,targetVisit:+document.getElementById('m-sales-visit').value||0,targetBox:+document.getElementById('m-sales-box').value||0});
+          e.preventDefault(); const username=document.getElementById('m-sales-user').value.trim(); const position='Sales';
+          try{await apiPost({action:'addSales',name:document.getElementById('m-sales-name').value.trim(),phone:document.getElementById('m-sales-phone').value.trim(),area:document.getElementById('m-sales-area').value.trim(),username,password:document.getElementById('m-sales-pass').value,position,targetVisit:+document.getElementById('m-sales-visit').value||0,targetBox:+document.getElementById('m-sales-box').value||0,basicSalary:+document.getElementById('m-sales-basic')?.value||0,transportAllowance:+document.getElementById('m-sales-transport')?.value||0,motorcycleMaintenanceAllowance:+document.getElementById('m-sales-motor')?.value||250000});
             db.users.push({username,role:'sales'}); e.target.reset();document.getElementById('m-sales-visit').value=0;document.getElementById('m-sales-box').value=0;await refreshOnlineData(false);showToast('Sales tersimpan ke Google Sheet');
           }catch(err){showToast('Gagal menambah sales: '+err.message);}
         }
