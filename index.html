@@ -681,8 +681,8 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
         }
 
         const API_URL='https://script.google.com/macros/s/AKfycbyR-riwS3HVUM93sA8D09AR3Orb1kgYbZnZ9HwKSYA8Z1wo0DaJh-Z-sqQhSQvJ53ANCg/exec';
-        const DBKEY='tmeez_sales_monitor_v6_15_route_cache';
-        const SESSIONKEY='tmeez_sales_monitor_v6_15_route_session';
+        const DBKEY='tmeez_sales_monitor_v6_18_7_cache';
+        const SESSIONKEY='tmeez_sales_monitor_v6_18_7_session';
         let apiOnline=false;
         let sessionToken='';
         async function apiGet(action,params={}){
@@ -788,7 +788,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
         async function resetMonitoringAccount(userId){const p=prompt('Password baru Monitoring (minimal 6 karakter):');if(!p)return;try{await apiPost({action:'resetMonitoringPassword',userId,password:p});showToast('Password Monitoring berhasil direset');}catch(e){showToast(e.message);}}
         async function addSales(e){if(currentUser?.role==='monitoring'){showToast('Akses Monitoring hanya untuk pemantauan.');return;}
           e.preventDefault(); const username=document.getElementById('m-sales-user').value.trim();
-          try{const r=await apiPost({action:'addSales',name:document.getElementById('m-sales-name').value.trim(),phone:document.getElementById('m-sales-phone').value.trim(),area:document.getElementById('m-sales-area').value.trim(),username,password:document.getElementById('m-sales-pass').value,position:'Sales',targetVisit:+document.getElementById('m-sales-visit').value||0,targetBox:+document.getElementById('m-sales-box').value||0,basicSalary:+document.getElementById('m-sales-basic').value||0,transportAllowance:+document.getElementById('m-sales-transport').value||0,motorcycleMaintenanceAllowance:+document.getElementById('m-sales-motor').value||250000});
+          try{const r=await apiPost({action:'addSales',name:document.getElementById('m-sales-name').value.trim(),phone:document.getElementById('m-sales-phone').value.trim(),area:document.getElementById('m-sales-area').value.trim(),username,password:document.getElementById('m-sales-pass').value,targetVisit:+document.getElementById('m-sales-visit').value||0,targetBox:+document.getElementById('m-sales-box').value||0,basicSalary:+document.getElementById('m-sales-basic').value||0,transportAllowance:+document.getElementById('m-sales-transport').value||0,motorcycleMaintenanceAllowance:+document.getElementById('m-sales-motor').value||250000});
             db.users.push({username,role:'sales'}); e.target.reset();document.getElementById('m-sales-visit').value=0;document.getElementById('m-sales-box').value=0;document.getElementById('m-sales-basic').value=0;document.getElementById('m-sales-transport').value=0;document.getElementById('m-sales-motor').value=250000;await refreshOnlineData(false);await loadHrAdmin();showToast('Sales, data karyawan, dan komponen gaji tersimpan ke Google Sheet');
           }catch(err){showToast('Gagal menambah sales: '+err.message);}
         }
