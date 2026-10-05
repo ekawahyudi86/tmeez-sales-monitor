@@ -106,10 +106,26 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
 
         <!-- ================= SALES WORKFLOW V6.9.4 ================= -->
         <div id="view-sales" class="space-y-6 animate-fadeIn">
-          <div id="sales-sticky-greeting" class="sticky top-16 z-40 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-2 bg-slate-100/95 backdrop-blur border-b border-slate-200 shadow-sm">
-            <div class="max-w-3xl mx-auto flex items-center justify-between gap-3">
-              <div class="min-w-0"><p id="sales-greeting" class="text-sm sm:text-base font-bold text-slate-900 truncate">Selamat datang</p><p id="sales-greeting-date" class="text-[10px] sm:text-xs text-slate-500"></p></div>
-              <span class="shrink-0 text-[10px] font-semibold text-brand-700 bg-brand-50 border border-brand-100 rounded-lg px-2 py-1">Sales</span>
+          <div id="sales-sticky-greeting" class="max-w-3xl mx-auto">
+            <div class="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700 text-white shadow-xl">
+              <div class="absolute -right-10 -top-16 h-40 w-40 rounded-full bg-white/10"></div>
+              <div class="absolute right-16 -bottom-20 h-36 w-36 rounded-full bg-white/5"></div>
+              <div class="relative p-5 sm:p-6">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <p id="sales-greeting-date" class="text-[10px] sm:text-xs text-slate-300">Senin, 05 Oktober 2026</p>
+                    <h1 id="sales-greeting" class="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight truncate">Halo, Sales</h1>
+                    <p class="mt-1 text-xs sm:text-sm text-slate-300">Dashboard Sales</p>
+                  </div>
+                  <button onclick="logoutApp()" class="shrink-0 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-xs font-semibold flex items-center gap-1.5">↪ Keluar</button>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-5">
+                  <div class="rounded-2xl bg-white/10 border border-white/10 p-3"><p class="text-[9px] text-slate-300">Status</p><b id="sales-head-status" class="block mt-1 text-sm">Belum Absen</b></div>
+                  <div class="rounded-2xl bg-white/10 border border-white/10 p-3"><p class="text-[9px] text-slate-300">Masuk</p><b id="sales-head-in" class="block mt-1 text-sm">-</b></div>
+                  <div class="rounded-2xl bg-white/10 border border-white/10 p-3"><p class="text-[9px] text-slate-300">Pulang</p><b id="sales-head-out" class="block mt-1 text-sm">-</b></div>
+                  <div class="rounded-2xl bg-white/10 border border-white/10 p-3"><p class="text-[9px] text-slate-300">Terlambat</p><b id="sales-head-late" class="block mt-1 text-sm">0 menit</b></div>
+                </div>
+              </div>
             </div>
           </div>
           <div class="max-w-3xl mx-auto">
@@ -1177,7 +1193,7 @@ function renderDynamicForms(){
           const sales=db.sales.find(s=>String(s.id)===String(currentUser.salesId));
           const name=sales?.name||currentUser.name||currentUser.username||'Sales';
           const g=document.getElementById('sales-greeting');if(g)g.innerText=`${greeting}, ${name}`;
-          const d=document.getElementById('sales-greeting-date');if(d)d.innerText=new Intl.DateTimeFormat('id-ID',{timeZone:APP_TIMEZONE,weekday:'long',day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(now)+' WIB';
+          const d=document.getElementById('sales-greeting-date');if(d)d.innerText=new Intl.DateTimeFormat('id-ID',{timeZone:APP_TIMEZONE,weekday:'long',day:'2-digit',month:'long',year:'numeric'}).format(now);
         }
         function renderSalesPendingPayments(){
           if(currentUser?.role!=='sales')return;
@@ -1944,7 +1960,8 @@ function startSalesLocationTracking(){
   salesLocationWatchId=navigator.geolocation.watchPosition(sendSalesLocation,err=>console.warn('GPS tracking:',err?.message||err),{enableHighAccuracy:true,maximumAge:15000,timeout:30000});
 }
 function stopSalesLocationTracking(){if(salesLocationWatchId!==null){navigator.geolocation.clearWatch(salesLocationWatchId);salesLocationWatchId=null;}salesLocationLastSentAt=0;salesLocationLastLat=null;salesLocationLastLng=null;}
-async function loadAttendanceToday(){if(!['sales','staff'].includes(currentUser?.role))return;try{const r=await apiGet('attendanceToday'),a=r.data||null;if(currentUser?.role==='sales'){if(a&&!a.CheckOut)startSalesLocationTracking();else if(a?.CheckOut)stopSalesLocationTracking();}const stat=a?.Status||'Belum Absen',detail=a?`Masuk: <b>${escapeHtml(attClockV615(a.CheckIn))}</b>${a.CheckOut?` · Pulang: <b>${escapeHtml(attClockV615(a.CheckOut))}</b>`:''}${Number(a.LateMinutes||0)>0?` · Terlambat ${Number(a.LateMinutes)} menit`:''}${a.CheckInAccuracy?` · GPS ±${Math.round(Number(a.CheckInAccuracy))} m`:''}`:'Silakan Absen Masuk dari lokasi tempat kerja.';updateStaffDashboardAttendance(a);['sales-att-status','staff-att-status'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerText=stat});['sales-att-detail','staff-att-detail'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML=detail});['sales-att-in','staff-att-in'].forEach(id=>{const e=document.getElementById(id);if(e)e.disabled=!!a});['sales-att-out','staff-att-out'].forEach(id=>{const e=document.getElementById(id);if(e)e.disabled=!a||!!a.CheckOut});const sw=document.getElementById('staff-welcome');if(sw)sw.innerText='Halo, '+(currentUser?.name||'Staff');const sd=document.getElementById('staff-date');if(sd)sd.innerText=new Intl.DateTimeFormat('id-ID',{dateStyle:'full',timeZone:'Asia/Jakarta'}).format(new Date());}catch(e){showToast(e.message);if(employeeSyncActive)throw e}}
+async function loadAttendanceToday(){if(!['sales','staff'].includes(currentUser?.role))return;try{const r=await apiGet('attendanceToday'),a=r.data||null;if(currentUser?.role==='sales'){if(a&&!a.CheckOut)startSalesLocationTracking();else if(a?.CheckOut)stopSalesLocationTracking();}const stat=a?.Status||'Belum Absen',detail=a?`Masuk: <b>${escapeHtml(attClockV615(a.CheckIn))}</b>${a.CheckOut?` · Pulang: <b>${escapeHtml(attClockV615(a.CheckOut))}</b>`:''}${Number(a.LateMinutes||0)>0?` · Terlambat ${Number(a.LateMinutes)} menit`:''}${a.CheckInAccuracy?` · GPS ±${Math.round(Number(a.CheckInAccuracy))} m`:''}`:'Silakan Absen Masuk dari lokasi tempat kerja.';updateStaffDashboardAttendance(a);
+const hs=document.getElementById('sales-head-status');if(hs)hs.innerText=stat;const hi=document.getElementById('sales-head-in');if(hi)hi.innerText=a?.CheckIn?attClockV615(a.CheckIn):'-';const ho=document.getElementById('sales-head-out');if(ho)ho.innerText=a?.CheckOut?attClockV615(a.CheckOut):'-';const hl=document.getElementById('sales-head-late');if(hl)hl.innerText=(Number(a?.LateMinutes||0)>0?Number(a.LateMinutes):0)+' menit';['sales-att-status','staff-att-status'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerText=stat});['sales-att-detail','staff-att-detail'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML=detail});['sales-att-in','staff-att-in'].forEach(id=>{const e=document.getElementById(id);if(e)e.disabled=!!a});['sales-att-out','staff-att-out'].forEach(id=>{const e=document.getElementById(id);if(e)e.disabled=!a||!!a.CheckOut});const sw=document.getElementById('staff-welcome');if(sw)sw.innerText='Halo, '+(currentUser?.name||'Staff');const sd=document.getElementById('staff-date');if(sd)sd.innerText=new Intl.DateTimeFormat('id-ID',{dateStyle:'full',timeZone:'Asia/Jakarta'}).format(new Date());}catch(e){showToast(e.message);if(employeeSyncActive)throw e}}
         function showStaffPanel(panel){
           if(currentUser?.role!=='staff')return;
           const home=document.getElementById('staff-home-panel'),att=document.getElementById('staff-attendance-panel'),pay=document.getElementById('staff-payroll-panel');
