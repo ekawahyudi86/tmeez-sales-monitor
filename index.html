@@ -9,8 +9,8 @@
     <!-- Font Inter & Lucide Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQ3n4X5Q2l5pK2Qf0eQ0Qf3r4f5f7p4=" crossorigin="" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -46,7 +46,12 @@ button:not(:disabled):hover{filter:brightness(.98)}
 button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not-allowed!important;transform:none!important}
 .pay-btn.ring-2{transform:scale(.98);box-shadow:0 0 0 2px rgb(37 99 235 / .22)}
 </style>
-<style>.leaflet-container img{max-width:none!important;height:auto!important}.leaflet-container{font:inherit}</style>
+<style>
+.leaflet-container{font:inherit;overflow:hidden}
+.leaflet-container img{max-width:none!important;max-height:none!important}
+.leaflet-tile{width:256px!important;height:256px!important}
+.leaflet-tile-container{pointer-events:none}
+</style>
 </head>
 <body class="h-full flex flex-col text-slate-800 antialiased overflow-x-hidden">
 
@@ -169,6 +174,14 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
                   </div>
                   <div class="mt-3"><input id="sales-my-store-search" oninput="renderMySalesStores()" placeholder="Cari nama toko, pemilik, alamat..." class="w-full border rounded-xl p-2.5 text-xs"></div>
                   <div id="sales-my-store-list" class="mt-3 space-y-2 max-h-80 overflow-y-auto"></div>
+                </section>
+                <section class="rounded-2xl border bg-white p-4 shadow-sm">
+                  <div class="flex items-center justify-between gap-3">
+                    <div><p class="text-[11px] font-bold text-emerald-600">TRANSAKSI SAYA</p><h3 class="font-bold text-slate-900">Riwayat Transaksi</h3><p class="text-[11px] text-slate-500 mt-1">Hanya transaksi Sales ini. Read-only. Bukti transaksi dapat dibuat ulang dalam PDF.</p></div>
+                    <span id="sales-my-order-count" class="shrink-0 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-bold">0 transaksi</span>
+                  </div>
+                  <div class="mt-3"><input id="sales-my-order-search" oninput="renderMySalesOrders()" placeholder="Cari toko, nomor order..." class="w-full border rounded-xl p-2.5 text-xs"></div>
+                  <div id="sales-my-order-list" class="mt-3 space-y-2 max-h-96 overflow-y-auto"></div>
                 </section>
                 <div class="pt-4 border-t"><div class="flex items-center justify-between gap-2"><div><h3 class="font-bold text-slate-900">Tutup Hari</h3><p class="text-[11px] text-slate-500">Rangkuman barang dan uang hari ini.</p></div><button onclick="loadSalesCloseDay()" class="px-3 py-2 border rounded-xl text-[11px] font-bold">Perbarui</button></div><div class="grid grid-cols-2 gap-2 mt-3 text-xs"><div class="bg-indigo-50 p-3 rounded-xl"><span class="text-slate-500">Sisa Barang</span><b id="sales-stock-summary" class="block text-base">0 PCS</b></div><div class="bg-amber-50 p-3 rounded-xl"><span class="text-slate-500">Piutang Belum Tertagih</span><b id="sales-receivable-summary" class="block text-base">Rp 0</b></div><div class="bg-emerald-50 p-3 rounded-xl"><span class="text-slate-500">Cash Wajib Disetor</span><b id="sales-close-cash" class="block text-base">Rp 0</b><small id="sales-close-cash-detail" class="text-[10px] text-slate-500"></small></div><div class="bg-sky-50 p-3 rounded-xl"><span class="text-slate-500">Non-Cash ke Perusahaan</span><b id="sales-close-noncash" class="block text-base">Rp 0</b><small id="sales-close-noncash-detail" class="text-[10px] text-slate-500"></small></div></div><div id="sales-stock-breakdown" class="mt-2 text-[11px] bg-slate-50 rounded-xl p-3"></div><div id="sales-pending-payment-card" class="mt-3 rounded-2xl border border-amber-200 bg-amber-50 p-3">
   <div class="flex items-center justify-between gap-2"><div><b class="text-xs text-amber-900">Transfer/QRIS Menunggu Verifikasi</b><p class="text-[10px] text-amber-700">Pembayaran toko yang belum dikonfirmasi perusahaan.</p></div><button onclick="refreshOnlineData(true)" class="px-2 py-1 border border-amber-300 bg-white rounded-lg text-[10px] font-bold">↻</button></div>
@@ -752,7 +765,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
             }
             db.stores=(st.data||[]).map(mapStore);
             if(currentUser?.role==='sales')db.stores=db.stores.filter(x=>String(x.createdBySalesId)===String(currentUser.salesId)&&String(x.status).toLowerCase()==='active');
-            db.products=(pr.data||[]).map(mapProduct);try{const [xs,xd,xr]=await Promise.all([apiGet('stock'),apiGet('deposits'),apiGet('receivables')]);db.stock=xs.data||[];db.deposits=xd.data||[];db.receivables=xr.data||[];}catch(e){db.stock=db.stock||[];db.deposits=db.deposits||[];db.receivables=db.receivables||[];}apiOnline=true;saveDb();renderMaster();renderDynamicForms();renderMySalesStores();renderOperations();renderPendingPayments();renderStorePerformance();refreshVisitKpi();renderAdminDashboard(currentAdminPeriod||'monthly');renderWorkflowToday();
+            db.products=(pr.data||[]).map(mapProduct);try{const [xs,xd,xr]=await Promise.all([apiGet('stock'),apiGet('deposits'),apiGet('receivables')]);db.stock=xs.data||[];db.deposits=xd.data||[];db.receivables=xr.data||[];}catch(e){db.stock=db.stock||[];db.deposits=db.deposits||[];db.receivables=db.receivables||[];}apiOnline=true;saveDb();renderMaster();renderDynamicForms();renderMySalesStores();renderMySalesOrders();renderOperations();renderPendingPayments();renderStorePerformance();refreshVisitKpi();renderAdminDashboard(currentAdminPeriod||'monthly');renderWorkflowToday();
             if(showMessage)showToast('Data Google Sheet berhasil disinkronkan');
           }catch(err){apiOnline=false;if(showMessage)showToast('Sinkronisasi gagal: '+err.message);}
         }
@@ -763,7 +776,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
           const raw=localStorage.getItem(DBKEY);
           if(raw){ try{db=JSON.parse(raw)}catch(e){} }
           db.users=db.users||[]; db.products=db.products||[]; db.sales=db.sales||[]; db.stores=db.stores||[]; db.visits=db.visits||[]; db.orders=db.orders||[]; db.stock=db.stock||[];db.deposits=db.deposits||[];db.receivables=db.receivables||[]; db.pendingPayments=db.pendingPayments||[]; db.storePerformance=db.storePerformance||[]; db.settings=db.settings||{radius:100};
-          renderMaster(); renderDynamicForms(); renderMySalesStores(); refreshVisitKpi(); refreshOnlineData(false);
+          renderMaster(); renderDynamicForms(); renderMySalesStores(); renderMySalesOrders(); refreshVisitKpi(); refreshOnlineData(false);
         }
         function saveDb(){localStorage.setItem(DBKEY,JSON.stringify(db));}
         window.addEventListener('storage',e=>{if(e.key===DBKEY && e.newValue){try{db=JSON.parse(e.newValue);renderMaster();renderDynamicForms();refreshVisitKpi();}catch(err){}}});
@@ -942,6 +955,21 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
         async function resetSalesPasswordFromModal(){if(currentUser?.role==='monitoring'){showToast('Akses Monitoring hanya untuk pemantauan.');return;}const id=document.getElementById('edit-sales-id').value;const p=prompt('Masukkan password baru (minimal 6 karakter):');if(!p)return;try{await apiPost({action:'resetSalesPassword',salesId:id,newPassword:p});showToast('Password Sales berhasil diubah');}catch(err){showToast(err.message);}}
         async function transferSalesStoresFromModal(){if(currentUser?.role==='monitoring'){showToast('Akses Monitoring hanya untuk pemantauan.');return;}const from=document.getElementById('edit-sales-id').value,to=document.getElementById('transfer-sales-target').value;if(!to){showToast('Pilih Sales pengganti');return;}if(!confirm('Alihkan semua toko Sales ini ke Sales pengganti? Histori lama tidak akan diubah.'))return;try{const r=await apiPost({action:'transferSalesStores',fromSalesId:from,toSalesId:to});await refreshOnlineData();openSalesModal(from);showToast(r.message);}catch(err){showToast(err.message);}}
 
+function normalizeWaDigits(value){
+  let d=String(value??'').replace(/\D/g,'');
+  if(!d)return '';
+  if(d.startsWith('62'))return d;
+  if(d.startsWith('0'))return '62'+d.slice(1);
+  return '62'+d;
+}
+function formatWaDisplay(value){
+  let d=String(value??'').replace(/\D/g,'');
+  if(!d)return '-';
+  if(d.startsWith('62'))return '0'+d.slice(2);
+  if(d.startsWith('0'))return d;
+  return '0'+d;
+}
+function storeWaLink(value){const d=normalizeWaDigits(value);return d?('https://wa.me/'+d):'';}
 function renderMySalesStores(){
   if(currentUser?.role!=='sales')return;
   const box=document.getElementById('sales-my-store-list'),count=document.getElementById('sales-my-store-count');
@@ -955,1089 +983,70 @@ function renderMySalesStores(){
   box.innerHTML=rows.length?rows.map(x=>{
     const gps=(Number.isFinite(Number(x.lat))&&Number.isFinite(Number(x.lng))&&Number(x.lat)!==0&&Number(x.lng)!==0)?`${Number(x.lat).toFixed(6)}, ${Number(x.lng).toFixed(6)}`:'-';
     const photo=x.photoUrl?`<a href="${escapeHtml(x.photoUrl)}" target="_blank" rel="noopener" class="inline-flex px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 font-bold">Lihat Foto</a>`:'';
-    return `<div class="border rounded-xl p-3 bg-slate-50/60"><div class="flex justify-between gap-3"><div class="min-w-0"><b class="text-sm">${escapeHtml(x.name||'-')}</b><div class="text-[11px] text-slate-500 mt-1">Pemilik: ${escapeHtml(x.owner||'-')}</div><div class="text-[11px] text-slate-500">WA: ${escapeHtml(x.wa||'-')}</div><div class="text-[11px] text-slate-500">${escapeHtml(x.address||'Alamat belum diisi')}</div></div><span class="shrink-0 text-[10px] text-emerald-700 bg-emerald-50 px-2 py-1 rounded-full font-bold">Aktif</span></div><div class="mt-2 pt-2 border-t text-[10px] text-slate-500 flex flex-wrap gap-x-4 gap-y-1"><span>GPS: ${escapeHtml(gps)}</span>${x.createdAt?`<span>Daftar: ${escapeHtml(String(x.createdAt))}</span>`:''}${photo?`<span>${photo}</span>`:''}</div></div>`;
+    const waDisplay=formatWaDisplay(x.wa);
+    const waUrl=storeWaLink(x.wa);
+    const waBtn=waUrl?`<a href="${waUrl}" target="_blank" rel="noopener" class="inline-flex px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 font-bold">WhatsApp</a>`:'';
+    return `<div class="border rounded-xl p-3 bg-slate-50/60"><div class="flex justify-between gap-3"><div class="min-w-0"><b class="text-sm">${escapeHtml(x.name||'-')}</b><div class="text-[11px] text-slate-500 mt-1">Pemilik: ${escapeHtml(x.owner||'-')}</div><div class="text-[11px] text-slate-500">WA: ${escapeHtml(waDisplay)}</div><div class="text-[11px] text-slate-500">${escapeHtml(x.address||'Alamat belum diisi')}</div></div><span class="shrink-0 text-[10px] text-emerald-700 bg-emerald-50 px-2 py-1 rounded-full font-bold">Aktif</span></div><div class="mt-2 pt-2 border-t text-[10px] text-slate-500 flex flex-wrap gap-x-4 gap-y-1"><span>GPS: ${escapeHtml(gps)}</span>${x.createdAt?`<span>Daftar: ${escapeHtml(String(x.createdAt))}</span>`:''}${photo?`<span>${photo}</span>`:''}${waBtn?`<span>${waBtn}</span>`:''}</div></div>`;
   }).join(''):'<div class="py-6 text-center text-xs text-slate-400">Belum ada toko yang Anda daftarkan.</div>';
 }
-
-function renderDynamicForms(){
-          const ms=document.getElementById('m-store-sales');
-          if(ms){const old=ms.value;ms.innerHTML='<option value="">Pilih sales penanggung jawab</option>'+db.sales.filter(s=>s.active!==false).map(s=>`<option value="${s.id}">${s.name}</option>`).join('');ms.value=old;}
-          const vs=document.getElementById('visit-store'),is=document.getElementById('invoice-store'),ip=document.getElementById('invoice-products');
-          if(vs&&!activeVisit)vs.innerHTML='<option value="">Pilih toko yang dikunjungi</option>'+db.stores.map(x=>`<option value="${x.id}" data-lat="${x.lat}" data-lng="${x.lng}">${x.name}</option>`).join('');
-          if(is&&!activeVisit)is.innerHTML='<option value="">-- Pilih Toko Terdaftar --</option>'+db.stores.map(x=>`<option value="${x.id}">${x.name}${x.owner?' ('+x.owner+')':''}</option>`).join('');
-          if(ip)ip.innerHTML=db.products.map(x=>`<div class="invoice-item border rounded-xl bg-white p-3" data-product-id="${x.id}" data-product-name="${escapeHtml(x.name)}">
-            <div class="flex justify-between gap-2 mb-2"><span class="text-xs font-bold">${escapeHtml(x.name)}</span><span class="text-[10px] text-slate-400">Acuan Rp ${x.price.toLocaleString('id-ID')}/PCS</span></div>
-            <div class="grid grid-cols-3 gap-2">
-              <label class="text-[10px] text-slate-500">Qty PCS<input type="number" min="0" step="1" value="0" class="product-qty mt-1 w-full px-2 py-2 rounded-lg border text-xs font-bold" oninput="calculateInvoiceTotal()"></label>
-              <label class="text-[10px] text-slate-500">Harga/PCS<input type="number" min="0" step="1" value="${x.price}" class="product-price mt-1 w-full px-2 py-2 rounded-lg border text-xs font-bold" oninput="calculateInvoiceTotal()"></label>
-              <label class="text-[10px] text-slate-500">Diskon/PCS<input type="number" min="0" step="1" value="0" class="product-discount mt-1 w-full px-2 py-2 rounded-lg border text-xs font-bold" oninput="calculateInvoiceTotal()"></label>
-            </div>
-            <div class="text-right text-[11px] mt-2 text-indigo-700">Total: <b class="product-line-total">Rp 0</b></div>
-          </div>`).join(''); calculateInvoiceTotal();
-        }
-        let onboardingGps=null, onboardingPhoto=null;
-        function gpsErrorMessage(err){
-          if(!err)return 'GPS gagal tanpa detail.';
-          if(err.code===1)return 'Izin lokasi ditolak. Aktifkan izin Lokasi untuk situs/PWA Tmeez di pengaturan browser/HP.';
-          if(err.code===2)return 'Lokasi tidak tersedia. Pastikan GPS/Lokasi HP aktif lalu coba di area terbuka.';
-          if(err.code===3)return 'GPS terlalu lama merespons. Coba kembali dan tunggu beberapa detik.';
-          return 'GPS gagal: '+(err.message||'kesalahan tidak diketahui');
-        }
-        async function captureGps(){
-          const s=document.getElementById('gps-status');
-          if(!window.isSecureContext){const m='GPS membutuhkan HTTPS. Buka aplikasi dari alamat GitHub Pages HTTPS, bukan file lokal.';if(s)s.innerText=m;showToast(m);return;}
-          if(!navigator.geolocation){const m='Browser/perangkat ini tidak menyediakan Geolocation.';if(s)s.innerText=m;showToast(m);return;}
-          if(s)s.innerText='Meminta izin dan mengambil lokasi GPS...';
-          try{
-            if(navigator.permissions?.query){
-              try{const perm=await navigator.permissions.query({name:'geolocation'});if(perm.state==='denied'){const m='Izin lokasi diblokir. Ubah izin Location situs/PWA Tmeez menjadi Allow.';if(s)s.innerText=m;showToast(m);return;}}catch(_e){}
-            }
-          }catch(_e){}
-          navigator.geolocation.getCurrentPosition(pos=>{
-            onboardingGps={lat:pos.coords.latitude,lng:pos.coords.longitude,accuracy:pos.coords.accuracy||0};
-            if(s)s.innerText=`✓ GPS didapat · ${onboardingGps.lat.toFixed(6)}, ${onboardingGps.lng.toFixed(6)} · akurasi ±${Math.round(onboardingGps.accuracy)} m`;
-            scheduleWorkflowDraft();showToast('Lokasi GPS berhasil diambil');
-          },err=>{const m=gpsErrorMessage(err);if(s)s.innerText=m;showToast(m);},{enableHighAccuracy:true,timeout:30000,maximumAge:0});
-        }
-        function triggerCamera(){
-          const input=document.getElementById('store-photo-input');
-          if(!input){showToast('Input kamera tidak ditemukan. Muat ulang aplikasi.');return;}
-          input.value='';
-          try{input.click();}catch(err){showToast('Kamera gagal dibuka: '+err.message);}
-        }
-        function handleStorePhoto(input){
-          const file=input?.files?.[0];if(!file){return;}
-          if(!String(file.type||'').startsWith('image/')){showToast('File yang dipilih bukan gambar.');return;}
-          const status=document.getElementById('photo-status');if(status)status.innerText='Memproses foto...';
-          const reader=new FileReader();
-          reader.onerror=()=>{if(status)status.innerText='Foto gagal dibaca';showToast('Foto gagal dibaca');};
-          reader.onload=ev=>{
-            const img=new Image();
-            img.onerror=()=>{if(status)status.innerText='Format foto tidak dapat diproses';showToast('Format foto tidak dapat diproses');};
-            img.onload=()=>{
-              const max=1280,scale=Math.min(1,max/img.width),c=document.createElement('canvas');
-              c.width=Math.max(1,Math.round(img.width*scale));c.height=Math.max(1,Math.round(img.height*scale));
-              c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-              onboardingPhoto=c.toDataURL('image/jpeg',0.72);
-              if(status)status.innerText='✓ Foto siap · '+Math.round(onboardingPhoto.length/1024)+' KB';
-              showToast('Foto toko berhasil diambil');
-            };img.src=ev.target.result;
-          };reader.readAsDataURL(file);
-        }
-        async function handleStoreSubmit(e){
-          e.preventDefault();
-          if(!onboardingGps){showToast('Ambil lokasi GPS toko terlebih dahulu');return;}
-          if(!onboardingPhoto){showToast('Ambil foto tampak toko terlebih dahulu');return;}
-          try{
-            const res=await apiPost({action:'addStore',storeName:document.getElementById('store-name').value.trim(),ownerName:document.getElementById('owner-name').value.trim(),whatsapp:document.getElementById('store-wa')?.value||'',address:document.getElementById('store-address')?.value||'',latitude:onboardingGps.lat,longitude:onboardingGps.lng,gpsAccuracy:onboardingGps.accuracy,photoBase64:onboardingPhoto,photoMimeType:'image/jpeg'});
-            const newId=String(res.storeId||'');
-            e.target.reset();onboardingGps=null;onboardingPhoto=null;
-            await refreshOnlineData(false);
-            const store=db.stores.find(x=>String(x.id)===newId);
-            if(!store)throw new Error('Toko tersimpan tetapi belum ditemukan saat sinkronisasi. Muat ulang lalu pilih Kunjungan Toko.');
-            prepareWorkflowStore(store);
-            showSalesStep('checkin');
-            showToast('Toko tersimpan. Lanjutkan check-in kunjungan.');
-          }catch(err){showToast('Gagal mendaftarkan toko: '+err.message);}
-        }
-
-
-
-        const WORKFLOW_DRAFT_PREFIX='tmeez_sales_workflow_draft_v652_';
-        let currentSalesStep='home', restoringWorkflowDraft=false, draftTimer=null;
-        function workflowDraftKey(){return WORKFLOW_DRAFT_PREFIX+String(currentUser?.salesId||currentUser?.username||'unknown');}
-        function visibleSalesStep(){const x=[...document.querySelectorAll('#view-sales .sales-step')].find(el=>!el.classList.contains('hidden'));return x?x.id.replace('sales-step-',''):(currentSalesStep||'home');}
-        function getWorkflowDraft(){
-          if(currentUser?.role!=='sales')return null;
-          try{return JSON.parse(localStorage.getItem(workflowDraftKey())||'null');}catch(_e){return null;}
-        }
-        function clearWorkflowDraft(){if(currentUser?.role==='sales')localStorage.removeItem(workflowDraftKey());}
-        function collectWorkflowDraft(){
-          if(currentUser?.role!=='sales'||restoringWorkflowDraft||workflowVisitSaved)return null;
-          const items=[...document.querySelectorAll('#invoice-products .invoice-item')].map(row=>({
-            productId:String(row.dataset.productId||''),qty:row.querySelector('.product-qty')?.value||'0',
-            price:row.querySelector('.product-price')?.value||'0',discount:row.querySelector('.product-discount')?.value||'0'
-          }));
-          return {
-            version:1,updatedAt:new Date().toISOString(),step:visibleSalesStep(),
-            storeId:String(activeVisit?.storeId||document.getElementById('visit-store')?.value||document.getElementById('workflow-store-select')?.value||''),
-            activeVisit:activeVisit?{...activeVisit,checkIn:activeVisit.checkIn instanceof Date?activeVisit.checkIn.toISOString():activeVisit.checkIn}:null,
-            newStore:{name:document.getElementById('store-name')?.value||'',owner:document.getElementById('owner-name')?.value||'',wa:document.getElementById('store-wa')?.value||'',address:document.getElementById('store-address')?.value||''},
-            onboardingGps:onboardingGps||null,onboardingPhoto:onboardingPhoto||null,
-            noOrderOpen:!document.getElementById('workflow-no-order')?.classList.contains('hidden'),
-            noOrderReason:document.getElementById('no-order-reason')?.value||'',visitNote:document.getElementById('visit-note')?.value||'',
-            invoiceNotes:document.getElementById('invoice-notes')?.value||'',items,paymentMethod:workflowPaymentMethod||''
-          };
-        }
-        function saveWorkflowDraftNow(){
-          const d=collectWorkflowDraft();if(!d)return;
-          // home with no input is not an unfinished job
-          if(d.step==='home'&&!d.storeId&&!d.newStore.name&&!d.newStore.owner&&!d.newStore.wa&&!d.newStore.address)return;
-          try{localStorage.setItem(workflowDraftKey(),JSON.stringify(d));}catch(err){console.warn('Draft tidak dapat disimpan',err);}
-        }
-        function scheduleWorkflowDraft(){clearTimeout(draftTimer);draftTimer=setTimeout(saveWorkflowDraftNow,120);}
-        function applyOrderDraft(items){
-          (items||[]).forEach(x=>{const row=[...document.querySelectorAll('#invoice-products .invoice-item')].find(r=>String(r.dataset.productId)===String(x.productId));if(!row)return;const q=row.querySelector('.product-qty'),p=row.querySelector('.product-price'),d=row.querySelector('.product-discount');if(q)q.value=x.qty;if(p)p.value=x.price;if(d)d.value=x.discount;});calculateInvoiceTotal();
-        }
-        async function restoreWorkflowDraft(){
-          if(currentUser?.role!=='sales')return false;
-          const d=getWorkflowDraft();if(!d||!d.step||d.step==='success')return false;
-          restoringWorkflowDraft=true;
-          try{
-            const set=(id,val)=>{const e=document.getElementById(id);if(e&&val!==undefined)e.value=val;};
-            set('store-name',d.newStore?.name||'');set('owner-name',d.newStore?.owner||'');set('store-wa',d.newStore?.wa||'');set('store-address',d.newStore?.address||'');
-            onboardingGps=d.onboardingGps||null;onboardingPhoto=d.onboardingPhoto||null;
-            if(onboardingGps){const s=document.getElementById('gps-status');if(s)s.innerText=`✓ GPS draft · ${Number(onboardingGps.lat).toFixed(6)}, ${Number(onboardingGps.lng).toFixed(6)} · akurasi ±${Math.round(Number(onboardingGps.accuracy||0))} m`;}
-            if(onboardingPhoto){const s=document.getElementById('photo-status');if(s)s.innerText='✓ Foto toko dipulihkan dari draft';}
-            if(d.storeId){
-              const store=db.stores.find(x=>String(x.id)===String(d.storeId));
-              if(store)prepareWorkflowStore(store);
-            }
-            if(d.activeVisit){activeVisit={...d.activeVisit,checkIn:new Date(d.activeVisit.checkIn)};const b=document.getElementById('visit-badge');if(b){b.className='text-xs px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 font-semibold';b.innerText='Check-in aktif';}document.getElementById('workflow-checkin-btn')?.classList.add('hidden');document.getElementById('workflow-after-checkin')?.classList.remove('hidden');}
-            renderDynamicForms();
-            if(d.storeId){const inv=document.getElementById('invoice-store');if(inv)inv.value=d.storeId;}
-            applyOrderDraft(d.items);set('invoice-notes',d.invoiceNotes||'');set('no-order-reason',d.noOrderReason||'');set('visit-note',d.visitNote||'');
-            if(d.noOrderOpen)document.getElementById('workflow-no-order')?.classList.remove('hidden');
-            workflowPaymentMethod=d.paymentMethod||'';
-            showSalesStep(d.step);
-            if(workflowPaymentMethod&&d.step==='payment'){const t=document.getElementById('payment-selected');if(t)t.innerText='Metode dipilih: '+workflowPaymentMethod;const c=document.getElementById('payment-confirm-btn');if(c)c.disabled=false;}
-            showToast('Data terakhir dipulihkan');
-            return true;
-          }finally{restoringWorkflowDraft=false;}
-        }
-        let workflowPaymentMethod='';
-        let workflowVisitSaved=false;
-        let workflowSubmitting=false;
-        function showSalesStep(name){
-          currentSalesStep=name;
-          document.querySelectorAll('#view-sales .sales-step').forEach(x=>x.classList.add('hidden'));
-          const el=document.getElementById('sales-step-'+name);if(el)el.classList.remove('hidden');
-          const order=['home','checkin','result','order'];const at=Math.max(0,order.indexOf(name));
-          order.forEach((x,i)=>{const d=document.getElementById('wf-dot-'+x);if(d)d.className='wf-dot '+(i<=at?'bg-brand-600 text-white':'');});
-          if(window.lucide)lucide.createIcons();
-          if(!restoringWorkflowDraft) scheduleWorkflowDraft();
-        }
-        function resetWorkflowPaymentUI(){
-          workflowSubmitting=false;workflowVisitSaved=false;workflowPaymentMethod='';
-          document.querySelectorAll('#sales-step-payment .pay-btn').forEach(b=>{b.disabled=false;b.classList.remove('ring-2','ring-brand-600','bg-brand-50','opacity-50','cursor-not-allowed');});
-          const c=document.getElementById('payment-confirm-btn');if(c){c.disabled=true;c.innerText='Bayar & Selesaikan Kunjungan';c.className='w-full py-3 bg-slate-300 text-white rounded-xl font-bold cursor-not-allowed';}
-          const t=document.getElementById('payment-selected');if(t)t.innerText='Belum memilih metode pembayaran';
-          document.getElementById('payment-due-wrap')?.classList.add('hidden');
-        }
-        function workflowHome(){activeVisit=null;lastSavedOrder=null;lastInvoiceFingerprint='';resetWorkflowPaymentUI();showSalesStep('home');renderWorkflowToday();}
-        async function startNextWorkflow(){clearWorkflowDraft();try{await refreshOnlineData(false);}catch(_e){}workflowHome();}
-        function startNewStoreWorkflow(){onboardingGps=null;onboardingPhoto=null;showSalesStep('newstore');}
-        function hasVisitedStoreToday(storeId){
-          const today=jakartaTodayKey();
-          return (db.visits||[]).some(v=>String(v.storeId||v.StoreID||'')===String(storeId) && dateKeyJakarta(v.checkIn||v.CheckInAt||v.createdAt||v.CreatedAt)===today);
-        }
-        function startExistingVisitWorkflow(){
-          const sel=document.getElementById('workflow-store-select');
-          if(sel){const available=db.stores.filter(x=>String(x.status).toLowerCase()==='active'&&!hasVisitedStoreToday(x.id));sel.innerHTML='<option value="">Pilih toko</option>'+available.map(x=>`<option value="${x.id}">${escapeHtml(x.name)}${x.address?' · '+escapeHtml(x.address):''}</option>`).join('');if(!available.length)showToast('Semua toko aktif sudah dikunjungi hari ini');}
-          showSalesStep('selectstore');
-        }
-        function continueExistingStore(){const id=document.getElementById('workflow-store-select')?.value;if(!id){showToast('Pilih toko terlebih dahulu');return;}if(hasVisitedStoreToday(id)){showToast('Toko ini sudah dikunjungi hari ini. Kunjungan berikutnya dapat dilakukan besok.');return;}const store=db.stores.find(x=>String(x.id)===String(id));if(!store){showToast('Toko tidak ditemukan');return;}prepareWorkflowStore(store);showSalesStep('checkin');}
-        function prepareWorkflowStore(store){
-          activeVisit=null;lastSavedOrder=null;lastInvoiceFingerprint='';resetWorkflowPaymentUI();
-          const vs=document.getElementById('visit-store');if(vs){vs.innerHTML=`<option value="${store.id}" data-lat="${store.lat}" data-lng="${store.lng}" selected>${escapeHtml(store.name)}</option>`;vs.value=store.id;}
-          const inv=document.getElementById('invoice-store');if(inv){inv.innerHTML=`<option value="${store.id}" selected>${escapeHtml(store.name)}</option>`;inv.value=store.id;}
-          const n=document.getElementById('workflow-store-name');if(n)n.innerText=store.name;
-          const info=document.getElementById('visit-info');if(info)info.innerHTML=`Toko: <b>${escapeHtml(store.name)}</b><br>Tekan tombol di bawah untuk validasi GPS.`;
-          document.getElementById('workflow-checkin-btn')?.classList.remove('hidden');document.getElementById('workflow-after-checkin')?.classList.add('hidden');
-        }
-        function showOrderQuestion(){if(!activeVisit){showToast('Lakukan check-in terlebih dahulu');return;}showSalesStep('result');document.getElementById('workflow-no-order')?.classList.add('hidden');}
-        function workflowHasOrder(){renderDynamicForms();if(activeVisit){const inv=document.getElementById('invoice-store');if(inv){inv.value=activeVisit.storeId;}}showSalesStep('order');calculateInvoiceTotal();}
-        function workflowNoOrder(){document.getElementById('workflow-no-order')?.classList.remove('hidden');}
-        async function completeNoOrderVisit(){
-          if(!activeVisit||workflowVisitSaved)return;
-          const end=new Date(),dur=Math.max(1,Math.round((end-activeVisit.checkIn)/60000)),reason=document.getElementById('no-order-reason')?.value||'Tidak order',note=document.getElementById('visit-note')?.value||'';
-          try{await apiPost({action:'saveVisit',storeId:activeVisit.storeId,checkInAt:activeVisit.checkIn.toISOString(),checkOutAt:end.toISOString(),latitude:activeVisit.lat,longitude:activeVisit.lng,gpsAccuracy:activeVisit.accuracy||0,distanceMeter:Math.round(activeVisit.distance),durationMinute:dur,result:'no_order',notes:[reason,note].filter(Boolean).join(' - ')});workflowVisitSaved=true;clearWorkflowDraft();document.getElementById('workflow-order-actions')?.classList.add('hidden');document.getElementById('workflow-success-text').innerText=`${activeVisit.store} · Tidak ada order · ${reason}`;showSalesStep('success');}catch(err){showToast('Gagal menyimpan kunjungan: '+err.message);}
-        }
-        function showPaymentStep(){try{validateInvoice();resetWorkflowPaymentUI();document.querySelectorAll('#sales-step-payment .pay-btn').forEach(b=>{b.disabled=false;b.classList.remove('ring-2','ring-brand-600','bg-brand-50');});const t=document.getElementById('payment-selected');if(t)t.innerText='Belum memilih metode pembayaran';const c=document.getElementById('payment-confirm-btn');if(c){c.disabled=true;c.className='w-full py-3 bg-slate-300 text-white rounded-xl font-bold cursor-not-allowed';c.innerText='Bayar & Selesaikan Kunjungan';}showSalesStep('payment');}catch(err){showToast(err.message);}}
-        function selectPaymentMethod(method,button){
-          if(workflowSubmitting||workflowVisitSaved)return;
-          workflowPaymentMethod=method;
-          document.querySelectorAll('#sales-step-payment .pay-btn').forEach(b=>b.classList.remove('ring-2','ring-brand-600','bg-brand-50'));
-          if(button)button.classList.add('ring-2','ring-brand-600','bg-brand-50');
-          const due=document.getElementById('payment-due-wrap');if(due)due.classList.toggle('hidden',method!=='Tempo');const t=document.getElementById('payment-selected');if(t)t.innerText='Metode dipilih: '+method;
-          const c=document.getElementById('payment-confirm-btn');if(c){c.disabled=false;c.className='w-full py-3 bg-brand-600 text-white rounded-xl font-bold';}
-          scheduleWorkflowDraft();
-        }
-        function workflowClientTxnId(){
-          if(!activeVisit)return '';
-          const raw=[String(currentUser?.salesId||''),String(activeVisit.storeId||''),activeVisit.checkIn instanceof Date?activeVisit.checkIn.toISOString():String(activeVisit.checkIn||'')].join('|');
-          let hash=2166136261;for(let i=0;i<raw.length;i++){hash^=raw.charCodeAt(i);hash=Math.imul(hash,16777619);}
-          return 'TXN-'+jakartaTodayKey()+'-'+(hash>>>0).toString(16).padStart(8,'0');
-        }
-        async function confirmWorkflowPayment(){
-          if(!activeVisit||workflowVisitSaved||workflowSubmitting)return;
-          if(!workflowPaymentMethod){showToast('Pilih metode pembayaran terlebih dahulu');return;}
-          if(workflowPaymentMethod==='Tempo'&&!document.getElementById('payment-due-date')?.value){showToast('Isi tanggal jatuh tempo piutang');return;}
-          workflowSubmitting=true;
-          const confirmBtn=document.getElementById('payment-confirm-btn');
-          if(confirmBtn){confirmBtn.disabled=true;confirmBtn.innerText='Menyimpan transaksi...';confirmBtn.className='w-full py-3 bg-slate-400 text-white rounded-xl font-bold cursor-wait';}
-          document.querySelectorAll('#sales-step-payment .pay-btn').forEach(b=>b.disabled=true);
-          try{
-            const method=workflowPaymentMethod,inv=validateInvoice(),end=new Date(),dur=Math.max(1,Math.round((end-activeVisit.checkIn)/60000));
-            const res=await apiPost({
-              action:'createOrderVisit',
-              clientTxnId:workflowClientTxnId(),
-              storeId:inv.storeId,
-              salesId:currentUser?.salesId||'',
-              notes:inv.notes,
-              paymentType:method,
-              paymentStatus:method==='Tempo'?'Belum Lunas':(['Transfer','QRIS'].includes(method)?'Menunggu Verifikasi':'Lunas'),
-              dueDate:document.getElementById('payment-due-date')?.value||'',
-              items:inv.items.map(x=>({productId:x.productId,qtyPcs:x.qtyPcs,unitPricePcs:x.unitPricePcs,discountPerPcs:x.discountPerPcs})),
-              visit:{checkInAt:activeVisit.checkIn.toISOString(),checkOutAt:end.toISOString(),latitude:activeVisit.lat,longitude:activeVisit.lng,gpsAccuracy:activeVisit.accuracy||0,distanceMeter:Math.round(activeVisit.distance),durationMinute:dur,notes:'Pembayaran: '+method}
-            });
-            const order=res.order;lastSavedOrder=order;workflowVisitSaved=true;clearWorkflowDraft();
-            await refreshOnlineData(false);
-            document.getElementById('workflow-order-actions')?.classList.remove('hidden');
-            document.getElementById('workflow-success-text').innerText=`${order.storeName} · ${order.totalQtyPcs} PCS · ${rupiah(order.grandTotal)} · ${method}`;
-            showSalesStep('success');showToast(res.idempotent?'Transaksi sebelumnya ditemukan dan diselesaikan tanpa duplikat.':'Order dan kunjungan berhasil disimpan');
-          }catch(err){
-            workflowSubmitting=false;document.querySelectorAll('#sales-step-payment .pay-btn').forEach(b=>b.disabled=false);
-            if(confirmBtn){confirmBtn.disabled=false;confirmBtn.innerText='Bayar & Selesaikan Kunjungan';confirmBtn.className='w-full py-3 bg-brand-600 text-white rounded-xl font-bold';}
-            showToast('Gagal menyimpan transaksi: '+err.message);
-          }
-        }
-        async function payWorkflow(method){selectPaymentMethod(method,null);}
-        let currentSalesDashboardPeriod='monthly';
-        function salesTargetForPeriod(monthly,period){
-          monthly=Number(monthly||0);if(period==='monthly')return monthly;
-          return Math.ceil(monthly/25*(period==='weekly'?7:1));
-        }
-        function switchSalesDashboardPeriod(period){
-          currentSalesDashboardPeriod=period;
-          ['daily','weekly','monthly'].forEach(p=>{const b=document.getElementById('sales-period-'+p);if(b)b.className='px-3 py-1.5 rounded-lg '+(p===period?'bg-white shadow-sm text-slate-900':'text-slate-500')});
-          renderWorkflowToday();
-        }
-        function updateSalesGreeting(){
-          if(currentUser?.role!=='sales')return;
-          const now=new Date(),hour=Number(new Intl.DateTimeFormat('en-GB',{timeZone:APP_TIMEZONE,hour:'2-digit',hourCycle:'h23'}).format(now));
-          const greeting=hour<11?'Selamat pagi':hour<15?'Selamat siang':hour<18?'Selamat sore':'Selamat malam';
-          const sales=db.sales.find(s=>String(s.id)===String(currentUser.salesId));
-          const name=sales?.name||currentUser.name||currentUser.username||'Sales';
-          const g=document.getElementById('sales-greeting');if(g)g.innerText=`${greeting}, ${name}`;
-          const d=document.getElementById('sales-greeting-date');if(d)d.innerText=new Intl.DateTimeFormat('id-ID',{timeZone:APP_TIMEZONE,weekday:'long',day:'2-digit',month:'long',year:'numeric'}).format(now);
-        }
-        function renderSalesPendingPayments(){
-          if(currentUser?.role!=='sales')return;
-          const sid=String(currentUser.salesId||'');
-          const rows=(db.orders||[]).filter(o=>String(o.salesId)===sid&&['transfer','qris'].includes(String(o.paymentType||'').toLowerCase())&&String(o.paymentStatus||'').toLowerCase()==='menunggu verifikasi');
-          const storeIds=new Set(rows.map(o=>String(o.storeId||'')).filter(Boolean));
-          const total=rows.reduce((n,o)=>n+Number(o.total||0),0);
-          const sc=document.getElementById('sales-pending-store-count'),tt=document.getElementById('sales-pending-total'),box=document.getElementById('sales-pending-payment-list');
-          if(sc)sc.innerText=storeIds.size;if(tt)tt.innerText=rupiah(total);if(!box)return;
-          const storeName=id=>(db.stores.find(s=>String(s.id)===String(id))||{}).name||id||'Toko';
-          box.innerHTML=rows.length?rows.slice().sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))).map(o=>`<div class="bg-white rounded-xl p-2.5 border border-amber-100"><div class="flex justify-between gap-2"><div class="min-w-0"><b class="text-xs text-slate-900">${escapeHtml(storeName(o.storeId))}</b><p class="text-[10px] text-slate-500">${escapeHtml(o.paymentType||'')} · ${escapeHtml(o.dateKey||String(o.date||''))}</p><p class="text-[9px] text-slate-400">Order: ${escapeHtml(o.id||'-')}</p></div><div class="text-right shrink-0"><b class="text-xs">${rupiah(Number(o.total||0))}</b><p class="text-[9px] text-amber-700 font-bold">Menunggu Verifikasi</p></div></div></div>`).join(''):'<p class="text-[10px] text-slate-500">Tidak ada pembayaran menunggu verifikasi.</p>';
-        }
-        function renderWorkflowToday(){
-          if(currentUser?.role!=='sales')return;
-          updateSalesGreeting();
-          renderSalesPendingPayments();
-          const sid=String(currentUser.salesId||'');
-          const period=currentSalesDashboardPeriod||'monthly';
-          const orders=(db.orders||[]).filter(o=>String(o.salesId)===sid&&orderPeriodMatch(o,period));
-          const visits=(db.visits||[]).filter(v=>String(v.salesId)===sid&&periodMatch(v.checkIn||v.date,period));
-          const sales=(db.sales||[]).find(s=>String(s.id)===sid)||{};
-          const pcs=orders.reduce((n,o)=>n+Number(o.qty||0),0);
-          const omzet=orders.reduce((n,o)=>n+Number(o.total||0),0);
-          const effective=visits.filter(v=>v.result==='order').length;
-          const strike=visits.length?Math.round(effective/visits.length*100):0;
-          const targetPcs=salesTargetForPeriod(sales.targetBox,period),targetVisit=salesTargetForPeriod(sales.targetVisit,period);
-          const set=(id,val)=>{const e=document.getElementById(id);if(e)e.innerText=val;};
-          set('sales-dashboard-period-label',period==='daily'?'Ringkasan hari ini':period==='weekly'?'Ringkasan 7 hari terakhir':'Ringkasan bulan ini');
-          set('sales-dash-omzet',rupiah(omzet));set('sales-dash-orders',orders.length+' order');
-          set('sales-dash-pcs',pcs+' PCS');set('sales-dash-visits',visits.length+' Toko');set('sales-dash-effective',effective);set('sales-dash-strike','Strike Rate '+strike+'%');
-          set('sales-dash-pcs-target',targetPcs?`Target ${targetPcs} PCS`:'Target belum ditetapkan');set('sales-dash-visit-target',targetVisit?`Target ${targetVisit} toko`:'Target belum ditetapkan');
-          set('sales-pcs-progress-text',`${pcs} / ${targetPcs} PCS`);set('sales-visit-progress-text',`${visits.length} / ${targetVisit} Toko`);
-          const pb=document.getElementById('sales-pcs-progress-bar'),vb=document.getElementById('sales-visit-progress-bar');if(pb)pb.style.width=(targetPcs?Math.min(100,pcs/targetPcs*100):0)+'%';if(vb)vb.style.width=(targetVisit?Math.min(100,visits.length/targetVisit*100):0)+'%';
-          set('sales-pcs-remaining',targetPcs?(pcs>=targetPcs?'Target tercapai':`Kurang ${targetPcs-pcs} PCS lagi`):'Target belum ditetapkan');
-          set('sales-visit-remaining',targetVisit?(visits.length>=targetVisit?'Target tercapai':`Kurang ${targetVisit-visits.length} toko lagi`):'Target belum ditetapkan');
-          // Compatibility with existing KPI code.
-          const calls=document.getElementById('kpi-calls');if(calls)calls.innerText=visits.length;
-        }
-        async function downloadLastOrderPdf(){if(!lastSavedOrder){showToast('Data order belum tersedia');return;}await downloadPdfInvoice();}
-        function shareLastOrderWhatsApp(){
-          const order=lastSavedOrder;if(!order){showToast('Data order belum tersedia');return;}const store=db.stores.find(s=>String(s.id)===String(order.storeId));let wa=String(store?.wa||order.storeWhatsApp||'').replace(/\D/g,'');if(wa.startsWith('0'))wa='62'+wa.slice(1);if(!wa){showToast('Nomor WhatsApp toko belum tersedia');return;}
-          const lines=['*Tmeez - Nota Penjualan*','No: '+order.orderId,'Toko: '+order.storeName,'Sales: '+order.salesName,'Pembayaran: '+workflowPaymentMethod,'',...order.items.map((x,i)=>`${i+1}. ${x.productName}\n${x.qtyPcs} PCS × ${rupiah(x.unitPricePcs)}${x.discountPerPcs?'\nDiskon '+rupiah(x.discountPerPcs)+'/PCS':''}\n= ${rupiah(x.total)}`),'','*TOTAL: '+rupiah(order.grandTotal)+'*','','Terima kasih.'];window.open('https://wa.me/'+wa+'?text='+encodeURIComponent(lines.join('\n')),'_blank','noopener');
-        }
-        window.captureGps=captureGps;window.triggerCamera=triggerCamera;window.handleStorePhoto=handleStorePhoto;window.handleStoreSubmit=handleStoreSubmit;
-        function fillCurrentStoreGps(){if(!navigator.geolocation){showToast('GPS tidak tersedia');return;} navigator.geolocation.getCurrentPosition(p=>{document.getElementById('m-store-lat').value=p.coords.latitude.toFixed(7);document.getElementById('m-store-lng').value=p.coords.longitude.toFixed(7);showToast('Koordinat terisi');},e=>showToast('GPS gagal: '+e.message),{enableHighAccuracy:true});}
-        const APP_TIMEZONE='Asia/Jakarta';
-        function jakartaParts(value=new Date()){
-          const d=value instanceof Date?value:new Date(value);
-          if(isNaN(d))return null;
-          const parts=new Intl.DateTimeFormat('en-CA',{timeZone:APP_TIMEZONE,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(d);
-          const o={};parts.forEach(x=>{if(x.type!=='literal')o[x.type]=x.value;});
-          return {year:+o.year,month:+o.month,day:+o.day,key:`${o.year}-${o.month}-${o.day}`,monthKey:`${o.year}-${o.month}`};
-        }
-        function jakartaTodayKey(){return jakartaParts(new Date()).key;}
-        function dateKeyJakarta(value){
-          if(value===null||value===undefined||value==='')return '';
-          if(value instanceof Date){const p=jakartaParts(value);return p?p.key:'';}
-          // Google Sheets can return a numeric serial date.
-          if(typeof value==='number'&&isFinite(value)){
-            const d=new Date(Date.UTC(1899,11,30)+value*86400000);
-            const p=jakartaParts(d);return p?p.key:'';
-          }
-          const raw=String(value).trim();
-          let m;
-          // Calendar date/datetime emitted by Apps Script without timezone: preserve its date component.
-          if((m=raw.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})(?:[ T].*)?$/)))return `${m[1]}-${String(m[2]).padStart(2,'0')}-${String(m[3]).padStart(2,'0')}`;
-          // Common Indonesian/Sheets display: dd/MM/yyyy or dd-MM-yyyy, optionally with time.
-          if((m=raw.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:[ ,T].*)?$/)))return `${m[3]}-${String(m[2]).padStart(2,'0')}-${String(m[1]).padStart(2,'0')}`;
-          const p=jakartaParts(raw);return p?p.key:'';
-        }
-        function addDaysKey(key,days){
-          const [y,m,d]=key.split('-').map(Number);
-          const x=new Date(Date.UTC(y,m-1,d+days,12,0,0));
-          return x.toISOString().slice(0,10);
-        }
-        function periodMatch(value,period){
-          const key=dateKeyJakarta(value),today=jakartaTodayKey();if(!key)return false;
-          if(period==='daily')return key===today;
-          if(period==='weekly')return key>=addDaysKey(today,-6)&&key<=today;
-          return key.slice(0,7)===today.slice(0,7);
-        }
-        function orderPeriodMatch(order,period){
-          // Gunakan flag server hanya bila flag benar-benar dikirim oleh API.
-          // Pada versi sebelumnya field yang TIDAK ADA terkonversi menjadi false,
-          // sehingga fallback tanggal tidak pernah dijalankan.
-          if(period==='daily' && order?.isToday!==null && order?.isToday!==undefined)return order.isToday;
-          if(period==='weekly' && order?.isLast7Days!==null && order?.isLast7Days!==undefined)return order.isLast7Days;
-          if(period==='monthly' && order?.isThisMonth!==null && order?.isThisMonth!==undefined)return order.isThisMonth;
-          const source=order?.dateKey||order?.date||order?.createdAt||'';
-          const key=dateKeyJakarta(source),today=jakartaTodayKey();
-          if(!key)return false;
-          if(period==='daily')return key===today;
-          if(period==='weekly')return key>=addDaysKey(today,-6)&&key<=today;
-          return key.slice(0,7)===today.slice(0,7);
-        }
-        function periodLabel(period){return period==='daily'?'Hari ini':period==='weekly'?'7 hari terakhir':'Bulan ini';}
-        async function runSalesDiagnostics(){
-          const set=(id,v)=>{const e=document.getElementById(id);if(e)e.innerText=v;};
-          set('diag-front','V6.9.4');set('diag-status','Mengambil data langsung dari API...');
-          try{
-            const [ping,res]=await Promise.all([apiGet('ping'),apiGet('orders',{limit:500})]);
-            set('diag-api',String(ping.version||'-'));
-            const packs=res.data||[];
-            let totalItems=0,totalPcs=0;
-            const rows=packs.map(pack=>{
-              const o=pack.order||pack.Order||pack||{},items=pack.items||pack.Items||[];
-              const itemQty=items.reduce((n,x)=>n+Number(x.QtyPcs??x.qtyPcs??0),0);
-              totalItems+=items.length;totalPcs+=itemQty;
-              const mapped=mapOrderPack(pack);
-              const sales=db.sales.find(s=>String(s.id)===String(mapped.salesId));
-              const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-              const yes=b=>b?'<b class="text-emerald-600">YA</b>':'<b class="text-red-500">TIDAK</b>';
-              return `<tr class="border-t"><td class="p-2">${esc(mapped.id)}</td><td class="p-2">${esc(sales?.name||mapped.salesId)}</td><td class="p-2">${esc(o.OrderDateDisplay||o.OrderDate||o.orderDate||o.CreatedAt||'')}</td><td class="p-2 text-center">${items.length}</td><td class="p-2 text-center font-bold">${itemQty}</td><td class="p-2 text-right">${rupiah(Number(o.GrandTotal??o.grandTotal??0))}</td><td class="p-2 text-center">${yes(orderPeriodMatch(mapped,'daily'))}</td><td class="p-2 text-center">${yes(orderPeriodMatch(mapped,'weekly'))}</td><td class="p-2 text-center">${yes(orderPeriodMatch(mapped,'monthly'))}</td></tr>`;
-            });
-            set('diag-orders',packs.length);set('diag-items',totalItems);set('diag-pcs',totalPcs);
-            const body=document.getElementById('diag-body');if(body)body.innerHTML=rows.join('')||'<tr><td colspan="9" class="p-5 text-center text-red-500">API tidak mengirim order.</td></tr>';
-            set('diag-status',`API ${ping.version||'-'} aktif · ${packs.length} order · ${totalItems} item · ${totalPcs} PCS diterima langsung dari server.`);
-          }catch(err){
-            set('diag-status','GAGAL: '+err.message);set('diag-api','ERROR');
-          }
-        }
-
-        let adminNativeMapState={zoom:null,center:null,manual:false};
-        function storeVisitedTodayForMap(storeId){
-          const today=jakartaTodayKey();
-          return (db.visits||[]).some(v=>String(v.storeId||'')===String(storeId)&&dateKeyJakarta(v.checkIn||v.date)===today);
-        }
-        function populateAdminMapSalesFilter(){
-          const sel=document.getElementById('admin-map-sales-filter');if(!sel)return;
-          const keep=sel.value;
-          sel.innerHTML='<option value="">Semua Sales</option>'+(db.sales||[]).filter(s=>s.active!==false).map(s=>`<option value="${escapeHtml(String(s.id))}">${escapeHtml(s.name)}</option>`).join('');
-          if([...sel.options].some(o=>o.value===keep))sel.value=keep;
-        }
-        function nativeMapWorld(lat,lng,z){
-          const size=256*Math.pow(2,z),x=(Number(lng)+180)/360*size;
-          const clamped=Math.max(-85.05112878,Math.min(85.05112878,Number(lat)));
-          const r=clamped*Math.PI/180;
-          const y=(1-Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2*size;
-          return {x,y,size};
-        }
-        function nativeMapFit(stores,w,h){
-          if(!stores.length)return {center:{lat:-7.45,lng:112.65},zoom:10};
-          const lats=stores.map(s=>Number(s.lat)),lngs=stores.map(s=>Number(s.lng));
-          const center={lat:(Math.min(...lats)+Math.max(...lats))/2,lng:(Math.min(...lngs)+Math.max(...lngs))/2};
-          if(stores.length===1)return {center,zoom:15};
-          for(let z=17;z>=5;z--){
-            const pts=stores.map(s=>nativeMapWorld(s.lat,s.lng,z));
-            const dx=Math.max(...pts.map(p=>p.x))-Math.min(...pts.map(p=>p.x));
-            const dy=Math.max(...pts.map(p=>p.y))-Math.min(...pts.map(p=>p.y));
-            if(dx<=Math.max(100,w-100)&&dy<=Math.max(100,h-100))return {center,zoom:z};
-          }
-          return {center,zoom:5};
-        }
-        function adminNativeMapZoom(delta){
-          adminNativeMapState.zoom=Math.max(5,Math.min(19,Number(adminNativeMapState.zoom||10)+delta));
-          adminNativeMapState.manual=true;renderAdminStoreMap(true);
-        }
-        function nativeMapLatLngFromWorld(x,y,z){
-          const size=256*Math.pow(2,z);
-          const lng=x/size*360-180;
-          const n=Math.PI-2*Math.PI*y/size;
-          const lat=180/Math.PI*Math.atan(Math.sinh(n));
-          return {lat:Math.max(-85.05112878,Math.min(85.05112878,lat)),lng};
-        }
-        function adminNativeMapFitAll(){
-          adminNativeMapState.center=null;adminNativeMapState.zoom=null;adminNativeMapState.manual=false;
-          renderAdminStoreMap(false);
-        }
-        let adminMapDragSession=null;
-        function bindAdminNativeMapInteractions(el,w,hgt){
-          el.style.touchAction='none';el.style.cursor='grab';
-
-          // Desktop mouse drag. Listener move/up ditempatkan di window agar
-          // render ulang tile/marker tidak memutus sesi drag.
-          el.onmousedown=e=>{
-            if(e.button!==0||e.target.closest('button,.native-map-popup'))return;
-            e.preventDefault();
-            const z=adminNativeMapState.zoom;
-            const cp=nativeMapWorld(adminNativeMapState.center.lat,adminNativeMapState.center.lng,z);
-            adminMapDragSession={type:'mouse',startX:e.clientX,startY:e.clientY,startWorld:{x:cp.x,y:cp.y},zoom:z};
-            el.style.cursor='grabbing';
-          };
-
-          // Touch: satu jari untuk pan. Dua jari tetap dapat mengubah zoom.
-          el.ontouchstart=e=>{
-            if(e.target.closest('button,.native-map-popup'))return;
-            if(e.touches.length===1){
-              const t=e.touches[0],z=adminNativeMapState.zoom;
-              const cp=nativeMapWorld(adminNativeMapState.center.lat,adminNativeMapState.center.lng,z);
-              adminMapDragSession={type:'touch',startX:t.clientX,startY:t.clientY,startWorld:{x:cp.x,y:cp.y},zoom:z};
-            }else if(e.touches.length===2){
-              const a=e.touches[0],b=e.touches[1];
-              adminMapDragSession={type:'pinch',distance:Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY),zoom:adminNativeMapState.zoom};
-            }
-          };
-          el.ontouchmove=e=>{
-            if(!adminMapDragSession)return;
-            e.preventDefault();
-            if(e.touches.length===1&&adminMapDragSession.type==='touch'){
-              const t=e.touches[0],s=adminMapDragSession;
-              adminNativeMapState.center=nativeMapLatLngFromWorld(s.startWorld.x-(t.clientX-s.startX),s.startWorld.y-(t.clientY-s.startY),s.zoom);
-              adminNativeMapState.manual=true;renderAdminStoreMap(true);
-            }else if(e.touches.length===2){
-              const a=e.touches[0],b=e.touches[1],d=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY),s=adminMapDragSession;
-              if(s.type!=='pinch'){adminMapDragSession={type:'pinch',distance:d,zoom:adminNativeMapState.zoom};return;}
-              const nz=Math.max(5,Math.min(19,Math.round(s.zoom+Math.log2(Math.max(.25,d/s.distance)))));
-              if(nz!==adminNativeMapState.zoom){adminNativeMapState.zoom=nz;adminNativeMapState.manual=true;renderAdminStoreMap(true);}
-            }
-          };
-          el.ontouchend=e=>{if(!e.touches.length)adminMapDragSession=null;};
-
-          el.onwheel=e=>{
-            e.preventDefault();
-            const oldZ=adminNativeMapState.zoom,newZ=Math.max(5,Math.min(19,oldZ+(e.deltaY<0?1:-1)));
-            if(newZ===oldZ)return;
-            const rect=el.getBoundingClientRect(),mx=e.clientX-rect.left,my=e.clientY-rect.top;
-            const cp=nativeMapWorld(adminNativeMapState.center.lat,adminNativeMapState.center.lng,oldZ);
-            const before={x:cp.x+(mx-w/2),y:cp.y+(my-hgt/2)};
-            const scale=Math.pow(2,newZ-oldZ),after={x:before.x*scale,y:before.y*scale};
-            const centerAfter={x:after.x-(mx-w/2),y:after.y-(my-hgt/2)};
-            adminNativeMapState.zoom=newZ;adminNativeMapState.center=nativeMapLatLngFromWorld(centerAfter.x,centerAfter.y,newZ);
-            adminNativeMapState.manual=true;renderAdminStoreMap(true);
-          };
-        }
-
-        // Dipasang sekali. Tetap hidup walaupun isi frame peta dirender ulang.
-        if(!window.__tmeezAdminMapMouseBound){
-          window.__tmeezAdminMapMouseBound=true;
-          window.addEventListener('mousemove',e=>{
-            const s=adminMapDragSession;
-            if(!s||s.type!=='mouse')return;
-            e.preventDefault();
-            adminNativeMapState.center=nativeMapLatLngFromWorld(
-              s.startWorld.x-(e.clientX-s.startX),
-              s.startWorld.y-(e.clientY-s.startY),
-              s.zoom
-            );
-            adminNativeMapState.manual=true;
-            renderAdminStoreMap(true);
-            const el=document.getElementById('admin-store-map');if(el)el.style.cursor='grabbing';
-          });
-          window.addEventListener('mouseup',()=>{
-            if(adminMapDragSession?.type==='mouse'){
-              adminMapDragSession=null;
-              const el=document.getElementById('admin-store-map');if(el)el.style.cursor='grab';
-            }
-          });
-        }
-        function renderAdminStoreMap(keepView=false){
-          const el=document.getElementById('admin-store-map');if(!el||currentUser?.role==='sales')return;
-          populateAdminMapSalesFilter();
-          const sid=document.getElementById('admin-map-sales-filter')?.value||'';
-          const stores=(db.stores||[]).filter(s=>{
-            const lat=Number(s.lat),lng=Number(s.lng);
-            return isFinite(lat)&&isFinite(lng)&&lat!==0&&lng!==0&&(!sid||String(s.createdBySalesId)===String(sid));
-          });
-          const visited=stores.filter(s=>storeVisitedTodayForMap(s.id)).length;
-          const set=(id,v)=>{const x=document.getElementById(id);if(x)x.innerText=v;};
-          set('admin-map-total',stores.length+' toko');set('admin-map-visited',visited+' sudah dikunjungi hari ini');set('admin-map-unvisited',(stores.length-visited)+' belum dikunjungi');
-          el.innerHTML='';el.style.position='relative';el.style.overflow='hidden';el.style.background='#e2e8f0';
-          if(!stores.length){el.innerHTML='<div class="h-full flex items-center justify-center p-6 text-center text-sm text-slate-500">Belum ada toko dengan koordinat GPS untuk filter ini.</div>';return;}
-          const w=Math.max(320,el.clientWidth||800),hgt=Math.max(300,el.clientHeight||430);
-          if(!keepView||!adminNativeMapState.center||!adminNativeMapState.zoom){const fit=nativeMapFit(stores,w,hgt);adminNativeMapState.center=fit.center;adminNativeMapState.zoom=fit.zoom;adminNativeMapState.manual=false;}
-          const z=adminNativeMapState.zoom,center=adminNativeMapState.center,cp=nativeMapWorld(center.lat,center.lng,z),world=cp.size;
-          const left=cp.x-w/2,top=cp.y-hgt/2;
-          const x0=Math.floor(left/256),x1=Math.floor((left+w)/256),y0=Math.floor(top/256),y1=Math.floor((top+hgt)/256),n=Math.pow(2,z);
-          for(let ty=y0;ty<=y1;ty++)for(let tx=x0;tx<=x1;tx++){
-            if(ty<0||ty>=n)continue;const wrapped=((tx%n)+n)%n;
-            const img=document.createElement('img');img.alt='';img.draggable=false;img.loading='eager';img.src=`https://tile.openstreetmap.org/${z}/${wrapped}/${ty}.png`;
-            img.style.cssText=`position:absolute;width:256px;height:256px;left:${tx*256-left}px;top:${ty*256-top}px;max-width:none;user-select:none;`;
-            img.onerror=()=>{img.style.opacity='.12';};el.appendChild(img);
-          }
-          stores.forEach(s=>{
-            const p=nativeMapWorld(s.lat,s.lng,z),done=storeVisitedTodayForMap(s.id),sales=(db.sales||[]).find(x=>String(x.id)===String(s.createdBySalesId));
-            const b=document.createElement('button');b.type='button';b.title=s.name||'Toko';
-            b.style.cssText=`position:absolute;z-index:20;left:${p.x-left}px;top:${p.y-top}px;width:20px;height:20px;border-radius:50%;transform:translate(-50%,-50%);background:${done?'#10b981':'#f59e0b'};border:3px solid white;box-shadow:0 2px 8px rgba(15,23,42,.35);cursor:pointer;`;
-            if(z>=13){
-              const label=document.createElement('div');
-              label.className='native-map-pin-label';
-              label.style.cssText=`position:absolute;z-index:19;left:${p.x-left+13}px;top:${p.y-top}px;transform:translateY(-50%);max-width:170px;background:rgba(255,255,255,.94);border:1px solid rgba(203,213,225,.95);border-radius:8px;padding:4px 7px;box-shadow:0 2px 7px rgba(15,23,42,.16);pointer-events:none;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;`;
-              label.innerHTML=`<div style="font-size:10px;font-weight:700;color:#0f172a;overflow:hidden;text-overflow:ellipsis">${escapeHtml(s.name||'Toko')}</div><div style="font-size:9px;color:#64748b;margin-top:2px;overflow:hidden;text-overflow:ellipsis">Sales: ${escapeHtml(sales?.name||s.createdByName||'-')}</div>`;
-              el.appendChild(label);
-            }
-            b.onclick=()=>{
-              el.querySelectorAll('.native-map-popup').forEach(x=>x.remove());
-              const pop=document.createElement('div');pop.className='native-map-popup';pop.style.cssText=`position:absolute;z-index:40;left:${Math.min(w-230,Math.max(8,p.x-left+12))}px;top:${Math.min(hgt-155,Math.max(8,p.y-top-25))}px;width:220px;background:white;border:1px solid #e2e8f0;border-radius:12px;padding:12px;box-shadow:0 10px 30px rgba(15,23,42,.22);font-size:11px;line-height:1.45;`;
-              pop.innerHTML=`<button type="button" style="float:right;font-size:16px;line-height:1" aria-label="Tutup">×</button><b style="font-size:13px">${escapeHtml(s.name||'-')}</b><br><span style="color:#64748b">${escapeHtml(s.address||'Alamat belum diisi')}</span><hr style="margin:7px 0;border:0;border-top:1px solid #e2e8f0"><b>Sales:</b> ${escapeHtml(sales?.name||s.createdByName||'-')}<br><b>Status:</b> ${escapeHtml(s.status||'-')}<br><b>Kunjungan hari ini:</b> ${done?'Sudah':'Belum'}<br><b>Ditambahkan:</b> ${escapeHtml(String(s.createdAt||'-'))}`;
-              pop.querySelector('button').onclick=()=>pop.remove();el.appendChild(pop);
-            };el.appendChild(b);
-          });
-          const controls=document.createElement('div');controls.style.cssText='position:absolute;z-index:30;right:10px;top:10px;display:flex;flex-direction:column;gap:4px';
-          controls.innerHTML='<button type="button" onclick="adminNativeMapZoom(1)" style="width:34px;height:34px;background:white;border:1px solid #cbd5e1;border-radius:9px;font-size:20px;box-shadow:0 2px 8px rgba(0,0,0,.12)">+</button><button type="button" onclick="adminNativeMapZoom(-1)" style="width:34px;height:34px;background:white;border:1px solid #cbd5e1;border-radius:9px;font-size:20px;box-shadow:0 2px 8px rgba(0,0,0,.12)">−</button>';
-          el.appendChild(controls);
-          const attr=document.createElement('div');attr.style.cssText='position:absolute;z-index:25;right:4px;bottom:3px;background:rgba(255,255,255,.85);padding:2px 5px;font-size:9px;color:#475569;border-radius:4px';attr.innerHTML='© OpenStreetMap contributors';el.appendChild(attr);
-          bindAdminNativeMapInteractions(el,w,hgt);
-        }
-
-        function renderAdminDashboard(period='monthly'){
-          const visits=(db.visits||[]).filter(v=>periodMatch(v.checkIn||v.date,period));
-          const orders=(db.orders||[]).filter(o=>orderPeriodMatch(o,period));
-          const activeSales=(db.sales||[]).filter(s=>s.active!==false);
-          const omzet=orders.reduce((n,o)=>n+Number(o.total||0),0);
-          const pcs=orders.reduce((n,o)=>n+Number(o.qty||0),0);
-          const set=(id,v)=>{const e=document.getElementById(id);if(e)e.innerText=v;};
-          set('admin-total-omzet',rupiah(omzet));set('admin-total-visits',visits.length+' Toko');set('admin-total-pcs',pcs+' PCS');set('admin-active-sales',activeSales.length+' Orang');
-          set('admin-omzet-status',orders.length?`${orders.length} transaksi · ${periodLabel(period)}`:'Belum ada transaksi');
-          set('admin-visits-status',visits.length?`${visits.length} kunjungan · ${periodLabel(period)}`:'Belum ada kunjungan');
-          const factor=period==='daily'?1:period==='weekly'?7:25;
-          const targetPcs=activeSales.reduce((n,s)=>n+(period==='monthly'?Number(s.targetBox||0):Math.ceil(Number(s.targetBox||0)/25*factor)),0);
-          set('admin-pcs-status',targetPcs?(pcs>=targetPcs?'Target PCS tercapai':`${pcs} dari ${targetPcs} PCS`):(pcs?`${pcs} PCS terjual · ${periodLabel(period)}`:'Target belum ditetapkan'));
-          set('admin-sales-status',activeSales.length?`${activeSales.length} sales aktif`:'Belum ada sales');
-          setTimeout(()=>renderAdminStoreMap(),0);
-
-          const body=document.getElementById('leaderboard-tbody');
-          const rows=activeSales.map(s=>{
-            const v=visits.filter(x=>String(x.salesId)===String(s.id));
-            const o=orders.filter(x=>String(x.salesId)===String(s.id));
-            const qty=o.reduce((n,x)=>n+Number(x.qty||0),0);
-            const tv=period==='monthly'?Number(s.targetVisit||0):Math.ceil(Number(s.targetVisit||0)/25*factor);
-            const tq=period==='monthly'?Number(s.targetBox||0):Math.ceil(Number(s.targetBox||0)/25*factor);
-            const visitPct=tv?Math.min(1,v.length/tv):0, pcsPct=tq?Math.min(1,qty/tq):0;
-            const dimensions=(tv?1:0)+(tq?1:0);
-            const score=dimensions?((tv?visitPct:0)+(tq?pcsPct:0))/dimensions:0;
-            return {s,v:v.length,o:o.length,qty,tv,tq,score,omzet:o.reduce((n,x)=>n+Number(x.total||0),0)};
-          }).sort((a,b)=>b.score-a.score||b.omzet-a.omzet||b.qty-a.qty);
-          if(body)body.innerHTML=rows.map((r,i)=>`<tr><td class="py-3 px-6"><b>${i+1}. ${escapeHtml(r.s.name)}</b><br><span class="text-slate-400">${escapeHtml(r.s.area||'-')}</span></td><td class="text-center">${r.tv}</td><td class="text-center">${r.v}</td><td class="text-center">${r.tq}</td><td class="text-center">${r.qty}</td><td class="px-6 text-right font-bold">${Math.round(r.score*100)}%</td></tr>`).join('')||'<tr><td colspan="6" class="py-8 px-6 text-center text-slate-400">Belum ada data kinerja sales.</td></tr>';
-          const ob=document.getElementById('admin-operational-body');
-          if(ob)ob.innerHTML=rows.map(r=>`<tr><td class="p-2"><b>${escapeHtml(r.s.name)}</b></td><td class="text-center">${r.v}</td><td class="text-center">${r.o}</td><td class="text-center">${r.v?Math.round(r.o/r.v*100):0}%</td><td class="text-center">${r.qty}</td><td class="text-right p-2">${rupiah(r.omzet)}</td></tr>`).join('')||'<tr><td colspan="6" class="p-6 text-center text-slate-400">Belum ada data operasional.</td></tr>';
-        }
-        function applyOnlineSettings(rows){
-          const obj={};rows.forEach(x=>obj[String(x.Key)]=x.Value);
-          if(obj.GEOFENCE_RADIUS!==undefined)db.settings.radius=Number(obj.GEOFENCE_RADIUS)||100;
-          const r=document.getElementById('admin-radius');if(r)r.value=db.settings.radius;
-        }
-        async function saveAdminSettings(){if(currentUser?.role==='monitoring'){showToast('Akses Monitoring hanya untuk pemantauan.');return;}try{const radius=+document.getElementById('admin-radius').value||100;await apiPost({action:'updateSettings',geofenceRadius:radius});db.settings.radius=radius;saveDb();showToast('Radius GPS tersimpan online');}catch(err){showToast('Gagal menyimpan pengaturan: '+err.message);}}
-        function renderRecentVisits(){
-          const grid=document.getElementById('recent-visits-grid');if(!grid)return;
-          const rows=(db.visits||[]).slice(0,9);
-          grid.innerHTML=rows.map(v=>`<div class="border rounded-2xl p-4 bg-slate-50/60"><div class="flex justify-between gap-2"><div><b class="text-sm">${escapeHtml(v.store||'-')}</b><p class="text-[11px] text-slate-500">${escapeHtml(v.salesName||'-')}</p></div><span class="text-[10px] px-2 py-1 h-fit rounded-lg ${v.distance<=Number(db.settings.radius||100)?'bg-emerald-100 text-emerald-700':'bg-red-100 text-red-700'}">${Math.round(v.distance||0)} m</span></div><div class="mt-3 text-[11px] text-slate-600">${v.checkIn?new Date(v.checkIn).toLocaleString('id-ID'):'-'}<br>GPS ±${Math.round(v.accuracy||0)} m · ${v.duration||0} menit<br><b>${v.result==='order'?'Ada order':'Tidak order'}</b>${v.reason?' · '+escapeHtml(v.reason):''}</div></div>`).join('')||'<div class="md:col-span-3 py-6 text-center text-sm text-slate-400">Belum ada kunjungan toko.</div>';
-          const total=(db.visits||[]).length,eff=(db.visits||[]).filter(v=>v.result==='order').length,avg=total?Math.round((db.visits||[]).reduce((n,v)=>n+(+v.duration||0),0)/total):0;
-          const set=(id,val)=>{const x=document.getElementById(id);if(x)x.innerText=val;};
-          set('admin-kpi-visits',total);set('admin-kpi-effective',eff);set('admin-kpi-strike',total?Math.round(eff/total*100)+'%':'0%');set('admin-kpi-duration',avg+' mnt');
-        }
-        function refreshVisitKpi(){
-          renderRecentVisits();renderSalesProgress('daily');if(typeof renderWorkflowToday==='function')renderWorkflowToday();
-          const today=jakartaTodayKey();
-          let arr=(db.visits||[]).filter(v=>dateKeyJakarta(v.checkIn||v.date)===today);
-          if(currentUser?.role==='sales')arr=arr.filter(v=>String(v.salesId)===String(currentUser.salesId)||v.user===currentUser.username);
-          const eff=arr.filter(v=>v.result==='order').length;
-          visitStats={calls:arr.length,effective:eff,newOutlet:arr.filter(v=>v.newOutlet).length};
-          const a=document.getElementById('kpi-calls');if(a){a.innerText=arr.length;document.getElementById('kpi-effective').innerText=eff;document.getElementById('kpi-strike').innerText=arr.length?Math.round(eff/arr.length*100)+'%':'0%';document.getElementById('kpi-new').innerText=visitStats.newOutlet;}
-        }
-        function renderSalesProgress(period='daily'){
-          const sales=currentUser?.role==='sales'?db.sales.find(x=>String(x.id)===String(currentUser.salesId)):null;
-          let arr=(db.visits||[]).filter(v=>(!sales||String(v.salesId)===String(sales.id))&&periodMatch(v.checkIn||v.date,period));
-          const factor=period==='daily'?1:period==='weekly'?7:25;
-          const targetVisit=sales?(period==='monthly'?Number(sales.targetVisit||0):Math.ceil(Number(sales.targetVisit||0)/25*factor)):0;
-          const targetBox=sales?(period==='monthly'?Number(sales.targetBox||0):Math.ceil(Number(sales.targetBox||0)/25*factor)):0;
-          const ord=(db.orders||[]).filter(o=>(!sales||String(o.salesId)===String(sales.id))&&orderPeriodMatch(o,period));
-          const sold=ord.reduce((n,o)=>n+Number(o.qty||0),0),visits=arr.length;
-          const bt=document.getElementById('box-progress-text'),bb=document.getElementById('box-progress-bar'),br=document.getElementById('box-remaining');
-          if(bt)bt.innerText=`${sold} / ${targetBox} PCS`;if(bb)bb.style.width=(targetBox?Math.min(100,sold/targetBox*100):0)+'%';if(br)br.innerText=targetBox?(sold>=targetBox?'Target tercapai':`Kurang ${targetBox-sold} PCS lagi`):'Target belum ditetapkan';
-          const vt=document.getElementById('visit-progress-text'),vb=document.getElementById('visit-progress-bar'),vr=document.getElementById('visit-remaining');
-          if(vt)vt.innerText=`${visits} / ${targetVisit} Toko`;if(vb)vb.style.width=(targetVisit?Math.min(100,visits/targetVisit*100):0)+'%';if(vr)vr.innerText=targetVisit?(visits>=targetVisit?'Target tercapai':`Kurang ${targetVisit-visits} toko lagi`):'Target belum ditetapkan';
-        }
-        let activeVisit = null; let visitStats = {calls:0,effective:0,newOutlet:0};
-        function distanceMeters(a,b,c,d){ const R=6371000, p=Math.PI/180; const x=(c-a)*p, y=(d-b)*p; const h=Math.sin(x/2)**2+Math.cos(a*p)*Math.cos(c*p)*Math.sin(y/2)**2; return 2*R*Math.asin(Math.sqrt(h)); }
-        function checkInVisit(){
-          const sel=document.getElementById('visit-store');if(!sel?.value){showToast('Toko kunjungan belum dipilih');return;}if(!window.isSecureContext){showToast('GPS membutuhkan HTTPS');return;}if(!navigator.geolocation){showToast('GPS tidak didukung perangkat');return;}
-          document.getElementById('visit-info').innerHTML='Mengambil GPS aktual...';
-          navigator.geolocation.getCurrentPosition(pos=>{const opt=sel.options[sel.selectedIndex],slat=parseFloat(opt.dataset.lat),slng=parseFloat(opt.dataset.lng);if(!isFinite(slat)||!isFinite(slng)){showToast('Koordinat toko tidak valid');return;}const dist=distanceMeters(pos.coords.latitude,pos.coords.longitude,slat,slng),radius=Number(db.settings.radius||100);if(dist>radius){document.getElementById('visit-info').innerHTML=`<span class="text-red-600 font-semibold">Check-in ditolak · jarak ${Math.round(dist)} m, batas ${radius} m.</span>`;return;}activeVisit={storeId:sel.value,store:opt.text,checkIn:new Date(),lat:pos.coords.latitude,lng:pos.coords.longitude,distance:dist,accuracy:pos.coords.accuracy||0};document.getElementById('visit-info').innerHTML=`<span class="text-emerald-700 font-semibold">✓ Check-in valid · ${Math.round(dist)} m dari titik toko · akurasi ±${Math.round(activeVisit.accuracy)} m</span>`;document.getElementById('workflow-checkin-btn')?.classList.add('hidden');document.getElementById('workflow-after-checkin')?.classList.remove('hidden');showToast('Check-in berhasil');},err=>showToast(gpsErrorMessage(err)),{enableHighAccuracy:true,timeout:30000,maximumAge:0});
-        }
-        function toggleVisitReason(){document.getElementById('no-order-reason').classList.toggle('hidden',document.getElementById('visit-result').value!=='no_order');}
-        async function finishVisit(){
-          if(!activeVisit){showToast('Belum ada check-in aktif');return;}
-          const result=document.getElementById('visit-result').value,end=new Date(),dur=Math.max(1,Math.round((end-activeVisit.checkIn)/60000));
-          const reason=result==='no_order'?document.getElementById('no-order-reason').value:'';
-          try{
-            await apiPost({action:'saveVisit',storeId:activeVisit.storeId,checkInAt:activeVisit.checkIn.toISOString(),checkOutAt:end.toISOString(),latitude:activeVisit.lat,longitude:activeVisit.lng,gpsAccuracy:activeVisit.accuracy||0,distanceMeter:Math.round(activeVisit.distance),durationMinute:dur,result:result,notes:reason});
-            document.getElementById('visit-result-panel').classList.add('hidden');
-            document.getElementById('visit-badge').className='text-xs px-3 py-1 rounded-full bg-slate-100';
-            document.getElementById('visit-badge').innerText='Belum check-in';
-            document.getElementById('visit-info').innerHTML=`Kunjungan ${escapeHtml(activeVisit.store)} selesai · durasi ${dur} menit · hasil: ${escapeHtml(result)}.`;
-            activeVisit=null;
-            await refreshOnlineData(false);
-            showToast('Kunjungan tersimpan online');
-          }catch(err){showToast('Gagal menyimpan kunjungan: '+err.message);}
-        }
-        let lastSavedOrder = null;
-        let lastInvoiceFingerprint = '';
-
-        function rupiah(n){ return 'Rp '+Math.round(Number(n||0)).toLocaleString('id-ID'); }
-
-        function collectInvoiceItems(){
-          return [...document.querySelectorAll('.invoice-item')].map(row=>{
-            const qty=Math.max(0,Math.floor(Number(row.querySelector('.product-qty')?.value||0)));
-            const price=Math.max(0,Number(row.querySelector('.product-price')?.value||0));
-            const discountPerPcs=Math.max(0,Number(row.querySelector('.product-discount')?.value||0));
-            const before=qty*price;
-            const discount=qty*discountPerPcs;
-            const total=Math.max(0,before-discount);
-            return {
-              productId:row.dataset.productId,
-              productName:row.dataset.productName,
-              qtyPcs:qty,
-              unitPricePcs:price,
-              discountPerPcs:discountPerPcs,
-              discountAmount:discount,
-              subtotalBeforeDiscount:before,
-              total:total,
-              row:row
-            };
-          }).filter(x=>x.qtyPcs>0);
-        }
-
-        function calculateInvoiceTotal(){
-          const items=collectInvoiceItems();
-          let qty=0,total=0;
-          items.forEach(x=>{
-            qty+=x.qtyPcs;
-            total+=x.total;
-            const el=x.row?.querySelector('.product-line-total');
-            if(el)el.innerText=rupiah(x.total);
-          });
-          document.querySelectorAll('.invoice-item').forEach(row=>{
-            const qty=Number(row.querySelector('.product-qty')?.value||0);
-            if(!qty){const el=row.querySelector('.product-line-total');if(el)el.innerText='Rp 0';}
-          });
-          const t=document.getElementById('invoice-total-display');
-          const q=document.getElementById('invoice-qty-display');
-          if(t)t.innerText=rupiah(total);
-          if(q)q.innerText=qty+' PCS';
-          return {items,totalQtyPcs:qty,grandTotal:total};
-        }
-
-        function validateInvoice(){
-          const storeId=document.getElementById('invoice-store').value;
-          if(!storeId)throw new Error('Pilih toko terlebih dahulu.');
-          const calc=calculateInvoiceTotal();
-          if(!calc.items.length)throw new Error('Isi Qty PCS minimal pada satu produk.');
-          for(const x of calc.items){
-            if(x.discountPerPcs>x.unitPricePcs)throw new Error('Diskon/PCS '+x.productName+' melebihi harga/PCS.');
-          }
-          return {storeId,...calc,notes:document.getElementById('invoice-notes').value.trim()};
-        }
-
-        async function saveInvoiceOrder(){
-          const inv=validateInvoice();
-          const fingerprint=JSON.stringify({storeId:inv.storeId,notes:inv.notes,items:inv.items.map(x=>[x.productId,x.qtyPcs,x.unitPricePcs,x.discountPerPcs])});
-          if(lastSavedOrder && lastInvoiceFingerprint===fingerprint)return lastSavedOrder;
-          const res=await apiPost({
-            action:'createOrder',
-            storeId:inv.storeId,
-            salesId:currentUser?.salesId||'',
-            notes:inv.notes,
-            paymentType:workflowPaymentMethod||'Cash',
-            paymentStatus:workflowPaymentMethod==='Tempo'?'Belum Lunas':'Lunas',
-            dueDate:document.getElementById('payment-due-date')?.value||'',
-            items:inv.items.map(x=>({
-              productId:x.productId,
-              qtyPcs:x.qtyPcs,
-              unitPricePcs:x.unitPricePcs,
-              discountPerPcs:x.discountPerPcs
-            }))
-          });
-          lastSavedOrder=res.order;
-          lastInvoiceFingerprint=fingerprint;
-          const ro=res.order||{};
-          const mapped={id:String(ro.orderId||ro.OrderID||''),salesId:String(ro.salesId||ro.SalesID||currentUser?.salesId||''),storeId:String(ro.storeId||ro.StoreID||inv.storeId||''),date:ro.orderDate||ro.OrderDate||new Date().toISOString(),dateKey:jakartaTodayKey(),isToday:true,isLast7Days:true,isThisMonth:true,serverTodayKey:jakartaTodayKey(),qty:Number(ro.totalQtyPcs||ro.TotalQtyPcs||inv.items.reduce((n,z)=>n+Number(z.qtyPcs||0),0)),subtotal:Number(ro.subtotal||ro.Subtotal||0),discount:Number(ro.discount||ro.Discount||0),total:Number(ro.grandTotal||ro.GrandTotal||0),items:ro.items||[]};
-          if(mapped.id&&!db.orders.some(o=>String(o.id)===mapped.id))db.orders.unshift(mapped);
-          renderWorkflowToday();
-          return res.order;
-        }
-
-        async function handleInvoiceSubmit(e){
-          e.preventDefault();
-          try{
-            const order=await saveInvoiceOrder();
-            const store=db.stores.find(s=>s.id===order.storeId);
-            let wa=String(store?.wa||order.storeWhatsApp||'').replace(/\D/g,'');
-            if(wa.startsWith('0'))wa='62'+wa.slice(1);
-            if(!wa){showToast('Order tersimpan, tetapi nomor WhatsApp toko belum tersedia.');return;}
-
-            const lines=[
-              '*Tmeez - Nota Penjualan*',
-              'No: '+order.orderId,
-              'Toko: '+order.storeName,
-              'Sales: '+order.salesName,
-              '',
-              ...order.items.map((x,i)=>`${i+1}. ${x.productName}\n${x.qtyPcs} PCS × ${rupiah(x.unitPricePcs)}${x.discountPerPcs?'\nDiskon '+rupiah(x.discountPerPcs)+'/PCS × '+x.qtyPcs+' = '+rupiah(x.discountAmount):''}\n= ${rupiah(x.total)}`),
-              '',
-              'Subtotal: '+rupiah(order.subtotal),
-              'Diskon: '+rupiah(order.discount),
-              '*TOTAL: '+rupiah(order.grandTotal)+'*',
-              order.notes?'Catatan: '+order.notes:'',
-              '',
-              'Terima kasih.'
-            ].filter(Boolean);
-            window.open('https://wa.me/'+wa+'?text='+encodeURIComponent(lines.join('\n')),'_blank','noopener');
-            showToast('Order tersimpan & WhatsApp dibuka');
-          }catch(err){showToast('Gagal: '+err.message);}
-        }
-
-        async function downloadPdfInvoice(){
-          try{
-            validateInvoice();
-            const order=await saveInvoiceOrder();
-            if(!window.jspdf?.jsPDF)throw new Error('Modul PDF belum termuat. Pastikan internet aktif lalu muat ulang aplikasi.');
-            const {jsPDF}=window.jspdf;
-            const doc=new jsPDF({unit:'mm',format:'a4'});
-            const W=210, margin=15;
-            // Header modern
-            doc.setFillColor(15,23,42);doc.roundedRect(10,10,190,38,4,4,'F');
-            doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.setFontSize(22);doc.text('TMEEZ',margin,25);
-            doc.setFontSize(9);doc.setFont('helvetica','normal');doc.text('SALES INVOICE',margin,32);
-            doc.setFontSize(10);doc.text(order.orderId,195,23,{align:'right'});doc.text(order.orderDate,195,30,{align:'right'});
-            doc.setTextColor(15,23,42);
-            let y=58;
-            doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(100,116,139);doc.text('DITAGIHKAN KEPADA',15,y);doc.text('SALES',120,y);y+=6;
-            doc.setTextColor(15,23,42);doc.setFontSize(12);doc.text(String(order.storeName||'-'),15,y);doc.text(String(order.salesName||'-'),120,y);y+=12;
-            // table header
-            doc.setFillColor(241,245,249);doc.roundedRect(15,y-5,180,9,2,2,'F');
-            doc.setFontSize(8);doc.setFont('helvetica','bold');
-            doc.text('PRODUK',18,y);doc.text('QTY',105,y,{align:'right'});doc.text('HARGA/PCS',135,y,{align:'right'});doc.text('DISC/PCS',163,y,{align:'right'});doc.text('TOTAL',192,y,{align:'right'});y+=9;
-            doc.setFont('helvetica','normal');
-            order.items.forEach(x=>{
-              if(y>260){doc.addPage();y=20;}
-              doc.setFontSize(9);doc.text(String(x.productName||'').slice(0,40),18,y);
-              doc.text(String(x.qtyPcs),105,y,{align:'right'});
-              doc.text(Math.round(x.unitPricePcs).toLocaleString('id-ID'),135,y,{align:'right'});
-              doc.text(Math.round(x.discountPerPcs||0).toLocaleString('id-ID'),163,y,{align:'right'});
-              doc.setFont('helvetica','bold');doc.text(Math.round(x.total).toLocaleString('id-ID'),192,y,{align:'right'});doc.setFont('helvetica','normal');
-              y+=7;doc.setDrawColor(226,232,240);doc.line(15,y-3,195,y-3);
-            });
-            y+=5;
-            doc.setFillColor(248,250,252);doc.roundedRect(112,y-4,83,30,3,3,'F');
-            doc.setFontSize(9);doc.text('Subtotal',118,y+2);doc.text(rupiah(order.subtotal),190,y+2,{align:'right'});
-            doc.text('Diskon',118,y+9);doc.text(rupiah(order.discount),190,y+9,{align:'right'});
-            doc.setFont('helvetica','bold');doc.setFontSize(12);doc.text('TOTAL',118,y+19);doc.text(rupiah(order.grandTotal),190,y+19,{align:'right'});
-            y+=38;
-            if(order.notes){doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(100,116,139);doc.text('CATATAN',15,y);y+=5;doc.setFont('helvetica','normal');doc.setTextColor(15,23,42);doc.text(doc.splitTextToSize(order.notes,170),15,y);}
-            doc.setFontSize(8);doc.setTextColor(100,116,139);doc.text('Terima kasih telah berbelanja produk Tmeez.',105,286,{align:'center'});
-            const safe=String(order.storeName||'toko').replace(/[^a-z0-9_-]+/gi,'_');
-            doc.save(`Tmeez_${order.orderId}_${safe}.pdf`);
-            showToast('PDF modern berhasil dibuat');
-          }catch(err){showToast('PDF gagal: '+err.message);}
-        }
-
-        function exportExcel(){
-          const period=currentAdminPeriod||'monthly';
-          const visits=(db.visits||[]).filter(v=>periodMatch(v.checkIn||v.date,period));
-          const orders=(db.orders||[]).filter(o=>orderPeriodMatch(o,period));
-          const storeMap=new Map((db.stores||[]).map(s=>[String(s.id),s.name||s.id]));
-          const salesMap=new Map((db.sales||[]).map(s=>[String(s.id),s.name||s.id]));
-
-          const orderByVisit=new Map();
-          orders.forEach(o=>{if(o.visitId)orderByVisit.set(String(o.visitId),o);});
-          const orderByKey=new Map();
-          orders.forEach(o=>{
-            const k=[String(o.salesId||''),String(o.storeId||''),String(o.dateKey||dateKeyJakarta(o.date||o.createdAt||''))].join('|');
-            if(!orderByKey.has(k))orderByKey.set(k,[]);
-            orderByKey.get(k).push(o);
-          });
-          const used=new Set();
-          const detail=visits.map(v=>{
-            let o=orderByVisit.get(String(v.id||''));
-            if(!o){
-              const key=[String(v.salesId||''),String(v.storeId||''),dateKeyJakarta(v.checkIn||v.date||'')].join('|');
-              o=(orderByKey.get(key)||[]).find(x=>!used.has(x.id));
-            }
-            if(o?.id)used.add(o.id);
-            return [
-              v.salesName||salesMap.get(String(v.salesId))||'',
-              v.store||storeMap.get(String(v.storeId))||'',
-              dateKeyJakarta(v.checkIn||v.date||'')||v.date||'',
-              v.result||'',
-              Number(v.duration||0),
-              Math.round(Number(v.distance||0)),
-              o?Number(o.qty||0):0,
-              o?Number(o.total||0):0
-            ];
-          });
-
-          const totalPcs=orders.reduce((n,o)=>n+Number(o.qty||0),0);
-          const totalOmzet=orders.reduce((n,o)=>n+Number(o.total||0),0);
-          const uniqueStores=new Set(visits.map(v=>String(v.storeId||v.store||'')).filter(Boolean)).size;
-
-          const esc=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-          const cell=(v,type='String',style='')=>`<Cell${style?` ss:StyleID="${style}"`:''}><Data ss:Type="${type}">${esc(v)}</Data></Cell>`;
-          const row=cells=>`<Row>${cells.join('')}</Row>`;
-
-          let rows='';
-          rows+=row([cell('LAPORAN OPERASIONAL SALES - TMEEZ','String','Title')]);
-          rows+=row([cell('Periode'),cell(periodLabel(period))]);
-          rows+=row([]);
-          rows+=row(['Sales','Toko','Tanggal','Hasil','Durasi (Menit)','Jarak (Meter)','Jumlah PCS','Omzet (Rp)'].map(x=>cell(x,'String','Header')));
-          detail.forEach(r=>{
-            rows+=row([
-              cell(r[0]),cell(r[1]),cell(r[2]),cell(r[3]),
-              cell(r[4],'Number'),cell(r[5],'Number'),cell(r[6],'Number'),
-              cell(r[7],'Number','Money')
-            ]);
-          });
-          rows+=row([]);
-          rows+=row([cell('RINGKASAN','String','Header')]);
-          rows+=row([cell('Total Kunjungan'),cell(visits.length,'Number')]);
-          rows+=row([cell('Jumlah Toko Dikunjungi'),cell(uniqueStores,'Number')]);
-          rows+=row([cell('Total Order'),cell(orders.length,'Number')]);
-          rows+=row([cell('Total PCS'),cell(totalPcs,'Number')]);
-          rows+=row([cell('Total Omzet (Rp)'),cell(totalOmzet,'Number','Money')]);
-
-          const xml=`<?xml version="1.0"?>
-<?mso-application progid="Excel.Sheet"?>
-<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
- xmlns:o="urn:schemas-microsoft-com:office:office"
- xmlns:x="urn:schemas-microsoft-com:office:excel"
- xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
- <Styles>
-  <Style ss:ID="Default"><Alignment ss:Vertical="Center"/><Font ss:FontName="Calibri" ss:Size="11"/></Style>
-  <Style ss:ID="Title"><Font ss:Bold="1" ss:Size="14"/></Style>
-  <Style ss:ID="Header"><Font ss:Bold="1"/><Interior ss:Color="#E2E8F0" ss:Pattern="Solid"/></Style>
-  <Style ss:ID="Money"><NumberFormat ss:Format="#,##0"/></Style>
- </Styles>
- <Worksheet ss:Name="Laporan Sales">
-  <Table>
-   <Column ss:Width="90"/><Column ss:Width="150"/><Column ss:Width="85"/><Column ss:Width="80"/>
-   <Column ss:Width="90"/><Column ss:Width="90"/><Column ss:Width="80"/><Column ss:Width="105"/>
-   ${rows}
-  </Table>
-  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel"><FreezePanes/><FrozenNoSplit/><SplitHorizontal>4</SplitHorizontal><TopRowBottomPane>4</TopRowBottomPane></WorksheetOptions>
- </Worksheet>
-</Workbook>`;
-
-          const blob=new Blob(['\uFEFF',xml],{type:'application/vnd.ms-excel;charset=utf-8'});
-          const a=document.createElement('a');
-          a.href=URL.createObjectURL(blob);
-          a.download=`laporan-sales-${period}-${jakartaTodayKey()}.xls`;
-          document.body.appendChild(a);a.click();a.remove();
-          setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-          showToast(`Excel berhasil: ${orders.length} order · ${rupiah(totalOmzet)}`);
-        }
-        // Toast Notification Helper
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toast-message').innerText = message;
-            toast.classList.remove('translate-y-24', 'opacity-0');
-            setTimeout(() => {
-                toast.classList.add('translate-y-24', 'opacity-0');
-            }, 3000);
-        }
-    </script>
-<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}
-        let attendancePhotoData='';
-        function getGpsNow(){return new Promise((resolve,reject)=>{if(!navigator.geolocation)return reject(new Error('GPS tidak didukung.'));navigator.geolocation.getCurrentPosition(p=>resolve({latitude:p.coords.latitude,longitude:p.coords.longitude,accuracy:p.coords.accuracy}),e=>reject(new Error('GPS gagal: '+e.message)),{enableHighAccuracy:true,timeout:30000,maximumAge:0});});}
-        let selfieStream=null; let selfieResolve=null; let selfieReject=null; let attendanceBusy=false;
-        function stopSelfieCamera(){
-          if(selfieStream){selfieStream.getTracks().forEach(t=>t.stop());selfieStream=null;}
-          const video=document.getElementById('selfie-video'); if(video)video.srcObject=null;
-          const modal=document.getElementById('selfie-modal'); if(modal){modal.classList.add('hidden');modal.classList.remove('flex');}
-        }
-        function cancelSelfieCamera(){
-          const reject=selfieReject; selfieResolve=null; selfieReject=null; stopSelfieCamera();
-          if(reject)reject(new Error('Selfie dibatalkan.'));
-        }
-        async function captureSelfie(){
-          return new Promise(async (resolve,reject)=>{
-            selfieResolve=resolve; selfieReject=reject;
-            const modal=document.getElementById('selfie-modal'),video=document.getElementById('selfie-video'),status=document.getElementById('selfie-modal-status');
-            modal.classList.remove('hidden'); modal.classList.add('flex');
-            try{
-              if(!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) throw new Error('Kamera langsung membutuhkan HTTPS.');
-              selfieStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'user'},width:{ideal:1280},height:{ideal:1280}},audio:false});
-              video.srcObject=selfieStream; await video.play();
-              status.innerText='Arahkan kamera ke wajah, lalu tekan Ambil Selfie.';
-            }catch(e){
-              stopSelfieCamera();
-              const i=document.createElement('input'); i.type='file'; i.accept='image/*'; i.capture='user';
-              i.onchange=()=>{const f=i.files?.[0];if(!f)return reject(new Error('Foto selfie wajib.'));const img=new Image(),r=new FileReader();r.onload=()=>img.src=r.result;img.onload=()=>{const max=900,scale=Math.min(1,max/img.width),c=document.createElement('canvas');c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);c.getContext('2d').drawImage(img,0,0,c.width,c.height);resolve(c.toDataURL('image/jpeg',.72));};r.readAsDataURL(f)}; i.click();
-            }
-          });
-        }
-        function takeSelfiePhoto(){
-          const video=document.getElementById('selfie-video');
-          if(!video?.videoWidth)return showToast('Kamera belum siap. Tunggu sebentar.');
-          const max=900,scale=Math.min(1,max/video.videoWidth),c=document.createElement('canvas');
-          c.width=Math.round(video.videoWidth*scale);c.height=Math.round(video.videoHeight*scale);
-          const ctx=c.getContext('2d');ctx.drawImage(video,0,0,c.width,c.height);
-          const data=c.toDataURL('image/jpeg',.78),resolve=selfieResolve;
-          selfieResolve=null; selfieReject=null; stopSelfieCamera(); if(resolve)resolve(data);
-        }
-        async function startAttendance(kind){
-          if(attendanceBusy)return;
-          const buttons=['sales-att-in','sales-att-out','staff-att-in','staff-att-out'].map(id=>document.getElementById(id)).filter(Boolean);
-          attendanceBusy=true; buttons.forEach(b=>b.disabled=true);
-          try{
-            showToast('Mengambil GPS...'); const gps=await getGpsNow();
-            showToast('Kamera selfie dibuka'); const photo=await captureSelfie();
-            const clientTxnId='ATT-'+currentUser.employeeId+'-'+kind+'-'+Date.now()+'-'+Math.random().toString(36).slice(2,8);
-            const r=await apiPost({action:kind==='in'?'attendanceCheckIn':'attendanceCheckOut',clientTxnId,...gps,photoBase64:photo,photoMime:'image/jpeg'});
-            showToast(r.message); await loadAttendanceToday();
-          }catch(e){showToast(e.message||'Absensi gagal.'); await loadAttendanceToday();}
-          finally{attendanceBusy=false; await loadAttendanceToday();}
-        }
-        function attClockV615(value,withSeconds=false){
-  // NEVER return a Promise. Attendance table/dashboard cells must always receive plain text.
-  if(value && typeof value.then==='function') return '-';
-  if(value===null || value===undefined || value==='') return '-';
-  let raw='';
-  try { raw=String(value).trim(); } catch(e) { return '-'; }
-  if(!raw || raw==='[object Promise]') return '-';
-  // Plain Jakarta timestamp: YYYY-MM-DD HH:mm[:ss] — do not timezone-shift it.
-  let m=raw.match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?/);
-  if(m && !/[zZ]$/.test(raw) && !/[+-]\d{2}:?\d{2}$/.test(raw)) return m[2]+':'+m[3]+(withSeconds?':'+(m[4]||'00'):'');
-  // ISO timestamps with timezone/UTC: explicitly convert to Asia/Jakarta.
-  const d=new Date(raw);
-  if(!Number.isNaN(d.getTime())) {
-    const parts=new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit',...(withSeconds?{second:'2-digit'}:{}),hour12:false,timeZone:'Asia/Jakarta'}).formatToParts(d);
-    const get=k=>(parts.find(x=>x.type===k)||{}).value||'00';
-    return get('hour')+':'+get('minute')+(withSeconds?':'+get('second'):'');
-  }
-  return raw.length>=16?raw.slice(11,withSeconds?19:16):raw;
+function salesOrderView(o){
+  const store=(db.stores||[]).find(s=>String(s.id)===String(o.storeId))||{};
+  const sales=(db.sales||[]).find(s=>String(s.id)===String(o.salesId))||{};
+  return {
+    ...o,
+    orderId:o.id||o.orderId||'',
+    storeName:o.storeName||store.name||o.storeId||'Toko',
+    storeWhatsApp:o.storeWhatsApp||store.wa||'',
+    salesName:o.salesName||sales.name||currentUser?.name||'Sales',
+    orderDate:o.dateKey||dateKeyJakarta(o.date||o.createdAt||''),
+    grandTotal:Number(o.total||0),
+    subtotal:Number(o.subtotal||0),
+    discount:Number(o.discount||0),
+    totalQtyPcs:Number(o.qty||0),
+    items:Array.isArray(o.items)?o.items.map(x=>({
+      productName:x.ProductName||x.productName||'',qtyPcs:Number(x.QtyPcs??x.qtyPcs??x.Qty??x.qty??0),unitPricePcs:Number(x.UnitPricePcs??x.unitPricePcs??x.UnitPrice??x.unitPrice??0),discountPerPcs:Number(x.DiscountPerPcs??x.discountPerPcs??0),discountAmount:Number(x.DiscountAmount??x.discountAmount??0),total:Number(x.Total??x.total??0)
+    })):[]
+  };
 }
-let employeeSyncActive=false;
-async function syncEmployeeData(){
-  if(currentUser?.role!=='staff'){ return refreshOnlineData(true); }
-  const btns=[...document.querySelectorAll('button[onclick="syncEmployeeData()"]')];
-  btns.forEach(b=>{b.disabled=true;b.dataset.oldText=b.innerText;b.innerText='↻ Menyinkronkan...';});
-  employeeSyncActive=true;
+function renderMySalesOrders(){
+  if(currentUser?.role!=='sales')return;
+  const box=document.getElementById('sales-my-order-list'),count=document.getElementById('sales-my-order-count');if(!box)return;
+  const q=String(document.getElementById('sales-my-order-search')?.value||'').trim().toLowerCase();
+  const rows=(db.orders||[]).filter(o=>String(o.salesId)===String(currentUser.salesId)).filter(o=>{
+    const v=salesOrderView(o);return !q||[v.storeName,v.orderId,v.dateKey].join(' ').toLowerCase().includes(q);
+  }).sort((a,b)=>String(b.dateKey||b.date||'').localeCompare(String(a.dateKey||a.date||'')));
+  if(count)count.innerText=rows.length+' transaksi';
+  box.innerHTML=rows.length?rows.map(o=>{const v=salesOrderView(o);const safe=escapeHtml(v.orderId);const status=String(v.paymentStatus||'-');return `<div class="border rounded-xl p-3 bg-slate-50/60"><div class="flex justify-between gap-3"><div class="min-w-0"><b class="text-sm">${escapeHtml(v.storeName)}</b><div class="text-[10px] text-slate-500 mt-1">${escapeHtml(v.orderDate||'-')} · Order ${safe}</div><div class="text-[10px] text-slate-500">${v.totalQtyPcs.toLocaleString('id-ID')} PCS · ${escapeHtml(v.paymentType||'-')} · ${escapeHtml(status)}</div></div><b class="text-sm whitespace-nowrap">${rupiah(v.grandTotal)}</b></div><div class="mt-2 flex flex-wrap gap-2"><button onclick="downloadHistoricalOrderPdf('${safe}')" class="px-2.5 py-1.5 rounded-lg bg-slate-900 text-white text-[10px] font-bold">Unduh PDF</button><button onclick="shareHistoricalOrderWhatsApp('${safe}')" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 text-white text-[10px] font-bold">WhatsApp Customer</button></div></div>`;}).join(''):'<div class="py-6 text-center text-xs text-slate-400">Belum ada transaksi untuk Sales ini.</div>';
+}
+function findMySalesOrder(orderId){return (db.orders||[]).find(o=>String(o.id)===String(orderId)&&String(o.salesId)===String(currentUser?.salesId||''));}
+function makeOrderPdf(orderInput){
+  if(!window.jspdf?.jsPDF)throw new Error('Modul PDF belum termuat. Pastikan internet aktif lalu muat ulang aplikasi.');
+  const order=salesOrderView(orderInput),{jsPDF}=window.jspdf,doc=new jsPDF({unit:'mm',format:'a4'}),margin=15;
+  doc.setFillColor(15,23,42);doc.roundedRect(10,10,190,38,4,4,'F');doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.setFontSize(22);doc.text('TMEEZ',margin,25);doc.setFontSize(9);doc.setFont('helvetica','normal');doc.text('SALES INVOICE',margin,32);doc.setFontSize(10);doc.text(String(order.orderId||'-'),195,23,{align:'right'});doc.text(String(order.orderDate||'-'),195,30,{align:'right'});doc.setTextColor(15,23,42);
+  let y=58;doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(100,116,139);doc.text('DITAGIHKAN KEPADA',15,y);doc.text('SALES',120,y);y+=6;doc.setTextColor(15,23,42);doc.setFontSize(12);doc.text(String(order.storeName||'-').slice(0,35),15,y);doc.text(String(order.salesName||'-').slice(0,30),120,y);y+=12;
+  doc.setFillColor(241,245,249);doc.roundedRect(15,y-5,180,9,2,2,'F');doc.setFontSize(8);doc.setFont('helvetica','bold');doc.text('PRODUK',18,y);doc.text('QTY',105,y,{align:'right'});doc.text('HARGA/PCS',135,y,{align:'right'});doc.text('DISC/PCS',163,y,{align:'right'});doc.text('TOTAL',192,y,{align:'right'});y+=9;doc.setFont('helvetica','normal');
+  (order.items||[]).forEach(x=>{if(y>260){doc.addPage();y=20;}doc.setFontSize(9);doc.text(String(x.productName||'').slice(0,40),18,y);doc.text(String(x.qtyPcs||0),105,y,{align:'right'});doc.text(Math.round(x.unitPricePcs||0).toLocaleString('id-ID'),135,y,{align:'right'});doc.text(Math.round(x.discountPerPcs||0).toLocaleString('id-ID'),163,y,{align:'right'});doc.setFont('helvetica','bold');doc.text(Math.round(x.total||0).toLocaleString('id-ID'),192,y,{align:'right'});doc.setFont('helvetica','normal');y+=7;doc.setDrawColor(226,232,240);doc.line(15,y-3,195,y-3);});
+  y+=5;doc.setFillColor(248,250,252);doc.roundedRect(112,y-4,83,30,3,3,'F');doc.setFontSize(9);doc.text('Subtotal',118,y+2);doc.text(rupiah(order.subtotal),190,y+2,{align:'right'});doc.text('Diskon',118,y+9);doc.text(rupiah(order.discount),190,y+9,{align:'right'});doc.setFont('helvetica','bold');doc.setFontSize(12);doc.text('TOTAL',118,y+19);doc.text(rupiah(order.grandTotal),190,y+19,{align:'right'});y+=38;
+  if(order.notes){doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(100,116,139);doc.text('CATATAN',15,y);y+=5;doc.setFont('helvetica','normal');doc.setTextColor(15,23,42);doc.text(doc.splitTextToSize(String(order.notes),170),15,y);}
+  doc.setFontSize(8);doc.setTextColor(100,116,139);doc.text('Terima kasih telah berbelanja produk Tmeez.',105,286,{align:'center'});
+  return {doc,order};
+}
+function downloadHistoricalOrderPdf(orderId){try{const o=findMySalesOrder(orderId);if(!o)throw new Error('Transaksi tidak ditemukan.');const {doc,order}=makeOrderPdf(o);const safe=String(order.storeName||'toko').replace(/[^a-z0-9_-]+/gi,'_');doc.save(`Tmeez_${order.orderId}_${safe}.pdf`);showToast('Bukti PDF berhasil dibuat ulang');}catch(e){showToast('PDF gagal: '+e.message);}}
+async function shareHistoricalOrderWhatsApp(orderId){
   try{
-    await Promise.all([loadAttendanceToday(),loadMyAttendanceHistory(),loadMyPayroll()]);
-    apiOnline=true;
-    showToast('Data karyawan berhasil disinkronkan dari server');
-  }catch(e){
-    apiOnline=false;
-    showToast('Sinkronisasi gagal: '+(e?.message||e));
-  }finally{
-    employeeSyncActive=false;
-    btns.forEach(b=>{b.disabled=false;if(b.dataset.oldText)b.innerText=b.dataset.oldText;});
-  }
+    const o=findMySalesOrder(orderId);if(!o)throw new Error('Transaksi tidak ditemukan.');const {doc,order}=makeOrderPdf(o);const wa=normalizeWaDigits(order.storeWhatsApp);if(!wa)throw new Error('Nomor WhatsApp toko belum tersedia.');
+    const text=['Tmeez - Bukti Transaksi','No: '+order.orderId,'Toko: '+order.storeName,'Total: '+rupiah(order.grandTotal),'','Terima kasih.'].join('\n');
+    const blob=doc.output('blob');const file=new File([blob],`Tmeez_${order.orderId}.pdf`,{type:'application/pdf'});
+    if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+      await navigator.share({files:[file],title:'Bukti Transaksi Tmeez',text});
+      return;
+    }
+    doc.save(`Tmeez_${order.orderId}_${String(order.storeName||'toko').replace(/[^a-z0-9_-]+/gi,'_')}.pdf`);
+    window.open('https://wa.me/'+wa+'?text='+encodeURIComponent(text),'_blank','noopener');
+    showToast('PDF diunduh dan WhatsApp customer dibuka. Lampirkan PDF tersebut di chat.');
+  }catch(e){showToast('Gagal menyiapkan WhatsApp: '+e.message);}
 }
-let salesLocationWatchId=null,salesLocationLastSentAt=0,salesLocationLastLat=null,salesLocationLastLng=null,salesLocationBusy=false;
-async function sendSalesLocation(pos){
-  if(currentUser?.role!=='sales'||salesLocationBusy)return;
-  const lat=Number(pos?.coords?.latitude),lng=Number(pos?.coords?.longitude),acc=Number(pos?.coords?.accuracy||0);
-  if(!Number.isFinite(lat)||!Number.isFinite(lng))return;
-  const nowMs=Date.now(); const moved=salesLocationLastLat==null?Infinity:distanceMeters(salesLocationLastLat,salesLocationLastLng,lat,lng);
-  // Titik pertama setelah Absen Masuk selalu dikirim. Berikutnya minimal 1 menit atau berpindah 50 m.
-  if(nowMs-salesLocationLastSentAt<60000 && moved<50)return;
-  salesLocationBusy=true;
-  try{
-    const clientTxnId='LOC-'+currentUser.employeeId+'-'+nowMs+'-'+Math.random().toString(36).slice(2,8);
-    const r=await apiPost({action:'recordSalesLocation',clientTxnId,latitude:lat,longitude:lng,accuracy:acc});
-    salesLocationLastSentAt=nowMs;salesLocationLastLat=lat;salesLocationLastLng=lng;
-    if(r?.stopped){stopSalesLocationTracking();}
-  }catch(e){
-    if(String(e.message||e).includes('sudah pulang'))stopSalesLocationTracking();
-    else console.warn('Tracking lokasi:',e.message||e);
-  }finally{salesLocationBusy=false;}
-}
-function startSalesLocationTracking(){
-  if(currentUser?.role!=='sales'||salesLocationWatchId!==null||!navigator.geolocation)return;
-  // Kirim titik pertama segera, jangan menunggu perpindahan GPS dari watchPosition.
-  navigator.geolocation.getCurrentPosition(pos=>sendSalesLocation(pos),err=>console.warn('GPS tracking awal:',err?.message||err),{enableHighAccuracy:true,maximumAge:0,timeout:30000});
-  salesLocationWatchId=navigator.geolocation.watchPosition(sendSalesLocation,err=>console.warn('GPS tracking:',err?.message||err),{enableHighAccuracy:true,maximumAge:15000,timeout:30000});
-}
-function stopSalesLocationTracking(){if(salesLocationWatchId!==null){navigator.geolocation.clearWatch(salesLocationWatchId);salesLocationWatchId=null;}salesLocationLastSentAt=0;salesLocationLastLat=null;salesLocationLastLng=null;}
-async function loadAttendanceToday(){if(!['sales','staff'].includes(currentUser?.role))return;try{const r=await apiGet('attendanceToday'),a=r.data||null;if(currentUser?.role==='sales'){if(a&&!a.CheckOut)startSalesLocationTracking();else if(a?.CheckOut)stopSalesLocationTracking();}const stat=a?.Status||'Belum Absen',detail=a?`Masuk: <b>${escapeHtml(attClockV615(a.CheckIn))}</b>${a.CheckOut?` · Pulang: <b>${escapeHtml(attClockV615(a.CheckOut))}</b>`:''}${Number(a.LateMinutes||0)>0?` · Terlambat ${Number(a.LateMinutes)} menit`:''}${a.CheckInAccuracy?` · GPS ±${Math.round(Number(a.CheckInAccuracy))} m`:''}`:'Silakan Absen Masuk dari lokasi tempat kerja.';updateStaffDashboardAttendance(a);
-const hs=document.getElementById('sales-head-status');if(hs)hs.innerText=stat;const hi=document.getElementById('sales-head-in');if(hi)hi.innerText=a?.CheckIn?attClockV615(a.CheckIn):'-';const ho=document.getElementById('sales-head-out');if(ho)ho.innerText=a?.CheckOut?attClockV615(a.CheckOut):'-';const hl=document.getElementById('sales-head-late');if(hl)hl.innerText=(Number(a?.LateMinutes||0)>0?Number(a.LateMinutes):0)+' menit';['sales-att-status','staff-att-status'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerText=stat});['sales-att-detail','staff-att-detail'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML=detail});['sales-att-in','staff-att-in'].forEach(id=>{const e=document.getElementById(id);if(e)e.disabled=!!a});['sales-att-out','staff-att-out'].forEach(id=>{const e=document.getElementById(id);if(e)e.disabled=!a||!!a.CheckOut});const sw=document.getElementById('staff-welcome');if(sw)sw.innerText='Halo, '+(currentUser?.name||'Staff');const sd=document.getElementById('staff-date');if(sd)sd.innerText=new Intl.DateTimeFormat('id-ID',{dateStyle:'full',timeZone:'Asia/Jakarta'}).format(new Date());}catch(e){showToast(e.message);if(employeeSyncActive)throw e}}
-        function showStaffPanel(panel){
-          if(currentUser?.role!=='staff')return;
-          const home=document.getElementById('staff-home-panel'),att=document.getElementById('staff-attendance-panel'),pay=document.getElementById('staff-payroll-panel');
-          [home,att,pay].forEach(x=>x?.classList.add('hidden'));
-          if(panel==='attendance'){att?.classList.remove('hidden');loadMyAttendanceHistory();}
-          else if(panel==='payroll'){pay?.classList.remove('hidden');loadMyPayroll();}
-          else home?.classList.remove('hidden');
-          lucide.createIcons();
-          window.scrollTo({top:0,behavior:'smooth'});
-        }
-        function updateStaffDashboardAttendance(a){
-          const status=a?.Status||'Belum Absen', tin=a?.CheckIn?attClockV615(a.CheckIn):'--:--', tout=a?.CheckOut?attClockV615(a.CheckOut):'--:--', rawLate=Number(a?.LateMinutes), late=Number.isFinite(rawLate)&&rawLate>=0?Math.round(rawLate):0;
-          const set=(id,v)=>{const e=document.getElementById(id);if(e)e.innerText=v;};
-          set('staff-dash-status',status);set('staff-dash-in',tin);set('staff-dash-out',tout);set('staff-dash-late',late+' menit');set('staff-home-badge',status);
-          const badge=document.getElementById('staff-home-badge');if(badge){badge.className='px-3 py-1.5 rounded-full text-[10px] font-bold '+(status==='Hadir'?'bg-emerald-50 text-emerald-700':status==='Terlambat'?'bg-amber-50 text-amber-700':'bg-slate-100 text-slate-600');}
-        }
-        function payrollPeriodBoundsUi(period){
-          const m=/^(\d{4})-(\d{2})$/.exec(String(period||''));
-          if(!m)return null;
-          const y=Number(m[1]),mo=Number(m[2]);
-          const end=new Date(Date.UTC(y,mo-1,25));
-          const start=new Date(Date.UTC(y,mo-2,26));
-          const fmt=d=>new Intl.DateTimeFormat('id-ID',{timeZone:'UTC',day:'numeric',month:'long',year:'numeric'}).format(d);
-          return {startKey:start.toISOString().slice(0,10),endKey:end.toISOString().slice(0,10),label:`${fmt(start)} – ${fmt(end)}`};
-        }
-        function payrollPeriodLabelUi(p){return p?.PeriodLabel||payrollPeriodBoundsUi(p?.Period)?.label||p?.Period||'-';}
-        function currentPayrollPeriodUi(){
-          const d=new Date(), y=d.getFullYear(), m=d.getMonth()+1, day=d.getDate();
-          const yy=day<=25?y:y+(m===12?1:0), mm=day<=25?m:m===12?1:m+1;
-          return `${yy}-${String(mm).padStart(2,'0')}`;
-        }
-        function setStaffAttendancePeriodDefault(){const el=document.getElementById('staff-att-period');if(el&&!el.value)el.value=currentPayrollPeriodUi();}
-        async function loadMyAttendanceHistory(){
-          if(currentUser?.role!=='staff')return;
-          setStaffAttendancePeriodDefault();
-          const box=document.getElementById('staff-att-history'); if(box)box.innerHTML='<div class="py-4 text-center text-slate-400">Memuat riwayat absensi...</div>';
-          try{
-            const period=document.getElementById('staff-att-period')?.value||'';
-            const r=await apiGet('attendance',period?{period}:{}),rows=(r.data||[]).slice().sort((a,b)=>String(b.Date||'').localeCompare(String(a.Date||'')));
-            window.myAttendanceRows=rows;
-            if(!box)return;
-            if(!rows.length){box.innerHTML='<div class="py-5 text-center text-slate-400">Belum ada data absensi pada periode ini.</div>';return;}
-            box.innerHTML=rows.map((a,i)=>{
-              const date=String(a.Date||a.CreatedAt||'').slice(0,10), status=a.Status||'-';
-              const badge=status==='Hadir'?'bg-emerald-50 text-emerald-700':status==='Terlambat'?'bg-amber-50 text-amber-700':status==='Alpha'?'bg-red-50 text-red-700':'bg-slate-100 text-slate-700';
-              return `<button onclick="openAttendanceDetail(${i})" class="w-full text-left border rounded-xl p-3 mb-2 hover:bg-slate-50"><div class="flex items-center justify-between gap-2"><div><b>${escapeHtml(date)}</b><div class="text-[10px] text-slate-500 mt-1">Masuk ${escapeHtml(attClockV615(a.CheckIn)||'-')} · Pulang ${escapeHtml(attClockV615(a.CheckOut)||'-')}</div></div><span class="px-2 py-1 rounded-lg text-[10px] font-bold ${badge}">${escapeHtml(status)}</span></div><div class="grid grid-cols-3 gap-2 mt-2 text-[10px] text-slate-500"><span>Terlambat<br><b class="text-slate-700">${Number.isFinite(Number(a.LateMinutes))&&Number(a.LateMinutes)>=0?Math.round(Number(a.LateMinutes)):'-'} menit</b></span><span>Pulang cepat<br><b class="text-slate-700">${Number.isFinite(Number(a.EarlyLeaveMinutes))&&Number(a.EarlyLeaveMinutes)>=0?Math.round(Number(a.EarlyLeaveMinutes)):'-'} menit</b></span><span>Jarak masuk<br><b class="text-slate-700">${a.CheckInDistance!==''&&a.CheckInDistance!==undefined?Math.round(Number(a.CheckInDistance))+' m':'-'}</b></span></div></button>`;
-            }).join('');
-          }catch(e){if(box)box.innerHTML='<div class="py-4 text-center text-red-500">'+escapeHtml(e.message||'Gagal memuat absensi.')+'</div>';}
-        }
+
         function openAttendanceDetail(index){
           const a=(window.myAttendanceRows||[])[index];if(!a)return;
           const date=String(a.Date||a.CreatedAt||'').slice(0,10),fmt=v=>escapeHtml(String(v||'-'));
@@ -2047,6 +1056,7 @@ const hs=document.getElementById('sales-head-status');if(hs)hs.innerText=stat;co
           document.getElementById('attendance-detail-body').innerHTML=`<div class="rounded-xl bg-slate-50 p-3 mb-4"><div class="text-xs text-slate-500">Status</div><div class="text-lg font-bold mt-1">${fmt(a.Status)}</div></div><div>${row('Tanggal',fmt(date))}${row('Jam Masuk',fmt(attClockV615(a.CheckIn,true)))}${row('Jam Pulang',fmt(attClockV615(a.CheckOut,true)))}${row('Keterlambatan',Number(a.LateMinutes||0)+' menit')}${row('Pulang lebih awal',Number(a.EarlyLeaveMinutes||0)+' menit')}${row('GPS Masuk',fmt(a.CheckInLat)+', '+fmt(a.CheckInLng))}${row('Akurasi GPS Masuk',a.CheckInAccuracy!==''&&a.CheckInAccuracy!==undefined?Math.round(Number(a.CheckInAccuracy))+' m':'-')}${row('Jarak Masuk',a.CheckInDistance!==''&&a.CheckInDistance!==undefined?Math.round(Number(a.CheckInDistance))+' m':'-')}${row('GPS Pulang',fmt(a.CheckOutLat)+', '+fmt(a.CheckOutLng))}${row('Akurasi GPS Pulang',a.CheckOutAccuracy!==''&&a.CheckOutAccuracy!==undefined?Math.round(Number(a.CheckOutAccuracy))+' m':'-')}${row('Jarak Pulang',a.CheckOutDistance!==''&&a.CheckOutDistance!==undefined?Math.round(Number(a.CheckOutDistance))+' m':'-')}${row('Keterangan',fmt(a.Notes))}${a.CorrectionReason?row('Koreksi Admin',fmt(a.CorrectionReason)):''}</div><div class="mt-4"><div class="text-xs font-bold mb-2">Foto Absensi</div><div class="flex gap-2">${photo(a.CheckInPhotoURL,'Foto Masuk')}${photo(a.CheckOutPhotoURL,'Foto Pulang')}</div></div>`;
           document.getElementById('attendance-detail-modal').classList.remove('hidden');
         }
+
         function closeAttendanceDetailModal(){document.getElementById('attendance-detail-modal')?.classList.add('hidden')}
         async function loadMyPayroll(){if(!['sales','staff'].includes(currentUser?.role))return;try{const r=await apiGet('payroll'),box=document.getElementById('staff-payroll-list');window.myPayrollRows=r.data||[];if(box)box.innerHTML=(window.myPayrollRows).slice().reverse().map(p=>`<button onclick="openPayrollSlip('${p.PayrollID}')" class="w-full text-left border rounded-xl p-3 mb-2 hover:bg-slate-50"><div class="flex justify-between"><b>${escapeHtml(payrollPeriodLabelUi(p))}</b><b>${rupiah(p.TakeHomePay)}</b></div><div class="text-[10px] text-slate-500 mt-1">Gaji ${rupiah(p.BasicSalaryPaid)} · Transport ${rupiah(p.TransportPaid)} · Perawatan Motor ${rupiah(p.MotorcycleMaintenanceAllowance)} · Sembako ${rupiah(p.GroceryAllowance)}${Number(p.Commission||0)?' · Komisi '+rupiah(p.Commission):''} · ${escapeHtml(p.Status)}</div></button>`).join('')||'Belum ada slip gaji final.';}catch(e){showToast(e.message);if(employeeSyncActive)throw e}}
         async function showMyPayrollModal(){await loadMyPayroll();const rows=(window.myPayrollRows||[]).slice().reverse(),m=document.getElementById('payroll-modal'),b=document.getElementById('payroll-modal-body');m.classList.remove('hidden');document.getElementById('payroll-modal-sub').innerText='Pilih periode slip gaji';b.innerHTML=rows.map(p=>`<button onclick="openPayrollSlip('${p.PayrollID}')" class="w-full border rounded-xl p-3 mb-2 flex justify-between"><span>${escapeHtml(payrollPeriodLabelUi(p))} · ${escapeHtml(p.Status)}</span><b>${rupiah(p.TakeHomePay)}</b></button>`).join('')||'Belum ada slip final.';}
@@ -2070,6 +1080,7 @@ async function openSalesRoute(employeeId,date){
     const r=await apiGet('salesRoute',{employeeId,date}); const d=r.data||{},a=d.attendance||null,pts=Array.isArray(d.points)?d.points:[];
     document.getElementById('sales-route-sub').innerText=`${d.employee?.Name||employeeId} · ${date}`;
     const routePts=[];
+    pts.sort((x,y)=>String(x.RecordedAtDisplay||x.RecordedAt||'').localeCompare(String(y.RecordedAtDisplay||y.RecordedAt||'')));
     if(a?.CheckInLat&&a?.CheckInLng)routePts.push({Latitude:a.CheckInLat,Longitude:a.CheckInLng,Accuracy:a.CheckInAccuracy,RecordedAt:a.CheckIn,RouteLabel:'Absen Masuk'});
     pts.forEach(p=>routePts.push({...p,RouteLabel:'Titik GPS'}));
     if(a?.CheckOutLat&&a?.CheckOutLng)routePts.push({Latitude:a.CheckOutLat,Longitude:a.CheckOutLng,Accuracy:a.CheckOutAccuracy,RecordedAt:a.CheckOut,RouteLabel:'Absen Pulang'});
@@ -2082,18 +1093,19 @@ async function openSalesRoute(employeeId,date){
 function closeSalesRoute(){document.getElementById('sales-route-modal')?.classList.add('hidden');if(salesRouteMap){salesRouteMap.remove();salesRouteMap=null;salesRouteLine=null;salesRouteMarkers=[];}}
 function calcRouteDistance(pts){let total=0;for(let i=1;i<pts.length;i++){total+=distanceMeters(Number(pts[i-1].Latitude),Number(pts[i-1].Longitude),Number(pts[i].Latitude),Number(pts[i].Longitude));}return total;}
 function renderSalesRouteMap(pts,a){
-  if(!window.L){document.getElementById('sales-route-map').innerHTML='<div class="p-4 text-sm text-red-600">Peta belum tersedia. Periksa koneksi internet.</div>';return;}
-  if(salesRouteMap){salesRouteMap.remove();}
-  salesRouteMap=L.map('sales-route-map',{zoomControl:true});
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap',crossOrigin:true}).addTo(salesRouteMap);
-  setTimeout(()=>salesRouteMap?.invalidateSize(true),100);
-  setTimeout(()=>salesRouteMap?.invalidateSize(true),500);
-  const latlngs=pts.map(p=>[Number(p.Latitude),Number(p.Longitude)]).filter(x=>Number.isFinite(x[0])&&Number.isFinite(x[1]));
-  if(!latlngs.length){salesRouteMap.setView([-7.25,112.75],10);return;}
-  salesRouteLine=L.polyline(latlngs,{weight:4}).addTo(salesRouteMap);
-  latlngs.forEach((ll,i)=>{const p=pts[i]||{},m=L.circleMarker(ll,{radius:i===0?8:(i===latlngs.length-1?8:4)}).addTo(salesRouteMap);m.bindPopup(i===0?'📍 Absen Masuk':(i===latlngs.length-1?'🏁 Absen Pulang':`Titik GPS ${i}`));salesRouteMarkers.push(m);});
-  salesRouteMap.fitBounds(salesRouteLine.getBounds(),{padding:[30,30],maxZoom:17});
-  setTimeout(()=>{if(salesRouteMap){salesRouteMap.invalidateSize(true);salesRouteMap.fitBounds(salesRouteLine.getBounds(),{padding:[30,30],maxZoom:17});}},350);
+  const el=document.getElementById('sales-route-map');
+  if(!el)return;
+  if(!window.L){el.innerHTML='<div class="p-4 text-sm text-red-600">Peta belum tersedia. Periksa koneksi internet.</div>';return;}
+  if(salesRouteMap){try{salesRouteMap.remove();}catch(e){}salesRouteMap=null;salesRouteLine=null;salesRouteMarkers=[];}
+  el.innerHTML='';
+  salesRouteMap=L.map(el,{zoomControl:true,preferCanvas:false,zoomAnimation:false,fadeAnimation:false,markerZoomAnimation:false});
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,tileSize:256,zoomOffset:0,detectRetina:true,attribution:'© OpenStreetMap'}).addTo(salesRouteMap);
+  const latlngs=(pts||[]).map(p=>[Number(p.Latitude),Number(p.Longitude)]).filter(x=>Number.isFinite(x[0])&&Number.isFinite(x[1])&&Math.abs(x[0])<=90&&Math.abs(x[1])<=180);
+  if(!latlngs.length){salesRouteMap.setView([-7.25,112.75],10);setTimeout(()=>salesRouteMap?.invalidateSize(true),150);return;}
+  salesRouteLine=L.polyline(latlngs,{weight:4,smoothFactor:0.5}).addTo(salesRouteMap);
+  latlngs.forEach((ll,i)=>{const p=pts[i]||{},m=L.circleMarker(ll,{radius:i===0?8:(i===latlngs.length-1?8:4),weight:2}).addTo(salesRouteMap);m.bindPopup(i===0?'📍 Absen Masuk':(i===latlngs.length-1?'🏁 Absen Pulang':`Titik GPS ${i}`));salesRouteMarkers.push(m);});
+  const fit=()=>{if(!salesRouteMap||!salesRouteLine)return;salesRouteMap.invalidateSize(true);salesRouteMap.fitBounds(salesRouteLine.getBounds(),{padding:[35,35],maxZoom:16});};
+  requestAnimationFrame(fit);setTimeout(fit,150);setTimeout(fit,500);setTimeout(fit,1000);
 }
 function renderHrAttendance(rows){const b=document.getElementById('hr-attendance');if(!b)return;const em={};hrEmployees.forEach(e=>em[e.EmployeeID]=e);b.innerHTML='<table class="w-full whitespace-nowrap"><thead><tr class="bg-slate-50"><th class="p-2 text-left">Tanggal</th><th>Karyawan</th><th>Masuk</th><th>Pulang</th><th>Status</th><th>Terlambat</th><th>Pulang Cepat</th><th>GPS</th><th>Perjalanan</th><th>Koreksi</th></tr></thead><tbody>'+rows.slice().reverse().map(a=>{const e=em[a.EmployeeID]||{};const isSales=!!e.SalesID;return `<tr class="border-t"><td class="p-2">${escapeHtml(String(a.Date||'').slice(0,10))}</td><td>${escapeHtml(e.Name||a.EmployeeID)}</td><td>${escapeHtml(attClockV615(a.CheckIn)||'-')}</td><td>${escapeHtml(attClockV615(a.CheckOut)||'-')}</td><td><b>${escapeHtml(a.Status||'-')}</b></td><td>${Number.isFinite(Number(a.LateMinutes))&&Number(a.LateMinutes)>=0?Math.round(Number(a.LateMinutes)):'-'} menit</td><td>${Number.isFinite(Number(a.EarlyLeaveMinutes))&&Number(a.EarlyLeaveMinutes)>=0?Math.round(Number(a.EarlyLeaveMinutes)):'-'} menit</td><td>${a.CheckInDistance!==''&&a.CheckInDistance!==undefined?Number(a.CheckInDistance)+' m':'-'}</td><td>${isSales?`<button onclick="openSalesRoute('${String(a.EmployeeID).replace(/'/g,"\\'")}','${String(a.Date||'').slice(0,10)}')" class="px-2 py-1 rounded-lg bg-indigo-50 text-indigo-700 font-bold">Lihat rute</button>`:'-'}</td><td>${a.CorrectionReason?escapeHtml(a.CorrectionReason):'-'}</td></tr>`}).join('')+'</tbody></table>'+(rows.length?'':'Belum ada data absensi pada periode ini.')}
         async function editEmployeeAdmin(id){const e=hrEmployees.find(x=>String(x.EmployeeID)===String(id));if(!e)return;const name=prompt('Nama karyawan',e.Name||'');if(name===null)return;const pos=prompt('Jabatan / bagian',e.Position||'');if(pos===null)return;const basic=prompt('Gaji pokok per bulan',String(Number(e.BasicSalary||0)));if(basic===null)return;const transport=prompt('Transport per bulan',String(Number(e.TransportAllowance||0)));if(transport===null)return;const motor=prompt('Tunjangan perawatan motor per bulan',String(Number(e.MotorcycleMaintenanceAllowance??(String(e.EmployeeType||'').toLowerCase()==='sales'?250000:0))));if(motor===null)return;const start=prompt('Tanggal mulai YYYY-MM-DD',String(e.StartDate||'').slice(0,10));if(start===null)return;const end=prompt('Tanggal selesai YYYY-MM-DD, kosong jika masih aktif',String(e.EndDate||'').slice(0,10));if(end===null)return;const status=confirm('OK = Aktif, Cancel = Nonaktif');try{await apiPost({action:'updateStaffAccount',employeeId:id,name,position:pos,startDate:start,endDate:end,status:status?'Active':'Inactive'});await apiPost({action:'updateEmployeeCompensation',employeeId:id,basicSalary:Number(basic||0),transportAllowance:Number(transport||0),motorcycleMaintenanceAllowance:Number(motor||0),position:pos,status:status?'Active':'Inactive'});showToast('Data karyawan dan komponen gaji diperbarui');await loadHrAdmin();}catch(e){showToast(e.message)}}
