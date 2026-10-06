@@ -166,11 +166,17 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
                     <div class="min-w-0"><h3 class="font-bold text-slate-900">Toko Saya</h3><p class="text-[11px] text-slate-500 mt-1">Daftar toko yang Anda daftarkan. Hanya untuk dilihat.</p></div>
                     <span class="shrink-0 text-[10px] font-bold bg-slate-100 text-slate-600 rounded-lg px-2 py-1"><span id="sales-my-store-count">0</span> toko</span>
                   </div>
-                  <div class="relative mb-3">
-                    <input id="sales-my-store-search" type="search" oninput="renderSalesMyStores()" placeholder="Cari nama toko, pemilik atau WhatsApp..." class="w-full border rounded-xl px-4 py-2.5 pr-9 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200">
+                  <div class="relative mb-2">
+                    <input id="sales-my-store-search" type="search" oninput="salesMyStorePage=1;renderSalesMyStores()" placeholder="Cari nama toko, pemilik atau WhatsApp..." class="w-full border rounded-xl px-4 py-2.5 pr-9 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200">
                     <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">⌕</span>
                   </div>
-                  <div id="sales-my-store-list" class="space-y-2"></div>
+                  <div class="flex items-center gap-1.5 mb-3 overflow-x-auto pb-0.5">
+                    <button type="button" id="sales-store-filter-all" onclick="setSalesStoreFilter('all')" class="shrink-0 px-2.5 py-1.5 rounded-lg bg-indigo-600 text-white text-[10px] font-bold">Semua <span id="sales-store-filter-all-count">0</span></button>
+                    <button type="button" id="sales-store-filter-bought" onclick="setSalesStoreFilter('bought')" class="shrink-0 px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-bold">Sudah Beli <span id="sales-store-filter-bought-count">0</span></button>
+                    <button type="button" id="sales-store-filter-unbought" onclick="setSalesStoreFilter('unbought')" class="shrink-0 px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-bold">Belum Beli <span id="sales-store-filter-unbought-count">0</span></button>
+                  </div>
+                  <div id="sales-my-store-list" class="space-y-1"></div>
+                  <div id="sales-my-store-pagination" class="mt-3 flex items-center justify-between gap-2"></div>
                 </section>
                 <div id="sales-purchase-modal" class="hidden fixed inset-0 z-[80] bg-slate-950/50 p-4 overflow-y-auto" onclick="if(event.target===this)closeSalesPurchaseModal()"><div class="max-w-2xl mx-auto mt-8 bg-white rounded-2xl shadow-2xl overflow-hidden"><div class="p-4 border-b flex items-start justify-between gap-3"><div><p class="text-[10px] uppercase tracking-wide text-brand-600 font-bold">Riwayat Pembelian</p><h3 id="sales-purchase-title" class="text-lg font-bold text-slate-900">Toko</h3><p id="sales-purchase-subtitle" class="text-[11px] text-slate-500 mt-1">Pembelian toko ini</p></div><button type="button" onclick="closeSalesPurchaseModal()" class="w-9 h-9 rounded-xl border text-slate-500 hover:bg-slate-50">✕</button></div><div id="sales-purchase-list" class="p-4 space-y-3"></div></div></div>
                 <div class="pt-4 border-t"><div class="flex items-center justify-between gap-2"><div><h3 class="font-bold text-slate-900">Tutup Hari</h3><p class="text-[11px] text-slate-500">Rangkuman barang dan uang hari ini.</p></div><button onclick="loadSalesCloseDay()" class="px-3 py-2 border rounded-xl text-[11px] font-bold">Perbarui</button></div><div class="grid grid-cols-2 gap-2 mt-3 text-xs"><div class="bg-indigo-50 p-3 rounded-xl"><span class="text-slate-500">Sisa Barang</span><b id="sales-stock-summary" class="block text-base">0 PCS</b></div><div class="bg-amber-50 p-3 rounded-xl"><span class="text-slate-500">Piutang Belum Tertagih</span><b id="sales-receivable-summary" class="block text-base">Rp 0</b></div><div class="bg-emerald-50 p-3 rounded-xl"><span class="text-slate-500">Cash Wajib Disetor</span><b id="sales-close-cash" class="block text-base">Rp 0</b><small id="sales-close-cash-detail" class="text-[10px] text-slate-500"></small></div><div class="bg-sky-50 p-3 rounded-xl"><span class="text-slate-500">Non-Cash ke Perusahaan</span><b id="sales-close-noncash" class="block text-base">Rp 0</b><small id="sales-close-noncash-detail" class="text-[10px] text-slate-500"></small></div></div><div id="sales-stock-breakdown" class="mt-2 text-[11px] bg-slate-50 rounded-xl p-3"></div><div id="sales-pending-payment-card" class="mt-3 rounded-2xl border border-amber-200 bg-amber-50 p-3">
@@ -883,35 +889,88 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
         async function saveSalesCloseDay(){try{const r=await apiPost({action:'saveDeposit',date:jakartaTodayKey(),actualDeposit:+document.getElementById('sales-deposit-actual').value||0});await refreshOnlineData(false);await loadSalesCloseDay();showToast(r.alreadyClosed?'Hari ini sudah ditutup sebelumnya.':'Tutup hari tersimpan · '+r.status+' · selisih '+rupiah(r.difference));}catch(e){showToast(e.message)}}
         async function payReceivableOps(id){try{const el=document.getElementById('pay-'+id),m=document.getElementById('pay-method-'+id);await apiPost({action:'payReceivable',receivableId:id,amount:+el.value||0,method:m?.value||'Cash'});await refreshOnlineData(false);showToast('Pembayaran piutang tersimpan');}catch(e){showToast(e.message)}}
 
+        let salesMyStorePage=1;
+        let salesMyStorePageSize=10;
+        let salesMyStoreFilter='all';
+        function setSalesStoreFilter(filter){
+          salesMyStoreFilter=['all','bought','unbought'].includes(filter)?filter:'all';
+          salesMyStorePage=1;
+          renderSalesMyStores();
+        }
+        function setSalesStorePageSize(size){
+          const n=Number(size);
+          salesMyStorePageSize=[10,20,30,50].includes(n)?n:10;
+          salesMyStorePage=1;
+          renderSalesMyStores();
+        }
+        function salesStoreOrders(storeId,sid){
+          return (db.orders||[]).filter(o=>String(o.salesId||'')===String(sid||'')&&String(o.storeId||'')===String(storeId||''));
+        }
         function renderSalesMyStores(){
           if(currentUser?.role!=='sales')return;
           const box=document.getElementById('sales-my-store-list');if(!box)return;
           const sid=String(currentUser.salesId||'');
           const rows=(db.stores||[]).filter(x=>String(x.createdBySalesId||'')===sid&&String(x.status||'').toLowerCase()==='active');
           const q=String(document.getElementById('sales-my-store-search')?.value||'').trim().toLowerCase();
-          const filtered=rows.filter(x=>[x.name,x.owner,x.wa,x.address].some(v=>String(v||'').toLowerCase().includes(q)));
-          const count=document.getElementById('sales-my-store-count');if(count)count.innerText=String(rows.length);
-          if(!filtered.length){
-            box.innerHTML=rows.length
-              ? '<div class="text-[11px] text-slate-400 text-center py-5">Toko tidak ditemukan.</div>'
-              : '<div class="text-[11px] text-slate-400 text-center py-5">Belum ada toko yang didaftarkan.</div>';
-            return;
-          }
-          box.innerHTML=filtered.map(x=>{
-            const orders=(db.orders||[]).filter(o=>String(o.salesId||'')===sid&&String(o.storeId||'')===String(x.id));
+          const enriched=rows.map(x=>{
+            const orders=salesStoreOrders(x.id,sid);
             const total=orders.reduce((n,o)=>n+Number(o.total||0),0);
             const last=orders.slice().sort((a,b)=>String(b.dateKey||b.date||'').localeCompare(String(a.dateKey||a.date||'')))[0];
-            const meta=orders.length?`${orders.length} pembelian · ${rupiah(total)}${last?' · terakhir '+escapeHtml(String(last.dateKey||last.date||'').slice(0,10)):''}`:'Belum ada pembelian';
-            return `<button type="button" onclick="openSalesPurchaseHistory('${escapeHtml(x.id)}')" class="w-full text-left rounded-xl border bg-white hover:bg-slate-50 active:bg-slate-100 px-3 py-2.5 transition flex items-center gap-3">
-              <div class="w-9 h-9 shrink-0 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center text-xs font-bold">${escapeHtml(String(x.name||'?').trim().slice(0,1).toUpperCase())}</div>
+            return {...x,_orders:orders,_hasPurchase:orders.length>0,_total:total,_last:last};
+          });
+          const allCount=enriched.length;
+          const boughtCount=enriched.filter(x=>x._hasPurchase).length;
+          const unboughtCount=allCount-boughtCount;
+          const textMatch=x=>[x.name,x.owner,x.wa,x.address].some(v=>String(v||'').toLowerCase().includes(q));
+          let filtered=enriched.filter(textMatch);
+          if(salesMyStoreFilter==='bought')filtered=filtered.filter(x=>x._hasPurchase);
+          if(salesMyStoreFilter==='unbought')filtered=filtered.filter(x=>!x._hasPurchase);
+          const count=document.getElementById('sales-my-store-count');if(count)count.innerText=String(allCount);
+          const setText=(id,v)=>{const e=document.getElementById(id);if(e)e.innerText=String(v)};
+          setText('sales-store-filter-all-count',allCount);
+          setText('sales-store-filter-bought-count',boughtCount);
+          setText('sales-store-filter-unbought-count',unboughtCount);
+          ['all','bought','unbought'].forEach(k=>{
+            const e=document.getElementById('sales-store-filter-'+k);if(!e)return;
+            const active=salesMyStoreFilter===k;
+            e.className=active?'shrink-0 px-2.5 py-1.5 rounded-lg bg-indigo-600 text-white text-[10px] font-bold':'shrink-0 px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-bold';
+          });
+          if(!filtered.length){
+            box.innerHTML=allCount
+              ? '<div class="text-[11px] text-slate-400 text-center py-5">Tidak ada toko yang sesuai pencarian/filter.</div>'
+              : '<div class="text-[11px] text-slate-400 text-center py-5">Belum ada toko yang didaftarkan.</div>';
+            const pg=document.getElementById('sales-my-store-pagination');if(pg)pg.innerHTML='';
+            return;
+          }
+          const totalPages=Math.max(1,Math.ceil(filtered.length/salesMyStorePageSize));
+          if(salesMyStorePage>totalPages)salesMyStorePage=totalPages;
+          const start=(salesMyStorePage-1)*salesMyStorePageSize;
+          const pageRows=filtered.slice(start,start+salesMyStorePageSize);
+          box.innerHTML=pageRows.map(x=>{
+            const meta=x._hasPurchase?`${x._orders.length} pembelian · ${rupiah(x._total)}${x._last?' · terakhir '+escapeHtml(String(x._last.dateKey||x._last.date||'').slice(0,10)):''}`:'Belum ada pembelian';
+            return `<button type="button" onclick="openSalesPurchaseHistory('${escapeHtml(x.id)}')" class="w-full text-left border-b border-slate-200 bg-white hover:bg-slate-50 active:bg-slate-100 px-1 py-2.5 transition flex items-center gap-2.5">
+              <div class="w-8 h-8 shrink-0 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center text-[11px] font-bold">${escapeHtml(String(x.name||'?').trim().slice(0,1).toUpperCase())}</div>
               <div class="min-w-0 flex-1">
-                <b class="block text-sm text-slate-800 truncate">${escapeHtml(x.name||'-')}</b>
+                <b class="block text-[12px] text-slate-800 truncate">${escapeHtml(x.name||'-')}</b>
                 <p class="text-[10px] text-slate-500 truncate">${escapeHtml(x.owner||'-')}${x.wa?' · '+escapeHtml(x.wa):''}</p>
                 <p class="text-[10px] text-slate-400 mt-0.5 truncate">${meta}</p>
               </div>
-              <span class="shrink-0 text-slate-400 text-lg">›</span>
+              <span class="shrink-0 text-slate-400 text-base">›</span>
             </button>`;
           }).join('');
+          const pg=document.getElementById('sales-my-store-pagination');
+          if(pg){
+            const from=start+1,to=Math.min(start+pageRows.length,filtered.length);
+            pg.innerHTML=`<div class="text-[10px] text-slate-500 whitespace-nowrap">${from}-${to} dari ${filtered.length}</div>
+              <div class="flex items-center gap-1.5">
+                <select onchange="setSalesStorePageSize(this.value)" class="border rounded-lg px-2 py-1.5 bg-white text-[10px] font-semibold text-slate-600">
+                  ${[10,20,30,50].map(n=>`<option value="${n}" ${salesMyStorePageSize===n?'selected':''}>${n}/halaman</option>`).join('')}
+                </select>
+                <button type="button" onclick="salesMyStorePage=Math.max(1,salesMyStorePage-1);renderSalesMyStores()" ${salesMyStorePage<=1?'disabled':''} class="w-8 h-8 rounded-lg border text-xs font-bold ${salesMyStorePage<=1?'text-slate-300 bg-slate-50':'text-slate-700 bg-white hover:bg-slate-50'}">‹</button>
+                <span class="text-[10px] font-semibold text-slate-600 min-w-[44px] text-center">${salesMyStorePage}/${totalPages}</span>
+                <button type="button" onclick="salesMyStorePage=Math.min(${totalPages},salesMyStorePage+1);renderSalesMyStores()" ${salesMyStorePage>=totalPages?'disabled':''} class="w-8 h-8 rounded-lg border text-xs font-bold ${salesMyStorePage>=totalPages?'text-slate-300 bg-slate-50':'text-slate-700 bg-white hover:bg-slate-50'}">›</button>
+              </div>`;
+          }
         }
         function salesOwnStore(storeId){
           if(currentUser?.role!=='sales')return null;
