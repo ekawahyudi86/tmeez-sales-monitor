@@ -53,6 +53,20 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
 .leaflet-tile-container{pointer-events:none}
 #sales-route-map .leaflet-tile-pane img{width:256px!important;height:256px!important;max-width:none!important;max-height:none!important}
 </style>
+
+<style id="tmeez-ui-safety-fix">
+/* UI safety fallback: keep closed overlays from intercepting clicks even if Tailwind CDN is unavailable. */
+.hidden { display: none !important; }
+.fixed.hidden,
+[role="dialog"].hidden {
+    display: none !important;
+    pointer-events: none !important;
+}
+/* Explicitly restore interaction for normal controls. */
+button, a, input, select, textarea, [role="button"] {
+    pointer-events: auto;
+}
+</style>
 </head>
 <body class="h-full flex flex-col text-slate-800 antialiased overflow-x-hidden">
 
@@ -617,10 +631,10 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
         document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')saveWorkflowDraftNow();});
 
         document.addEventListener('DOMContentLoaded', async () => {
-            lucide.createIcons();
-            calculateInvoiceTotal();
-            loadDb();
-            await restoreSession();
+            try { if (window.lucide && typeof window.lucide.createIcons === 'function') window.lucide.createIcons(); } catch (e) { console.warn('Lucide init skipped:', e); }
+            try { calculateInvoiceTotal(); } catch (e) { console.warn('Invoice init skipped:', e); }
+            try { loadDb(); } catch (e) { console.error('Database init failed:', e); }
+            try { await restoreSession(); } catch (e) { console.error('Session restore failed:', e); }
         });
 
         function applyAccessUI(){
