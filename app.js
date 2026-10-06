@@ -152,7 +152,7 @@
           const raw=localStorage.getItem(DBKEY);
           if(raw){ try{db=JSON.parse(raw)}catch(e){} }
           db.users=db.users||[]; db.products=db.products||[]; db.sales=db.sales||[]; db.stores=db.stores||[]; db.visits=db.visits||[]; db.orders=db.orders||[]; db.settings=db.settings||{radius:100};
-          renderMaster(); renderDynamicForms(); renderMySalesStores(); refreshVisitKpi(); refreshOnlineData(false);
+          renderMaster(); renderDynamicForms(); refreshVisitKpi(); refreshOnlineData(false);
         }
         function saveDb(){localStorage.setItem(DBKEY,JSON.stringify(db));}
         window.addEventListener('storage',e=>{if(e.key===DBKEY && e.newValue){try{db=JSON.parse(e.newValue);renderMaster();renderDynamicForms();refreshVisitKpi();}catch(err){}}});
@@ -218,23 +218,6 @@
         async function toggleSalesFromModal(){const id=document.getElementById('edit-sales-id').value,s=db.sales.find(x=>x.id===id);try{await apiPost({action:'setSalesStatus',salesId:id,status:s?.active===false?'Active':'Inactive'});await refreshOnlineData();openSalesModal(id);}catch(err){showToast(err.message);}}
         async function resetSalesPasswordFromModal(){const id=document.getElementById('edit-sales-id').value;const p=prompt('Masukkan password baru (minimal 6 karakter):');if(!p)return;try{await apiPost({action:'resetSalesPassword',salesId:id,newPassword:p});showToast('Password Sales berhasil diubah');}catch(err){showToast(err.message);}}
         async function transferSalesStoresFromModal(){const from=document.getElementById('edit-sales-id').value,to=document.getElementById('transfer-sales-target').value;if(!to){showToast('Pilih Sales pengganti');return;}if(!confirm('Alihkan semua toko Sales ini ke Sales pengganti? Histori lama tidak akan diubah.'))return;try{const r=await apiPost({action:'transferSalesStores',fromSalesId:from,toSalesId:to});await refreshOnlineData();openSalesModal(from);showToast(r.message);}catch(err){showToast(err.message);}}
-
-function renderMySalesStores(){
-  if(currentUser?.role!=='sales')return;
-  const box=document.getElementById('sales-my-store-list'),count=document.getElementById('sales-my-store-count');
-  if(!box)return;
-  const q=String(document.getElementById('sales-my-store-search')?.value||'').trim().toLowerCase();
-  const rows=(db.stores||[]).filter(x=>String(x.createdBySalesId)===String(currentUser.salesId)&&String(x.status||'Active').toLowerCase()==='active').filter(x=>{
-    if(!q)return true;
-    return [x.name,x.owner,x.wa,x.address,x.createdByName].some(v=>String(v||'').toLowerCase().includes(q));
-  }).sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
-  if(count)count.innerText=rows.length+' toko';
-  box.innerHTML=rows.length?rows.map(x=>{
-    const gps=(Number.isFinite(Number(x.lat))&&Number.isFinite(Number(x.lng))&&Number(x.lat)!==0&&Number(x.lng)!==0)?`${Number(x.lat).toFixed(6)}, ${Number(x.lng).toFixed(6)}`:'-';
-    const photo=x.photoUrl?`<a href="${escapeHtml(x.photoUrl)}" target="_blank" rel="noopener" class="inline-flex px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 font-bold">Lihat Foto</a>`:'';
-    return `<div class="border rounded-xl p-3 bg-slate-50/60"><div class="flex justify-between gap-3"><div class="min-w-0"><b class="text-sm">${escapeHtml(x.name||'-')}</b><div class="text-[11px] text-slate-500 mt-1">Pemilik: ${escapeHtml(x.owner||'-')}</div><div class="text-[11px] text-slate-500">WA: ${escapeHtml(x.wa||'-')}</div><div class="text-[11px] text-slate-500">${escapeHtml(x.address||'Alamat belum diisi')}</div></div><span class="shrink-0 text-[10px] text-emerald-700 bg-emerald-50 px-2 py-1 rounded-full font-bold">Aktif</span></div><div class="mt-2 pt-2 border-t text-[10px] text-slate-500 flex flex-wrap gap-x-4 gap-y-1"><span>GPS: ${escapeHtml(gps)}</span>${x.createdAt?`<span>Daftar: ${escapeHtml(String(x.createdAt))}</span>`:''}${photo?`<span>${photo}</span>`:''}</div></div>`;
-  }).join(''):'<div class="py-6 text-center text-xs text-slate-400">Belum ada toko yang Anda daftarkan.</div>';
-}
 
 function renderDynamicForms(){
           const ms=document.getElementById('m-store-sales');
