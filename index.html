@@ -47,10 +47,11 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
 .pay-btn.ring-2{transform:scale(.98);box-shadow:0 0 0 2px rgb(37 99 235 / .22)}
 </style>
 <style>
-.leaflet-container{font:inherit;overflow:hidden}
-.leaflet-container img{max-width:none!important;max-height:none!important}
-.leaflet-tile{width:256px!important;height:256px!important}
+.leaflet-container{font:inherit;overflow:hidden;position:relative}
+.leaflet-container img{max-width:none!important;max-height:none!important;width:auto}
+.leaflet-tile{width:256px!important;height:256px!important;max-width:none!important;max-height:none!important}
 .leaflet-tile-container{pointer-events:none}
+#sales-route-map .leaflet-tile-pane img{width:256px!important;height:256px!important;max-width:none!important;max-height:none!important}
 </style>
 </head>
 <body class="h-full flex flex-col text-slate-800 antialiased overflow-x-hidden">
@@ -704,8 +705,8 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
         }
 
         const API_URL='https://script.google.com/macros/s/AKfycbyR-riwS3HVUM93sA8D09AR3Orb1kgYbZnZ9HwKSYA8Z1wo0DaJh-Z-sqQhSQvJ53ANCg/exec';
-        const DBKEY='tmeez_sales_monitor_v6_18_7_cache';
-        const SESSIONKEY='tmeez_sales_monitor_v6_18_7_session';
+        const DBKEY='tmeez_sales_monitor_v6_19_1_cache';
+        const SESSIONKEY='tmeez_sales_monitor_v6_19_1_session';
         let apiOnline=false;
         let sessionToken='';
         async function apiGet(action,params={}){
@@ -792,8 +793,15 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
             if(currentUser.salesId && x.sales){const mapped=mapSales(x.sales); if(!db.sales.some(s=>s.id===mapped.id))db.sales.push(mapped);}
             document.getElementById('login-screen').classList.add('hidden'); switchRole(currentUser.role==='sales'?'sales':currentUser.role==='staff'?'staff':'admin');
             document.getElementById('current-user-name').innerText=currentUser.name; document.getElementById('current-user-role').innerText=currentUser.role==='sales'?'Sales · '+(db.sales.find(s=>s.id===currentUser.salesId)?.area||''):String(x.role||'Admin').toUpperCase();
-            await refreshOnlineData(false); renderMaster();renderDynamicForms();refreshVisitKpi();applyAccessUI();if(currentUser?.role==='admin'){loadMonitoringUsers();loadHrAdmin();} if(currentUser?.role==='sales')workflowHome(); if(currentUser?.role==='staff'){loadAttendanceToday();loadMyAttendanceHistory();loadMyPayroll();} if(currentUser?.role==='sales')loadAttendanceToday(); showToast('Login online berhasil');
-          }catch(err){showToast('Login gagal: '+err.message);}
+            showToast('Login online berhasil');
+            try{
+              await refreshOnlineData(false); renderMaster();renderDynamicForms();refreshVisitKpi();applyAccessUI();
+              if(currentUser?.role==='admin'){loadMonitoringUsers();loadHrAdmin();}
+              if(currentUser?.role==='sales')workflowHome();
+              if(currentUser?.role==='staff'){loadAttendanceToday();loadMyAttendanceHistory();loadMyPayroll();}
+              if(currentUser?.role==='sales')loadAttendanceToday();
+            }catch(initErr){showToast('Login berhasil, tetapi sinkronisasi awal gagal: '+(initErr.message||initErr));}
+          }catch(err){clearSession();currentUser=null;showToast('Login gagal: '+err.message);}
         }
         function uid(prefix){return prefix+Date.now().toString(36)+Math.random().toString(36).slice(2,5)}
         async function loadMonitoringUsers(){
