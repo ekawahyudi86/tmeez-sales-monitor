@@ -9,7 +9,7 @@
     <!-- Font Inter & Lucide Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQ3n4X5Q2l5pK2Qf0eQ0Qf3r4f5f7p4=" crossorigin="" />
+    <link rel="stylesheet" href="leaflet-local.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <script>
         tailwind.config = {
@@ -32,6 +32,10 @@
         }
     </script>
     <style>
+      /* Leaflet route map must fill its container; prevents tile strips/blank gaps when opened from a hidden modal. */
+      #sales-route-map.leaflet-container { position: relative; width: 100%; height: 55vh; min-height: 360px; overflow: hidden; display: block; }
+      #sales-route-map .leaflet-tile-pane, #sales-route-map .leaflet-overlay-pane, #sales-route-map .leaflet-marker-pane, #sales-route-map .leaflet-shadow-pane, #sales-route-map .leaflet-tooltip-pane, #sales-route-map .leaflet-popup-pane { pointer-events: none; }
+      #sales-route-map .leaflet-marker-icon, #sales-route-map .leaflet-marker-shadow, #sales-route-map .leaflet-popup, #sales-route-map .leaflet-control { pointer-events: auto; }
         body { font-family: 'Inter', sans-serif; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -2179,6 +2183,7 @@ let salesRouteMap=null,salesRouteLine=null,salesRouteMarkers=[];
 async function openSalesRoute(employeeId,date){
   const modal=document.getElementById('sales-route-modal'); if(!modal)return;
   modal.classList.remove('hidden');
+  const routeMapEl=document.getElementById('sales-route-map'); if(routeMapEl){routeMapEl.style.width='100%';routeMapEl.style.height='55vh';routeMapEl.style.minHeight='360px';}
   document.getElementById('sales-route-sub').innerText='Memuat perjalanan...';
   document.getElementById('sales-route-summary').innerHTML='<div class="col-span-full text-slate-500">Mengambil titik GPS dari server...</div>';
   document.getElementById('sales-route-points').innerHTML='';
@@ -2200,12 +2205,19 @@ function calcRouteDistance(pts){let total=0;for(let i=1;i<pts.length;i++){total+
 function renderSalesRouteMap(pts,a){
   if(!window.L){document.getElementById('sales-route-map').innerHTML='<div class="p-4 text-sm text-red-600">Peta belum tersedia. Periksa koneksi internet.</div>';return;}
   if(salesRouteMap){salesRouteMap.remove();}
-  salesRouteMap=L.map('sales-route-map'); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(salesRouteMap);
+  const mapEl=document.getElementById('sales-route-map');
+  if(!mapEl)return;
+  mapEl.innerHTML='';
+  salesRouteMap=L.map(mapEl,{preferCanvas:true,zoomControl:true});
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(salesRouteMap);
+  requestAnimationFrame(()=>salesRouteMap?.invalidateSize({pan:false,animate:false}));
   const latlngs=pts.map(p=>[Number(p.Latitude),Number(p.Longitude)]).filter(x=>Number.isFinite(x[0])&&Number.isFinite(x[1]));
   if(!latlngs.length){salesRouteMap.setView([-7.25,112.75],10);return;}
   salesRouteLine=L.polyline(latlngs,{weight:4}).addTo(salesRouteMap);
   latlngs.forEach((ll,i)=>{const p=pts[i]||{},m=L.circleMarker(ll,{radius:i===0?8:(i===latlngs.length-1?8:4)}).addTo(salesRouteMap);m.bindPopup(i===0?'📍 Absen Masuk':(i===latlngs.length-1?'🏁 Absen Pulang':`Titik GPS ${i}`));salesRouteMarkers.push(m);});
   salesRouteMap.fitBounds(salesRouteLine.getBounds(),{padding:[20,20]});
+  setTimeout(()=>salesRouteMap?.invalidateSize({pan:false,animate:false}),80);
+  setTimeout(()=>salesRouteMap?.invalidateSize({pan:false,animate:false}),300);
 }
 function renderHrAttendance(rows){const b=document.getElementById('hr-attendance');if(!b)return;const em={};hrEmployees.forEach(e=>em[e.EmployeeID]=e);b.innerHTML='<table class="w-full whitespace-nowrap"><thead><tr class="bg-slate-50"><th class="p-2 text-left">Tanggal</th><th>Karyawan</th><th>Masuk</th><th>Pulang</th><th>Status</th><th>Terlambat</th><th>Pulang Cepat</th><th>GPS</th><th>Perjalanan</th><th>Koreksi</th></tr></thead><tbody>'+rows.slice().reverse().map(a=>{const e=em[a.EmployeeID]||{};const isSales=!!e.SalesID;return `<tr class="border-t"><td class="p-2">${escapeHtml(String(a.Date||'').slice(0,10))}</td><td>${escapeHtml(e.Name||a.EmployeeID)}</td><td>${escapeHtml(attClockV615(a.CheckIn)||'-')}</td><td>${escapeHtml(attClockV615(a.CheckOut)||'-')}</td><td><b>${escapeHtml(a.Status||'-')}</b></td><td>${Number.isFinite(Number(a.LateMinutes))&&Number(a.LateMinutes)>=0?Math.round(Number(a.LateMinutes)):'-'} menit</td><td>${Number.isFinite(Number(a.EarlyLeaveMinutes))&&Number(a.EarlyLeaveMinutes)>=0?Math.round(Number(a.EarlyLeaveMinutes)):'-'} menit</td><td>${a.CheckInDistance!==''&&a.CheckInDistance!==undefined?Number(a.CheckInDistance)+' m':'-'}</td><td>${isSales?`<button onclick="openSalesRoute('${String(a.EmployeeID).replace(/'/g,"\\'")}','${String(a.Date||'').slice(0,10)}')" class="px-2 py-1 rounded-lg bg-indigo-50 text-indigo-700 font-bold">Lihat rute</button>`:'-'}</td><td>${a.CorrectionReason?escapeHtml(a.CorrectionReason):'-'}</td></tr>`}).join('')+'</tbody></table>'+(rows.length?'':'Belum ada data absensi pada periode ini.')}
         async function editEmployeeAdmin(id){const e=hrEmployees.find(x=>String(x.EmployeeID)===String(id));if(!e)return;const name=prompt('Nama karyawan',e.Name||'');if(name===null)return;const pos=prompt('Jabatan / bagian',e.Position||'');if(pos===null)return;const basic=prompt('Gaji pokok per bulan',String(Number(e.BasicSalary||0)));if(basic===null)return;const transport=prompt('Transport per bulan',String(Number(e.TransportAllowance||0)));if(transport===null)return;const motor=prompt('Tunjangan perawatan motor per bulan',String(Number(e.MotorcycleMaintenanceAllowance??(String(e.EmployeeType||'').toLowerCase()==='sales'?250000:0))));if(motor===null)return;const start=prompt('Tanggal mulai YYYY-MM-DD',String(e.StartDate||'').slice(0,10));if(start===null)return;const end=prompt('Tanggal selesai YYYY-MM-DD, kosong jika masih aktif',String(e.EndDate||'').slice(0,10));if(end===null)return;const status=confirm('OK = Aktif, Cancel = Nonaktif');try{await apiPost({action:'updateStaffAccount',employeeId:id,name,position:pos,startDate:start,endDate:end,status:status?'Active':'Inactive'});await apiPost({action:'updateEmployeeCompensation',employeeId:id,basicSalary:Number(basic||0),transportAllowance:Number(transport||0),motorcycleMaintenanceAllowance:Number(motor||0),position:pos,status:status?'Active':'Inactive'});showToast('Data karyawan dan komponen gaji diperbarui');await loadHrAdmin();}catch(e){showToast(e.message)}}
