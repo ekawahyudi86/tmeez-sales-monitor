@@ -142,6 +142,27 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
 
               <div id="sales-step-home" class="sales-step p-5 space-y-5">
                 <section class="rounded-2xl border bg-emerald-50/60 p-4"><div class="flex justify-between items-start gap-3"><div><p class="text-[11px] font-bold text-emerald-700">ABSENSI HARI INI</p><b id="sales-att-status" class="text-base">Belum Absen</b><div id="sales-att-detail" class="text-xs text-slate-600 mt-1">Wajib GPS + selfie di tempat kerja.</div></div><div class="flex gap-2"><button id="sales-att-in" onclick="startAttendance('in')" class="px-3 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold">Masuk</button><button id="sales-att-out" onclick="startAttendance('out')" class="px-3 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold">Pulang</button></div></div><div class="mt-3 flex justify-end"><button onclick="showMyPayrollModal()" class="text-xs border bg-white rounded-lg px-3 py-2 font-bold">Slip Gaji Saya</button></div></section>
+                <section class="pt-4 border-t">
+                  <div class="flex items-center justify-between gap-2 mb-3">
+                    <div class="min-w-0"><h3 class="font-bold text-slate-900">Peta Toko Saya</h3><p class="text-[11px] text-slate-500 mt-1">Hanya menampilkan toko yang menjadi tanggung jawab Anda.</p></div>
+                    <span id="sales-map-count" class="shrink-0 text-[10px] font-bold bg-slate-100 text-slate-600 rounded-lg px-2 py-1">0 toko</span>
+                  </div>
+                  <div class="flex items-center gap-1.5 mb-2 overflow-x-auto pb-0.5">
+                    <button type="button" id="sales-map-filter-all" onclick="setSalesMapFilter('all')" class="shrink-0 px-2.5 py-1.5 rounded-lg bg-indigo-600 text-white text-[10px] font-bold">Semua</button>
+                    <button type="button" id="sales-map-filter-bought" onclick="setSalesMapFilter('bought')" class="shrink-0 px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-bold">Sudah Beli</button>
+                    <button type="button" id="sales-map-filter-unbought" onclick="setSalesMapFilter('unbought')" class="shrink-0 px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-bold">Belum Beli</button>
+                    <button type="button" id="sales-map-filter-visited" onclick="setSalesMapFilter('visited')" class="shrink-0 px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-bold">Sudah Dikunjungi</button>
+                    <button type="button" id="sales-map-filter-unvisited" onclick="setSalesMapFilter('unvisited')" class="shrink-0 px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-bold">Belum Dikunjungi</button>
+                  </div>
+                  <div id="sales-store-map" class="w-full rounded-2xl border overflow-hidden bg-slate-100 relative" style="height:360px"></div>
+                  <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[10px] text-slate-500">
+                    <span><i class="inline-block w-2.5 h-2.5 rounded-full bg-blue-600 mr-1"></i>Sudah beli</span>
+                    <span><i class="inline-block w-2.5 h-2.5 rounded-full bg-red-500 mr-1"></i>Belum beli</span>
+                    <span><i class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 mr-1"></i>Sudah dikunjungi hari ini</span>
+                    <span><i class="inline-block w-2.5 h-2.5 rounded-full bg-amber-500 mr-1"></i>Belum dikunjungi hari ini</span>
+                  </div>
+                </section>
+
                 <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
                   <div><p class="text-xs font-semibold text-brand-600">DASHBOARD SALES</p><h3 class="text-xl font-bold text-slate-900">Kinerja Saya</h3><p id="sales-dashboard-period-label" class="text-xs text-slate-500 mt-1">Ringkasan bulan ini</p></div>
                   <div class="inline-flex bg-slate-100 p-1 rounded-xl text-xs font-medium">
@@ -165,26 +186,6 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
                   <button onclick="startNewStoreWorkflow()" class="text-left p-5 rounded-2xl border-2 border-brand-100 bg-brand-50 hover:border-brand-400 transition"><div class="w-11 h-11 rounded-xl bg-brand-600 text-white flex items-center justify-center mb-3"><i data-lucide="store" class="w-5 h-5"></i></div><b>Tambah Toko Baru</b><p class="text-xs text-slate-500 mt-1">Daftarkan toko, GPS dan foto, lalu check-in.</p></button>
                   <button onclick="startExistingVisitWorkflow()" class="text-left p-5 rounded-2xl border-2 border-indigo-100 bg-indigo-50 hover:border-indigo-400 transition"><div class="w-11 h-11 rounded-xl bg-indigo-600 text-white flex items-center justify-center mb-3"><i data-lucide="map-pin" class="w-5 h-5"></i></div><b>Kunjungan Toko</b><p class="text-xs text-slate-500 mt-1">Pilih toko yang sudah terdaftar lalu check-in GPS.</p></button>
                 </div>
-                <section class="pt-4 border-t">
-                  <div class="flex items-center justify-between gap-2 mb-3">
-                    <div class="min-w-0"><h3 class="font-bold text-slate-900">Peta Toko Saya</h3><p class="text-[11px] text-slate-500 mt-1">Hanya menampilkan toko yang menjadi tanggung jawab Anda.</p></div>
-                    <span id="sales-map-count" class="shrink-0 text-[10px] font-bold bg-slate-100 text-slate-600 rounded-lg px-2 py-1">0 toko</span>
-                  </div>
-                  <div class="flex items-center gap-1.5 mb-2 overflow-x-auto pb-0.5">
-                    <button type="button" id="sales-map-filter-all" onclick="setSalesMapFilter('all')" class="shrink-0 px-2.5 py-1.5 rounded-lg bg-indigo-600 text-white text-[10px] font-bold">Semua</button>
-                    <button type="button" id="sales-map-filter-bought" onclick="setSalesMapFilter('bought')" class="shrink-0 px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-bold">Sudah Beli</button>
-                    <button type="button" id="sales-map-filter-unbought" onclick="setSalesMapFilter('unbought')" class="shrink-0 px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-bold">Belum Beli</button>
-                    <button type="button" id="sales-map-filter-visited" onclick="setSalesMapFilter('visited')" class="shrink-0 px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-bold">Sudah Dikunjungi</button>
-                    <button type="button" id="sales-map-filter-unvisited" onclick="setSalesMapFilter('unvisited')" class="shrink-0 px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-bold">Belum Dikunjungi</button>
-                  </div>
-                  <div id="sales-store-map" class="w-full rounded-2xl border overflow-hidden bg-slate-100 relative" style="height:360px"></div>
-                  <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[10px] text-slate-500">
-                    <span><i class="inline-block w-2.5 h-2.5 rounded-full bg-blue-600 mr-1"></i>Sudah beli</span>
-                    <span><i class="inline-block w-2.5 h-2.5 rounded-full bg-red-500 mr-1"></i>Belum beli</span>
-                    <span><i class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 mr-1"></i>Sudah dikunjungi hari ini</span>
-                    <span><i class="inline-block w-2.5 h-2.5 rounded-full bg-amber-500 mr-1"></i>Belum dikunjungi hari ini</span>
-                  </div>
-                </section>
                 <section class="pt-4 border-t">
                   <div class="flex items-center justify-between gap-2 mb-3">
                     <div class="min-w-0"><h3 class="font-bold text-slate-900">Toko Saya</h3><p class="text-[11px] text-slate-500 mt-1">Daftar toko yang Anda daftarkan. Hanya untuk dilihat.</p></div>
@@ -1037,6 +1038,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
           }
           renderSalesStoreMap();
         }
+        window.addEventListener('resize',()=>{if(currentUser?.role==='sales'&&document.getElementById('sales-store-map')){clearTimeout(window.__salesMapResize);window.__salesMapResize=setTimeout(()=>renderSalesStoreMap(true),150);}});
         function salesOwnStore(storeId){
           if(currentUser?.role!=='sales')return null;
           return (db.stores||[]).find(x=>String(x.id)===String(storeId)&&String(x.createdBySalesId||'')===String(currentUser.salesId||'')&&String(x.status||'').toLowerCase()==='active')||null;
@@ -1289,6 +1291,8 @@ function renderDynamicForms(){
           const c=document.getElementById('payment-confirm-btn');if(c){c.disabled=true;c.innerText='Bayar & Selesaikan Kunjungan';c.className='w-full py-3 bg-slate-300 text-white rounded-xl font-bold cursor-not-allowed';}
           const t=document.getElementById('payment-selected');if(t)t.innerText='Belum memilih metode pembayaran';
           document.getElementById('payment-due-wrap')?.classList.add('hidden');
+        }
+          if(name==='home' && currentUser?.role==='sales'){renderSalesStoreMap();setTimeout(()=>renderSalesStoreMap(true),120);}
         }
         function workflowHome(){activeVisit=null;lastSavedOrder=null;lastInvoiceFingerprint='';resetWorkflowPaymentUI();showSalesStep('home');renderWorkflowToday();}
         async function startNextWorkflow(){clearWorkflowDraft();try{await refreshOnlineData(false);}catch(_e){}workflowHome();}
