@@ -1327,7 +1327,7 @@ function renderDynamicForms(){
 
 
 
-        const WORKFLOW_DRAFT_PREFIX='tmeez_sales_workflow_draft_v652_';
+        var WORKFLOW_DRAFT_PREFIX='tmeez_sales_workflow_draft_v653_';
         let currentSalesStep='home', restoringWorkflowDraft=false, draftTimer=null;
         function workflowDraftKey(){return WORKFLOW_DRAFT_PREFIX+String(currentUser?.salesId||currentUser?.username||'unknown');}
         function visibleSalesStep(){const x=[...document.querySelectorAll('#view-sales .sales-step')].find(el=>!el.classList.contains('hidden'));return x?x.id.replace('sales-step-',''):(currentSalesStep||'home');}
@@ -1902,7 +1902,7 @@ function renderDynamicForms(){
           const vt=document.getElementById('visit-progress-text'),vb=document.getElementById('visit-progress-bar'),vr=document.getElementById('visit-remaining');
           if(vt)vt.innerText=`${visits} / ${targetVisit} Toko`;if(vb)vb.style.width=(targetVisit?Math.min(100,visits/targetVisit*100):0)+'%';if(vr)vr.innerText=targetVisit?(visits>=targetVisit?'Target tercapai':`Kurang ${targetVisit-visits} toko lagi`):'Target belum ditetapkan';
         }
-        let activeVisit = null; let visitStats = {calls:0,effective:0,newOutlet:0};
+        var activeVisit = null; var visitStats = {calls:0,effective:0,newOutlet:0};
         function distanceMeters(a,b,c,d){ const R=6371000, p=Math.PI/180; const x=(c-a)*p, y=(d-b)*p; const h=Math.sin(x/2)**2+Math.cos(a*p)*Math.cos(c*p)*Math.sin(y/2)**2; return 2*R*Math.asin(Math.sqrt(h)); }
         function checkInVisit(){
           const sel=document.getElementById('visit-store');if(!sel?.value){showToast('Toko kunjungan belum dipilih');return;}if(!window.isSecureContext){showToast('GPS membutuhkan HTTPS');return;}if(!navigator.geolocation){showToast('GPS tidak didukung perangkat');return;}
