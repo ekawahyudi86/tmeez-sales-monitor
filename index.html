@@ -36,18 +36,11 @@
       #sales-route-map.leaflet-container { position: relative; width: 100%; height: 55vh; min-height: 360px; overflow: hidden; display: block; }
       #sales-route-map .leaflet-tile-pane, #sales-route-map .leaflet-overlay-pane, #sales-route-map .leaflet-marker-pane, #sales-route-map .leaflet-shadow-pane, #sales-route-map .leaflet-tooltip-pane, #sales-route-map .leaflet-popup-pane { pointer-events: none; }
       #sales-route-map .leaflet-marker-icon, #sales-route-map .leaflet-marker-shadow, #sales-route-map .leaflet-popup, #sales-route-map .leaflet-control { pointer-events: auto; }
-      #sales-store-map { touch-action: none; -webkit-user-select: none; user-select: none; }
-      #sales-store-map img { -webkit-user-drag: none; }
         body { font-family: 'Inter', sans-serif; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     
         .wf-dot{width:20px;height:20px;border-radius:999px;background:#e2e8f0;display:inline-flex;align-items:center;justify-content:center;font-weight:700}.pay-btn{padding:16px;border-radius:12px;border:1px solid #cbd5e1;background:white;font-weight:700}.pay-btn:hover{background:#f8fafc}
-        .tm-sidebar{position:fixed;left:0;top:0;bottom:0;width:248px;background:#0f172a;color:#e2e8f0;z-index:70;border-right:1px solid rgba(148,163,184,.15);display:flex;flex-direction:column;box-shadow:8px 0 24px rgba(15,23,42,.08)}
-        .tm-sidebar-brand{height:72px;display:flex;align-items:center;gap:10px;padding:0 18px;border-bottom:1px solid rgba(148,163,184,.12)}
-        .tm-sidebar-nav{padding:14px 10px;overflow-y:auto;flex:1}.tm-sidebar-section{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#64748b;padding:10px 10px 6px;font-weight:800}.tm-side-btn{width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:0;background:transparent;color:#cbd5e1;text-align:left;font-size:12px;font-weight:600;cursor:pointer;margin:2px 0}.tm-side-btn:hover{background:#1e293b;color:white}.tm-side-btn.active{background:#4f46e5;color:white;box-shadow:0 4px 12px rgba(79,70,229,.25)}.tm-sidebar-footer{padding:12px;border-top:1px solid rgba(148,163,184,.12)}.tm-sidebar-user{font-size:11px;color:#94a3b8;margin-bottom:8px}.tm-sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(2,6,23,.55);z-index:65}.tm-mobile-menu{display:none;position:fixed;top:12px;left:12px;z-index:80;width:40px;height:40px;border:1px solid rgba(148,163,184,.25);border-radius:12px;background:#0f172a;color:white;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(15,23,42,.2)}
-        @media (min-width:768px){body{padding-left:248px}#app-header{left:248px!important}#app-main{max-width:none!important;margin-left:0!important;margin-right:0!important}.tm-mobile-menu{display:none!important}}
-        @media (max-width:767px){.tm-sidebar{transform:translateX(-105%);transition:transform .2s ease;width:280px}.tm-sidebar.open{transform:translateX(0)}.tm-sidebar-overlay.open{display:block}.tm-mobile-menu{display:flex}#app-header{left:0!important;padding-left:54px}.tm-sidebar-brand{height:64px}body{padding-left:0}#app-main{padding-top:72px!important}}
 </style>
 <link rel="manifest" href="manifest.webmanifest">    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
@@ -63,44 +56,10 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
     <div id="login-screen" class="fixed inset-0 z-[100] bg-slate-950/95 flex items-center justify-center p-4">
       <div class="bg-white w-full max-w-md rounded-3xl p-7 shadow-2xl">
         <div class="text-center mb-6"><div class="w-14 h-14 mx-auto bg-brand-600 text-white rounded-2xl flex items-center justify-center mb-3"><i data-lucide="bar-chart-3"></i></div><h2 class="text-xl font-bold">Tmeez Sales Monitor</h2><p class="text-xs text-slate-500 mt-1">Masuk sebagai Admin, Monitoring, Sales, atau Staff</p></div>
-        <form onsubmit="loginApp(event)" class="space-y-3"><input id="login-user" required placeholder="Username" class="w-full border rounded-xl px-4 py-3 text-sm"><input id="login-pass" required type="password" placeholder="Password" class="w-full border rounded-xl px-4 py-3 text-sm"><button class="w-full py-3 bg-brand-600 text-white rounded-xl font-semibold text-sm">Masuk</button></form><div id="login-error" class="hidden mt-2 rounded-lg bg-red-50 border border-red-200 text-red-700 px-3 py-2 text-xs"></div>
+        <form onsubmit="loginApp(event)" class="space-y-3"><input id="login-user" required placeholder="Username" class="w-full border rounded-xl px-4 py-3 text-sm"><input id="login-pass" required type="password" placeholder="Password" class="w-full border rounded-xl px-4 py-3 text-sm"><button class="w-full py-3 bg-brand-600 text-white rounded-xl font-semibold text-sm">Masuk</button></form>
         <p class="text-[11px] text-slate-400 mt-4 text-center">Akun Admin dan Sales dikelola oleh Administrator.</p>
       </div>
     </div>
-
-    <button id="tm-mobile-menu" class="tm-mobile-menu" type="button" aria-label="Buka menu" onclick="toggleTmSidebar()">☰</button>
-    <div id="tm-sidebar-overlay" class="tm-sidebar-overlay" onclick="closeTmSidebar()"></div>
-    <aside id="tm-sidebar" class="tm-sidebar" aria-label="Navigasi aplikasi">
-      <div class="tm-sidebar-brand"><div class="bg-brand-600 p-2 rounded-xl text-white"><i data-lucide="bar-chart-3" class="w-5 h-5"></i></div><div><div class="font-extrabold text-sm tracking-tight">TMEEZ</div><div class="text-[10px] text-slate-400">SALES MONITOR</div></div></div>
-      <nav id="tm-sidebar-nav" class="tm-sidebar-nav">
-        <div id="tm-nav-sales">
-          <div class="tm-sidebar-section">Sales</div>
-          <button class="tm-side-btn active" data-target="sales-step-home" onclick="sidebarNavigate('sales-step-home',this)">🏠 <span>Dashboard</span></button>
-          <button class="tm-side-btn" data-target="sales-my-store-list" onclick="sidebarNavigate('sales-my-store-list',this)">🏪 <span>Toko Saya</span></button>
-          <button class="tm-side-btn" data-target="sales-store-map" onclick="sidebarNavigate('sales-store-map',this)">🗺️ <span>Peta Toko</span></button>
-          <button class="tm-side-btn" data-target="sales-step-newstore" onclick="sidebarNavigate('sales-step-newstore',this)">➕ <span>Tambah Toko</span></button>
-          <button class="tm-side-btn" data-target="sales-step-selectstore" onclick="sidebarNavigate('sales-step-selectstore',this)">📍 <span>Kunjungan</span></button>
-          <button class="tm-side-btn" data-target="sales-purchase-list" onclick="sidebarNavigate('sales-purchase-list',this)">🛒 <span>Pembelian</span></button>
-          <button class="tm-side-btn" data-target="sales-step-order" onclick="sidebarNavigate('sales-step-order',this)">🧾 <span>Order</span></button>
-        </div>
-        <div id="tm-nav-admin" class="hidden">
-          <div class="tm-sidebar-section">Admin</div>
-          <button class="tm-side-btn active" data-target="view-admin" onclick="sidebarNavigate('view-admin',this)">🏠 <span>Dashboard</span></button>
-          <button class="tm-side-btn" data-target="admin-sales-management-section" onclick="sidebarNavigate('admin-sales-management-section',this)">👥 <span>Sales</span></button>
-          <button class="tm-side-btn" data-target="admin-master-store-block" onclick="sidebarNavigate('admin-master-store-block',this)">🏪 <span>Toko</span></button>
-          <button class="tm-side-btn" data-target="admin-store-map" onclick="sidebarNavigate('admin-store-map',this)">🗺️ <span>Peta Toko</span></button>
-          <button class="tm-side-btn" data-target="admin-payment-verification-section" onclick="sidebarNavigate('admin-payment-verification-section',this)">🛒 <span>Penjualan</span></button>
-          <button class="tm-side-btn" data-target="admin-hr-section" onclick="sidebarNavigate('admin-hr-section',this)">📊 <span>Laporan & HR</span></button>
-          <button class="tm-side-btn" data-target="admin-operations-section" onclick="sidebarNavigate('admin-operations-section',this)">⚙️ <span>Operasional</span></button>
-        </div>
-        <div id="tm-nav-staff" class="hidden">
-          <div class="tm-sidebar-section">Staff</div>
-          <button class="tm-side-btn active" data-target="view-staff" onclick="sidebarNavigate('view-staff',this)">🏠 <span>Dashboard</span></button>
-          <button class="tm-side-btn" data-target="view-staff" onclick="sidebarNavigate('view-staff',this)">📍 <span>Absensi & Kunjungan</span></button>
-        </div>
-      </nav>
-      <div class="tm-sidebar-footer"><div class="tm-sidebar-user"><span id="tm-sidebar-name">Belum login</span><br><span id="tm-sidebar-role">-</span></div><button type="button" class="tm-side-btn" onclick="logoutApp()">🚪 <span>Logout</span></button></div>
-    </aside>
 
     <header id="app-header" class="bg-slate-900 text-white shadow-md z-50 fixed top-0 left-0 right-0">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -147,7 +106,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
         </div>
     </header>
 
-    <main id="app-main" class="flex-1 max-w-7xl w-full mx-auto pt-20 px-4 pb-4 sm:pt-20 sm:px-6 sm:pb-6 lg:px-8 lg:pb-8 flex flex-col">
+    <main class="flex-1 max-w-7xl w-full mx-auto pt-20 px-4 pb-4 sm:pt-20 sm:px-6 sm:pb-6 lg:px-8 lg:pb-8 flex flex-col">
 
         <!-- ================= SALES WORKFLOW V6.9.4 ================= -->
         <div id="view-sales" class="space-y-6 animate-fadeIn">
@@ -183,27 +142,6 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
 
               <div id="sales-step-home" class="sales-step p-5 space-y-5">
                 <section class="rounded-2xl border bg-emerald-50/60 p-4"><div class="flex justify-between items-start gap-3"><div><p class="text-[11px] font-bold text-emerald-700">ABSENSI HARI INI</p><b id="sales-att-status" class="text-base">Belum Absen</b><div id="sales-att-detail" class="text-xs text-slate-600 mt-1">Wajib GPS + selfie di tempat kerja.</div></div><div class="flex gap-2"><button id="sales-att-in" onclick="startAttendance('in')" class="px-3 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold">Masuk</button><button id="sales-att-out" onclick="startAttendance('out')" class="px-3 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold">Pulang</button></div></div><div class="mt-3 flex justify-end"><button onclick="showMyPayrollModal()" class="text-xs border bg-white rounded-lg px-3 py-2 font-bold">Slip Gaji Saya</button></div></section>
-                <section class="pt-4 border-t">
-                  <div class="flex items-center justify-between gap-2 mb-3">
-                    <div class="min-w-0"><h3 class="font-bold text-slate-900">Peta Toko Saya</h3><p class="text-[11px] text-slate-500 mt-1">Hanya menampilkan toko yang menjadi tanggung jawab Anda.</p></div>
-                    <span id="sales-map-count" class="shrink-0 text-[10px] font-bold bg-slate-100 text-slate-600 rounded-lg px-2 py-1">0 toko</span>
-                  </div>
-                  <div class="flex items-center gap-1.5 mb-2 overflow-x-auto pb-0.5">
-                    <button type="button" id="sales-map-filter-all" onclick="setSalesMapFilter('all')" class="shrink-0 px-2.5 py-1.5 rounded-lg bg-indigo-600 text-white text-[10px] font-bold">Semua</button>
-                    <button type="button" id="sales-map-filter-bought" onclick="setSalesMapFilter('bought')" class="shrink-0 px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-bold">Sudah Beli</button>
-                    <button type="button" id="sales-map-filter-unbought" onclick="setSalesMapFilter('unbought')" class="shrink-0 px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-bold">Belum Beli</button>
-                    <button type="button" id="sales-map-filter-visited" onclick="setSalesMapFilter('visited')" class="shrink-0 px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-bold">Sudah Dikunjungi</button>
-                    <button type="button" id="sales-map-filter-unvisited" onclick="setSalesMapFilter('unvisited')" class="shrink-0 px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-bold">Belum Dikunjungi</button>
-                  </div>
-                  <div id="sales-store-map" class="w-full rounded-2xl border overflow-hidden bg-slate-100 relative" style="height:360px"></div>
-                  <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[10px] text-slate-500">
-                    <span><i class="inline-block w-2.5 h-2.5 rounded-full bg-blue-600 mr-1"></i>Sudah beli</span>
-                    <span><i class="inline-block w-2.5 h-2.5 rounded-full bg-red-500 mr-1"></i>Belum beli</span>
-                    <span><i class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 mr-1"></i>Sudah dikunjungi hari ini</span>
-                    <span><i class="inline-block w-2.5 h-2.5 rounded-full bg-amber-500 mr-1"></i>Belum dikunjungi hari ini</span>
-                  </div>
-                </section>
-
                 <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
                   <div><p class="text-xs font-semibold text-brand-600">DASHBOARD SALES</p><h3 class="text-xl font-bold text-slate-900">Kinerja Saya</h3><p id="sales-dashboard-period-label" class="text-xs text-slate-500 mt-1">Ringkasan bulan ini</p></div>
                   <div class="inline-flex bg-slate-100 p-1 rounded-xl text-xs font-medium">
@@ -641,9 +579,6 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
 
     <!-- Script Logic for Frontend Interactivity -->
     <script>
-        var APP_TIMEZONE='Asia/Jakarta';
-        var activeVisit = null;
-        var visitStats = {calls:0,effective:0,newOutlet:0};
         async function restoreSession(){
             const raw=localStorage.getItem(SESSIONKEY);
             if(!raw) return false;
@@ -660,7 +595,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
                 const sr=String(serverUser.role||currentUser.role).toLowerCase();currentUser.role=['sales','monitoring','staff'].includes(sr)?sr:'admin';
                 currentUser.salesId=serverUser.salesId||currentUser.salesId||'';
 
-                setLoginScreenVisible(false);
+                document.getElementById('login-screen').classList.add('hidden');
                 switchRole(currentUser.role==='sales'?'sales':currentUser.role==='staff'?'staff':'admin');
                 document.getElementById('current-user-name').innerText=currentUser.name||currentUser.username||'Pengguna';
                 await refreshOnlineData(false);
@@ -670,7 +605,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
             }catch(err){
                 clearSession();
                 currentUser=null;
-                setLoginScreenVisible(true);
+                document.getElementById('login-screen').classList.remove('hidden');
                 return false;
             }
         }
@@ -709,7 +644,6 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
         }
         // Role Switcher Simulation
         function switchRole(role) {
-            updateTmSidebar(role);
             const salesView = document.getElementById('view-sales');
             const adminView = document.getElementById('view-admin');
             const staffView = document.getElementById('view-staff');
@@ -743,7 +677,6 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
                 if(btnAdmin) btnAdmin.className = "px-3 py-1.5 text-xs font-medium rounded-lg transition-all flex items-center gap-1.5 text-slate-300 hover:text-white";
                 userName.innerText = currentUser?.name || "Sales";
                 userRole.innerText = currentUser?.role==='sales' ? "Sales Lapangan" : "Tampilan Sales";
-                setTimeout(()=>{try{renderSalesMyStores();renderSalesStoreMap(false);}catch(e){}},150);
             } else {
                 staffView.classList.add('hidden');
                 salesView.classList.add('hidden');
@@ -753,7 +686,6 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
                 userName.innerText = currentUser?.name || "Administrator";
                 userRole.innerText = currentUser?.role==='monitoring' ? "Monitoring Sales" : "Administrator";
                 applyAccessUI();
-                setTimeout(()=>{try{renderAdminStoreMap(false);}catch(e){}},150);
             }
         }
 
@@ -772,8 +704,8 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
         }
 
         const API_URL='https://script.google.com/macros/s/AKfycbyR-riwS3HVUM93sA8D09AR3Orb1kgYbZnZ9HwKSYA8Z1wo0DaJh-Z-sqQhSQvJ53ANCg/exec';
-        const DBKEY='tmeez_sales_monitor_v6_18_8_cache';
-        const SESSIONKEY='tmeez_sales_monitor_v6_18_8_session';
+        const DBKEY='tmeez_sales_monitor_v6_18_7_cache';
+        const SESSIONKEY='tmeez_sales_monitor_v6_18_7_session';
         let apiOnline=false;
         let sessionToken='';
         async function apiGet(action,params={}){
@@ -848,62 +780,20 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
         }
         function saveDb(){localStorage.setItem(DBKEY,JSON.stringify(db));}
         window.addEventListener('storage',e=>{if(e.key===DBKEY && e.newValue){try{db=JSON.parse(e.newValue);renderMaster();renderDynamicForms();refreshVisitKpi();}catch(err){}}});
-        function setLoginScreenVisible(visible){
-          const el=document.getElementById('login-screen');
-          if(!el)return;
-          if(visible){el.classList.remove('hidden');el.style.display='flex';}
-          else{el.classList.add('hidden');el.style.display='none';}
-        }
-        async 
-        function toggleTmSidebar(){document.getElementById('tm-sidebar')?.classList.toggle('open');document.getElementById('tm-sidebar-overlay')?.classList.toggle('open');}
-        function closeTmSidebar(){document.getElementById('tm-sidebar')?.classList.remove('open');document.getElementById('tm-sidebar-overlay')?.classList.remove('open');}
-        function sidebarNavigate(target,btn){
-          const el=document.getElementById(target);
-          if(!el)return;
-          closeTmSidebar();
-          document.querySelectorAll('.tm-side-btn[data-target]').forEach(b=>b.classList.remove('active'));
-          if(btn)btn.classList.add('active');
-          el.scrollIntoView({behavior:'smooth',block:'start'});
-          if(target==='sales-store-map'){setTimeout(()=>{try{renderSalesStoreMap(true);}catch(e){}},250);}
-        }
-        function updateTmSidebar(role){
-          const sales=document.getElementById('tm-nav-sales'),admin=document.getElementById('tm-nav-admin'),staff=document.getElementById('tm-nav-staff');
-          sales?.classList.toggle('hidden',role!=='sales'); admin?.classList.toggle('hidden',!(role==='admin'||role==='monitoring')); staff?.classList.toggle('hidden',role!=='staff');
-          const n=document.getElementById('tm-sidebar-name'),r=document.getElementById('tm-sidebar-role');
-          if(n)n.textContent=currentUser?.name||'Pengguna'; if(r)r.textContent=role==='monitoring'?'Monitoring Sales':role==='admin'?'Administrator':role==='staff'?'Staff':'Sales Lapangan';
-        }
-async function loginApp(e){
-          e.preventDefault();
-          const errBox=document.getElementById('login-error');
-          if(errBox){errBox.classList.add('hidden');errBox.textContent='';}
-          clearSession();
-          const u=document.getElementById('login-user').value.trim(),p=document.getElementById('login-pass').value;
-          const btn=e?.submitter||document.querySelector('#login-screen form button');
-          if(btn){btn.disabled=true;btn.dataset.oldText=btn.textContent;btn.textContent='Memeriksa...';}
+        async function loginApp(e){
+          e.preventDefault(); clearSession(); const u=document.getElementById('login-user').value.trim(),p=document.getElementById('login-pass').value;
           try{
-            let res;
-            try{ res=await apiPost({action:'login',username:u,password:p}); }
-            catch(firstErr){
-              const msg=String(firstErr?.message||firstErr||'');
-              if(/Password salah|Username tidak ditemukan|Akun tidak aktif|wajib diisi/i.test(msg)) throw firstErr;
-              await new Promise(r=>setTimeout(r,700));
-              res=await apiPost({action:'login',username:u,password:p});
-            }
-            sessionToken=res.token||''; const x=res.user||{}; const role=String(x.role||'').toLowerCase();
+            const res=await apiPost({action:'login',username:u,password:p}); sessionToken=res.token||''; const x=res.user||{}; const role=String(x.role||'').toLowerCase();
             currentUser={username:x.username||u,role:['sales','monitoring','staff'].includes(role)?role:'admin',name:x.sales?.Name||x.employee?.Name||x.username||(role==='monitoring'?'Monitoring':'Administrator'),salesId:x.salesId||'',employeeId:x.employeeId||x.employee?.EmployeeID||'',active:true};
+            // Login manual selalu mulai dari Beranda Sales. Draft lama hanya dipertahankan
+            // selama sesi yang sama (refresh/tutup browser tanpa logout).
             if(currentUser.role==='sales') clearWorkflowDraft();
             saveSession();
             if(currentUser.salesId && x.sales){const mapped=mapSales(x.sales); if(!db.sales.some(s=>s.id===mapped.id))db.sales.push(mapped);}
-            setLoginScreenVisible(false); switchRole(currentUser.role==='sales'?'sales':currentUser.role==='staff'?'staff':'admin');
+            document.getElementById('login-screen').classList.add('hidden'); switchRole(currentUser.role==='sales'?'sales':currentUser.role==='staff'?'staff':'admin');
             document.getElementById('current-user-name').innerText=currentUser.name; document.getElementById('current-user-role').innerText=currentUser.role==='sales'?'Sales · '+(db.sales.find(s=>s.id===currentUser.salesId)?.area||''):String(x.role||'Admin').toUpperCase();
             await refreshOnlineData(false); renderMaster();renderDynamicForms();refreshVisitKpi();applyAccessUI();if(currentUser?.role==='admin'){loadMonitoringUsers();loadHrAdmin();} if(currentUser?.role==='sales')workflowHome(); if(currentUser?.role==='staff'){loadAttendanceToday();loadMyAttendanceHistory();loadMyPayroll();} if(currentUser?.role==='sales')loadAttendanceToday(); showToast('Login online berhasil');
-          }catch(err){
-            const msg=String(err?.message||err||'Login gagal');
-            if(errBox){errBox.textContent='Login gagal: '+msg;errBox.classList.remove('hidden');}
-            showToast('Login gagal: '+msg);
-          }finally{
-            if(btn){btn.disabled=false;btn.textContent=btn.dataset.oldText||'Masuk';}
-          }
+          }catch(err){showToast('Login gagal: '+err.message);}
         }
         function uid(prefix){return prefix+Date.now().toString(36)+Math.random().toString(36).slice(2,5)}
         async function loadMonitoringUsers(){
@@ -1000,7 +890,6 @@ async function loginApp(e){
         function closeSummaryHtml(r){return `<div class="space-y-1"><div class="flex justify-between"><span>Penjualan cash</span><b>${rupiah(r.cashSales)}</b></div><div class="flex justify-between"><span>Piutang dibayar cash</span><b>${rupiah(r.cashReceivable)}</b></div><div class="flex justify-between border-t pt-1"><span>Cash wajib disetor</span><b class="text-emerald-700">${rupiah(r.cashRequired)}</b></div><div class="flex justify-between mt-2"><span>Penjualan non-cash</span><b>${rupiah(r.nonCashSales)}</b></div><div class="flex justify-between"><span>Piutang dibayar non-cash</span><b>${rupiah(r.nonCashReceivable)}</b></div><div class="flex justify-between border-t pt-1"><span>Non-cash terverifikasi</span><b class="text-sky-700">${rupiah(r.nonCashTotal)}</b></div><div class="flex justify-between"><span>Non-cash menunggu verifikasi</span><b class="text-amber-700">${rupiah(r.pendingNonCash||0)}</b></div><div class="flex justify-between mt-2"><span>Piutang belum tertagih</span><b class="text-amber-700">${rupiah(r.openReceivable)}</b></div></div>`;}
         async function loadAdminCloseDay(){try{const sid=document.getElementById('ops-deposit-sales')?.value;if(!sid){document.getElementById('ops-close-summary').innerHTML='Pilih Sales untuk melihat rangkuman.';return;}const r=await apiGet('closeDaySummary',{salesId:sid,date:jakartaTodayKey()});document.getElementById('ops-close-summary').innerHTML=closeSummaryHtml(r);document.getElementById('ops-deposit-actual').value=r.cashRequired||0;}catch(e){showToast(e.message)}}
         async function loadSalesCloseDay(){try{const r=await apiGet('closeDaySummary',{date:jakartaTodayKey()});const set=(id,v)=>{const e=document.getElementById(id);if(e)e.innerText=v};set('sales-close-cash',rupiah(r.cashRequired));set('sales-close-noncash',rupiah(r.nonCashTotal));set('sales-receivable-summary',rupiah(r.openReceivable));set('sales-close-cash-detail',`Penjualan ${rupiah(r.cashSales)} + piutang ${rupiah(r.cashReceivable)}`);set('sales-close-noncash-detail',`Terverifikasi ${rupiah(r.nonCashTotal)} · Menunggu ${rupiah(r.pendingNonCash||0)}`);const inp=document.getElementById('sales-deposit-actual'),btn=document.getElementById('sales-close-day-btn');if(r.alreadyClosed){if(inp){inp.value=Number(r.closedRecord?.ActualDeposit||0);inp.disabled=true;}if(btn){btn.disabled=true;btn.innerText='Hari Ini Sudah Ditutup';btn.className='mt-2 w-full bg-slate-300 text-slate-600 rounded-xl py-3 text-sm font-bold cursor-not-allowed';}}else{if(inp){inp.disabled=false;if(!inp.value)inp.value=r.cashRequired||0;}if(btn){btn.disabled=false;btn.innerText='Tutup Hari';btn.className='mt-2 w-full bg-slate-900 text-white rounded-xl py-3 text-sm font-bold';}}const sid=String(currentUser?.salesId||''),rows=(db.stock||[]).filter(x=>String(x.SalesID)===sid&&String(x.DateKey||x.DateDisplay||x.Date).slice(0,10)===jakartaTodayKey());const pn=id=>(db.products.find(p=>String(p.id)===String(id))||{}).name||id;const box=document.getElementById('sales-stock-breakdown');if(box)box.innerHTML='<b>Sisa barang:</b><br>'+(rows.length?rows.map(x=>`${escapeHtml(pn(x.ProductID))}: <b>${Number(x.ClosingStock||0)} PCS</b>`).join('<br>'):'Belum ada pencatatan stok hari ini.');}catch(e){showToast(e.message)}}
-        async function saveDepositOps(){try{const salesId=document.getElementById('ops-deposit-sales')?.value||'';if(!salesId){showToast('Pilih Sales terlebih dahulu');return;}const actual=Number(document.getElementById('ops-deposit-actual')?.value||0);const note=document.getElementById('ops-deposit-note')?.value||'';const r=await apiPost({action:'saveDeposit',date:jakartaTodayKey(),salesId,actualDeposit:actual,note});await refreshOnlineData(false);await loadAdminCloseDay();showToast(r.alreadyClosed?'Hari ini sudah ditutup sebelumnya.':'Tutup hari Sales tersimpan · '+(r.status||'OK')+' · selisih '+rupiah(r.difference||0));}catch(e){showToast('Gagal tutup hari: '+e.message);}}
         async function saveSalesCloseDay(){try{const r=await apiPost({action:'saveDeposit',date:jakartaTodayKey(),actualDeposit:+document.getElementById('sales-deposit-actual').value||0});await refreshOnlineData(false);await loadSalesCloseDay();showToast(r.alreadyClosed?'Hari ini sudah ditutup sebelumnya.':'Tutup hari tersimpan · '+r.status+' · selisih '+rupiah(r.difference));}catch(e){showToast(e.message)}}
         async function payReceivableOps(id){try{const el=document.getElementById('pay-'+id),m=document.getElementById('pay-method-'+id);await apiPost({action:'payReceivable',receivableId:id,amount:+el.value||0,method:m?.value||'Cash'});await refreshOnlineData(false);showToast('Pembayaran piutang tersimpan');}catch(e){showToast(e.message)}}
 
@@ -1021,78 +910,6 @@ async function loginApp(e){
         function salesStoreOrders(storeId,sid){
           return (db.orders||[]).filter(o=>String(o.salesId||'')===String(sid||'')&&String(o.storeId||'')===String(storeId||''));
         }
-        let salesMapFilter='all';
-        let salesMapState={center:null,zoom:null};
-        function setSalesMapFilter(filter){
-          salesMapFilter=['all','bought','unbought','visited','unvisited'].includes(filter)?filter:'all';
-          renderSalesStoreMap();
-        }
-        function salesStoreVisitedToday(storeId){
-          const sid=String(currentUser?.salesId||'');
-          return (db.visits||[]).some(v=>String(v.salesId||'')===sid&&String(v.storeId||'')===String(storeId||'')&&String(v.checkIn||v.date||'').slice(0,10)===new Date().toISOString().slice(0,10));
-        }
-        function salesMapColor(store,orders,visited){
-          if(visited)return '#10b981';
-          return orders.length?'#2563eb':'#ef4444';
-        }
-        function renderSalesStoreMap(keepView=false){
-          if(currentUser?.role!=='sales')return;
-          const el=document.getElementById('sales-store-map');if(!el)return;
-          const sid=String(currentUser.salesId||'');
-          const base=(db.stores||[]).filter(s=>String(s.createdBySalesId||'')===sid&&String(s.status||'').toLowerCase()==='active'&&isFinite(Number(s.lat))&&isFinite(Number(s.lng))&&Number(s.lat)!==0&&Number(s.lng)!==0);
-          const enriched=base.map(s=>{const orders=salesStoreOrders(s.id,sid);return {...s,_orders:orders,_bought:orders.length>0,_visited:salesStoreVisitedToday(s.id)}});
-          let stores=enriched;
-          if(salesMapFilter==='bought')stores=stores.filter(s=>s._bought);
-          if(salesMapFilter==='unbought')stores=stores.filter(s=>!s._bought);
-          if(salesMapFilter==='visited')stores=stores.filter(s=>s._visited);
-          if(salesMapFilter==='unvisited')stores=stores.filter(s=>!s._visited);
-          const count=document.getElementById('sales-map-count');if(count)count.innerText=stores.length+' toko';
-          ['all','bought','unbought','visited','unvisited'].forEach(k=>{const b=document.getElementById('sales-map-filter-'+k);if(!b)return;const active=salesMapFilter===k;b.className=active?'shrink-0 px-2.5 py-1.5 rounded-lg bg-indigo-600 text-white text-[10px] font-bold':'shrink-0 px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-bold';});
-          el.innerHTML='';el.style.position='relative';el.style.overflow='hidden';el.style.background='#e2e8f0';
-          const w=Math.max(300,el.clientWidth||700),hgt=Math.max(280,el.clientHeight||360);
-          if(!keepView||!salesMapState.center||!salesMapState.zoom){const fit=nativeMapFit(stores,w,hgt);salesMapState.center=fit.center;salesMapState.zoom=fit.zoom;}
-          const z=salesMapState.zoom,center=salesMapState.center,cp=nativeMapWorld(center.lat,center.lng,z),left=cp.x-w/2,top=cp.y-hgt/2,n=Math.pow(2,z);
-          const x0=Math.floor(left/256),x1=Math.floor((left+w)/256),y0=Math.floor(top/256),y1=Math.floor((top+hgt)/256);
-          for(let ty=y0;ty<=y1;ty++)for(let tx=x0;tx<=x1;tx++){if(ty<0||ty>=n)continue;const wrapped=((tx%n)+n)%n;const img=document.createElement('img');img.alt='';img.draggable=false;img.src=`https://tile.openstreetmap.org/${z}/${wrapped}/${ty}.png`;img.style.cssText=`position:absolute;width:256px;height:256px;left:${tx*256-left}px;top:${ty*256-top}px;max-width:none;user-select:none;pointer-events:none;`;img.onerror=()=>img.style.opacity='.15';el.appendChild(img);}
-          if(!stores.length){const empty=document.createElement('div');empty.style.cssText='position:absolute;z-index:35;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(255,255,255,.94);border:1px solid #cbd5e1;border-radius:12px;padding:10px 14px;box-shadow:0 4px 18px rgba(15,23,42,.16);font-size:11px;color:#475569;text-align:center;max-width:260px;';empty.innerHTML='Belum ada toko milik Sales dengan koordinat GPS yang tersinkron.';el.appendChild(empty);}
-          stores.forEach(s=>{const p=nativeMapWorld(s.lat,s.lng,z),color=salesMapColor(s,s._orders,s._visited);const b=document.createElement('button');b.type='button';b.title=s.name||'Toko';b.style.cssText=`position:absolute;z-index:20;left:${p.x-left}px;top:${p.y-top}px;width:20px;height:20px;border-radius:50%;transform:translate(-50%,-50%);background:${color};border:3px solid white;box-shadow:0 2px 8px rgba(15,23,42,.35);cursor:pointer;`;b.onclick=()=>{el.querySelectorAll('.sales-map-popup').forEach(x=>x.remove());const pop=document.createElement('div');pop.className='sales-map-popup';pop.style.cssText=`position:absolute;z-index:40;left:${Math.min(w-235,Math.max(8,p.x-left+12))}px;top:${Math.min(hgt-145,Math.max(8,p.y-top-20))}px;width:225px;background:white;border:1px solid #e2e8f0;border-radius:12px;padding:11px;box-shadow:0 10px 30px rgba(15,23,42,.22);font-size:11px;line-height:1.45;`;pop.innerHTML=`<button type="button" style="float:right;font-size:16px;line-height:1" aria-label="Tutup">×</button><b style="font-size:13px">${escapeHtml(s.name||'-')}</b><br><span style="color:#64748b">${escapeHtml(s.owner||'-')}${s.wa?' · '+escapeHtml(s.wa):''}</span><hr style="margin:7px 0;border:0;border-top:1px solid #e2e8f0"><b>Pembelian:</b> ${s._orders.length}x${s._orders.length?' · '+rupiah(s._orders.reduce((n,o)=>n+Number(o.total||0),0)):''}<br><b>Kunjungan hari ini:</b> ${s._visited?'Sudah':'Belum'}<br><button type="button" class="mt-2 w-full bg-indigo-600 text-white rounded-lg py-2 text-[10px] font-bold">Lihat Riwayat Pembelian</button>`;pop.querySelector('button').onclick=()=>pop.remove();const action=pop.querySelectorAll('button')[1];action.onclick=()=>openSalesPurchaseHistory(s.id);el.appendChild(pop);};el.appendChild(b);});
-          const controls=document.createElement('div');controls.style.cssText='position:absolute;z-index:30;right:10px;top:10px;display:flex;flex-direction:column;gap:4px';controls.innerHTML='<button type="button" style="width:34px;height:34px;background:white;border:1px solid #cbd5e1;border-radius:9px;font-size:20px;box-shadow:0 2px 8px rgba(0,0,0,.12)">+</button><button type="button" style="width:34px;height:34px;background:white;border:1px solid #cbd5e1;border-radius:9px;font-size:20px;box-shadow:0 2px 8px rgba(0,0,0,.12)">−</button>';controls.children[0].onclick=()=>{salesMapState.zoom=Math.min(19,(salesMapState.zoom||10)+1);renderSalesStoreMap(true)};controls.children[1].onclick=()=>{salesMapState.zoom=Math.max(5,(salesMapState.zoom||10)-1);renderSalesStoreMap(true)};el.appendChild(controls);
-          const fit=document.createElement('button');fit.type='button';fit.textContent='Fit Semua';fit.style.cssText='position:absolute;z-index:30;left:10px;top:10px;background:white;border:1px solid #cbd5e1;border-radius:9px;padding:8px 10px;font-size:10px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.12)';fit.onclick=()=>{salesMapState.center=null;salesMapState.zoom=null;renderSalesStoreMap(false)};el.appendChild(fit);
-          // Mobile/desktop pan: drag the map with one finger or mouse.
-          // Do not start panning when interacting with markers, controls, popups, or filter UI.
-          if(!el.__salesPanBound){
-            el.__salesPanBound=true;
-            let pan=null, raf=0;
-            const isInteractive=(t)=>!!(t&&t.closest&&t.closest('button,.sales-map-popup'));
-            el.addEventListener('pointerdown',e=>{
-              if(isInteractive(e.target))return;
-              if(e.pointerType==='mouse'&&e.button!==0)return;
-              pan={x:e.clientX,y:e.clientY,startX:e.clientX,startY:e.clientY,center:{...salesMapState.center},moved:false,pointerId:e.pointerId};
-              el.setPointerCapture?.(e.pointerId);
-            });
-            el.addEventListener('pointermove',e=>{
-              if(!pan||e.pointerId!==pan.pointerId)return;
-              const dx=e.clientX-pan.startX,dy=e.clientY-pan.startY;
-              if(Math.abs(dx)+Math.abs(dy)<3)return;
-              pan.moved=true;
-              const cp=nativeMapWorld(pan.center.lat,pan.center.lng,salesMapState.zoom||10);
-              const next=nativeMapLatLngFromWorld(cp.x-dx,cp.y-dy,salesMapState.zoom||10);
-              salesMapState.center=next;
-              if(!raf){raf=requestAnimationFrame(()=>{raf=0;renderSalesStoreMap(true);});}
-              e.preventDefault();
-            },{passive:false});
-            const endPan=e=>{
-              if(!pan||e.pointerId!==pan.pointerId)return;
-              pan=null;
-              if(raf){cancelAnimationFrame(raf);raf=0;}
-              e.preventDefault?.();
-            };
-            el.addEventListener('pointerup',endPan);
-            el.addEventListener('pointercancel',endPan);
-          }
-          const attr=document.createElement('div');attr.style.cssText='position:absolute;z-index:25;right:4px;bottom:3px;background:rgba(255,255,255,.85);padding:2px 5px;font-size:9px;color:#475569;border-radius:4px';attr.innerHTML='© OpenStreetMap contributors';el.appendChild(attr);
-        }
-
         function renderSalesMyStores(){
           if(currentUser?.role!=='sales')return;
           const box=document.getElementById('sales-my-store-list');if(!box)return;
@@ -1158,9 +975,7 @@ async function loginApp(e){
                 <button type="button" onclick="salesMyStorePage=Math.min(${totalPages},salesMyStorePage+1);renderSalesMyStores()" ${salesMyStorePage>=totalPages?'disabled':''} class="w-8 h-8 rounded-lg border text-xs font-bold ${salesMyStorePage>=totalPages?'text-slate-300 bg-slate-50':'text-slate-700 bg-white hover:bg-slate-50'}">›</button>
               </div>`;
           }
-          renderSalesStoreMap();
         }
-        window.addEventListener('resize',()=>{if(currentUser?.role==='sales'&&document.getElementById('sales-store-map')){clearTimeout(window.__salesMapResize);window.__salesMapResize=setTimeout(()=>renderSalesStoreMap(true),150);}});
         function salesOwnStore(storeId){
           if(currentUser?.role!=='sales')return null;
           return (db.stores||[]).find(x=>String(x.id)===String(storeId)&&String(x.createdBySalesId||'')===String(currentUser.salesId||'')&&String(x.status||'').toLowerCase()==='active')||null;
@@ -1333,7 +1148,7 @@ function renderDynamicForms(){
 
 
 
-        var WORKFLOW_DRAFT_PREFIX='tmeez_sales_workflow_draft_v653_';
+        const WORKFLOW_DRAFT_PREFIX='tmeez_sales_workflow_draft_v652_';
         let currentSalesStep='home', restoringWorkflowDraft=false, draftTimer=null;
         function workflowDraftKey(){return WORKFLOW_DRAFT_PREFIX+String(currentUser?.salesId||currentUser?.username||'unknown');}
         function visibleSalesStep(){const x=[...document.querySelectorAll('#view-sales .sales-step')].find(el=>!el.classList.contains('hidden'));return x?x.id.replace('sales-step-',''):(currentSalesStep||'home');}
@@ -1556,6 +1371,7 @@ function renderDynamicForms(){
         }
         window.captureGps=captureGps;window.triggerCamera=triggerCamera;window.handleStorePhoto=handleStorePhoto;window.handleStoreSubmit=handleStoreSubmit;
         function fillCurrentStoreGps(){if(!navigator.geolocation){showToast('GPS tidak tersedia');return;} navigator.geolocation.getCurrentPosition(p=>{document.getElementById('m-store-lat').value=p.coords.latitude.toFixed(7);document.getElementById('m-store-lng').value=p.coords.longitude.toFixed(7);showToast('Koordinat terisi');},e=>showToast('GPS gagal: '+e.message),{enableHighAccuracy:true});}
+        const APP_TIMEZONE='Asia/Jakarta';
         function jakartaParts(value=new Date()){
           const d=value instanceof Date?value:new Date(value);
           if(isNaN(d))return null;
@@ -1770,6 +1586,7 @@ function renderDynamicForms(){
           const set=(id,v)=>{const x=document.getElementById(id);if(x)x.innerText=v;};
           set('admin-map-total',stores.length+' toko');set('admin-map-visited',visited+' sudah dikunjungi hari ini');set('admin-map-unvisited',(stores.length-visited)+' belum dikunjungi');
           el.innerHTML='';el.style.position='relative';el.style.overflow='hidden';el.style.background='#e2e8f0';
+          if(!stores.length){el.innerHTML='<div class="h-full flex items-center justify-center p-6 text-center text-sm text-slate-500">Belum ada toko dengan koordinat GPS untuk filter ini.</div>';return;}
           const w=Math.max(320,el.clientWidth||800),hgt=Math.max(300,el.clientHeight||430);
           if(!keepView||!adminNativeMapState.center||!adminNativeMapState.zoom){const fit=nativeMapFit(stores,w,hgt);adminNativeMapState.center=fit.center;adminNativeMapState.zoom=fit.zoom;adminNativeMapState.manual=false;}
           const z=adminNativeMapState.zoom,center=adminNativeMapState.center,cp=nativeMapWorld(center.lat,center.lng,z),world=cp.size;
@@ -1802,38 +1619,6 @@ function renderDynamicForms(){
           const controls=document.createElement('div');controls.style.cssText='position:absolute;z-index:30;right:10px;top:10px;display:flex;flex-direction:column;gap:4px';
           controls.innerHTML='<button type="button" onclick="adminNativeMapZoom(1)" style="width:34px;height:34px;background:white;border:1px solid #cbd5e1;border-radius:9px;font-size:20px;box-shadow:0 2px 8px rgba(0,0,0,.12)">+</button><button type="button" onclick="adminNativeMapZoom(-1)" style="width:34px;height:34px;background:white;border:1px solid #cbd5e1;border-radius:9px;font-size:20px;box-shadow:0 2px 8px rgba(0,0,0,.12)">−</button>';
           el.appendChild(controls);
-          // Mobile/desktop pan: drag the map with one finger or mouse.
-          // Do not start panning when interacting with markers, controls, popups, or filter UI.
-          if(!el.__salesPanBound){
-            el.__salesPanBound=true;
-            let pan=null, raf=0;
-            const isInteractive=(t)=>!!(t&&t.closest&&t.closest('button,.sales-map-popup'));
-            el.addEventListener('pointerdown',e=>{
-              if(isInteractive(e.target))return;
-              if(e.pointerType==='mouse'&&e.button!==0)return;
-              pan={x:e.clientX,y:e.clientY,startX:e.clientX,startY:e.clientY,center:{...salesMapState.center},moved:false,pointerId:e.pointerId};
-              el.setPointerCapture?.(e.pointerId);
-            });
-            el.addEventListener('pointermove',e=>{
-              if(!pan||e.pointerId!==pan.pointerId)return;
-              const dx=e.clientX-pan.startX,dy=e.clientY-pan.startY;
-              if(Math.abs(dx)+Math.abs(dy)<3)return;
-              pan.moved=true;
-              const cp=nativeMapWorld(pan.center.lat,pan.center.lng,salesMapState.zoom||10);
-              const next=nativeMapLatLngFromWorld(cp.x-dx,cp.y-dy,salesMapState.zoom||10);
-              salesMapState.center=next;
-              if(!raf){raf=requestAnimationFrame(()=>{raf=0;renderSalesStoreMap(true);});}
-              e.preventDefault();
-            },{passive:false});
-            const endPan=e=>{
-              if(!pan||e.pointerId!==pan.pointerId)return;
-              pan=null;
-              if(raf){cancelAnimationFrame(raf);raf=0;}
-              e.preventDefault?.();
-            };
-            el.addEventListener('pointerup',endPan);
-            el.addEventListener('pointercancel',endPan);
-          }
           const attr=document.createElement('div');attr.style.cssText='position:absolute;z-index:25;right:4px;bottom:3px;background:rgba(255,255,255,.85);padding:2px 5px;font-size:9px;color:#475569;border-radius:4px';attr.innerHTML='© OpenStreetMap contributors';el.appendChild(attr);
           bindAdminNativeMapInteractions(el,w,hgt);
         }
@@ -1906,6 +1691,7 @@ function renderDynamicForms(){
           const vt=document.getElementById('visit-progress-text'),vb=document.getElementById('visit-progress-bar'),vr=document.getElementById('visit-remaining');
           if(vt)vt.innerText=`${visits} / ${targetVisit} Toko`;if(vb)vb.style.width=(targetVisit?Math.min(100,visits/targetVisit*100):0)+'%';if(vr)vr.innerText=targetVisit?(visits>=targetVisit?'Target tercapai':`Kurang ${targetVisit-visits} toko lagi`):'Target belum ditetapkan';
         }
+        let activeVisit = null; let visitStats = {calls:0,effective:0,newOutlet:0};
         function distanceMeters(a,b,c,d){ const R=6371000, p=Math.PI/180; const x=(c-a)*p, y=(d-b)*p; const h=Math.sin(x/2)**2+Math.cos(a*p)*Math.cos(c*p)*Math.sin(y/2)**2; return 2*R*Math.asin(Math.sqrt(h)); }
         function checkInVisit(){
           const sel=document.getElementById('visit-store');if(!sel?.value){showToast('Toko kunjungan belum dipilih');return;}if(!window.isSecureContext){showToast('GPS membutuhkan HTTPS');return;}if(!navigator.geolocation){showToast('GPS tidak didukung perangkat');return;}
