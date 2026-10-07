@@ -36,6 +36,8 @@
       #sales-route-map.leaflet-container { position: relative; width: 100%; height: 55vh; min-height: 360px; overflow: hidden; display: block; }
       #sales-route-map .leaflet-tile-pane, #sales-route-map .leaflet-overlay-pane, #sales-route-map .leaflet-marker-pane, #sales-route-map .leaflet-shadow-pane, #sales-route-map .leaflet-tooltip-pane, #sales-route-map .leaflet-popup-pane { pointer-events: none; }
       #sales-route-map .leaflet-marker-icon, #sales-route-map .leaflet-marker-shadow, #sales-route-map .leaflet-popup, #sales-route-map .leaflet-control { pointer-events: auto; }
+      #sales-store-map { touch-action: none; -webkit-user-select: none; user-select: none; }
+      #sales-store-map img { -webkit-user-drag: none; }
         body { font-family: 'Inter', sans-serif; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -56,7 +58,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
     <div id="login-screen" class="fixed inset-0 z-[100] bg-slate-950/95 flex items-center justify-center p-4">
       <div class="bg-white w-full max-w-md rounded-3xl p-7 shadow-2xl">
         <div class="text-center mb-6"><div class="w-14 h-14 mx-auto bg-brand-600 text-white rounded-2xl flex items-center justify-center mb-3"><i data-lucide="bar-chart-3"></i></div><h2 class="text-xl font-bold">Tmeez Sales Monitor</h2><p class="text-xs text-slate-500 mt-1">Masuk sebagai Admin, Monitoring, Sales, atau Staff</p></div>
-        <form onsubmit="loginApp(event)" class="space-y-3"><input id="login-user" required placeholder="Username" class="w-full border rounded-xl px-4 py-3 text-sm"><input id="login-pass" required type="password" placeholder="Password" class="w-full border rounded-xl px-4 py-3 text-sm"><button class="w-full py-3 bg-brand-600 text-white rounded-xl font-semibold text-sm">Masuk</button></form>
+        <form onsubmit="loginApp(event)" class="space-y-3"><input id="login-user" required placeholder="Username" class="w-full border rounded-xl px-4 py-3 text-sm"><input id="login-pass" required type="password" placeholder="Password" class="w-full border rounded-xl px-4 py-3 text-sm"><button class="w-full py-3 bg-brand-600 text-white rounded-xl font-semibold text-sm">Masuk</button></form><div id="login-error" class="hidden mt-2 rounded-lg bg-red-50 border border-red-200 text-red-700 px-3 py-2 text-xs"></div>
         <p class="text-[11px] text-slate-400 mt-4 text-center">Akun Admin dan Sales dikelola oleh Administrator.</p>
       </div>
     </div>
@@ -725,8 +727,8 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
         }
 
         const API_URL='https://script.google.com/macros/s/AKfycbyR-riwS3HVUM93sA8D09AR3Orb1kgYbZnZ9HwKSYA8Z1wo0DaJh-Z-sqQhSQvJ53ANCg/exec';
-        const DBKEY='tmeez_sales_monitor_v6_18_7_cache';
-        const SESSIONKEY='tmeez_sales_monitor_v6_18_7_session';
+        const DBKEY='tmeez_sales_monitor_v6_18_8_cache';
+        const SESSIONKEY='tmeez_sales_monitor_v6_18_8_session';
         let apiOnline=false;
         let sessionToken='';
         async function apiGet(action,params={}){
@@ -802,19 +804,37 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
         function saveDb(){localStorage.setItem(DBKEY,JSON.stringify(db));}
         window.addEventListener('storage',e=>{if(e.key===DBKEY && e.newValue){try{db=JSON.parse(e.newValue);renderMaster();renderDynamicForms();refreshVisitKpi();}catch(err){}}});
         async function loginApp(e){
-          e.preventDefault(); clearSession(); const u=document.getElementById('login-user').value.trim(),p=document.getElementById('login-pass').value;
+          e.preventDefault();
+          const errBox=document.getElementById('login-error');
+          if(errBox){errBox.classList.add('hidden');errBox.textContent='';}
+          clearSession();
+          const u=document.getElementById('login-user').value.trim(),p=document.getElementById('login-pass').value;
+          const btn=e?.submitter||document.querySelector('#login-screen form button');
+          if(btn){btn.disabled=true;btn.dataset.oldText=btn.textContent;btn.textContent='Memeriksa...';}
           try{
-            const res=await apiPost({action:'login',username:u,password:p}); sessionToken=res.token||''; const x=res.user||{}; const role=String(x.role||'').toLowerCase();
+            let res;
+            try{ res=await apiPost({action:'login',username:u,password:p}); }
+            catch(firstErr){
+              const msg=String(firstErr?.message||firstErr||'');
+              if(/Password salah|Username tidak ditemukan|Akun tidak aktif|wajib diisi/i.test(msg)) throw firstErr;
+              await new Promise(r=>setTimeout(r,700));
+              res=await apiPost({action:'login',username:u,password:p});
+            }
+            sessionToken=res.token||''; const x=res.user||{}; const role=String(x.role||'').toLowerCase();
             currentUser={username:x.username||u,role:['sales','monitoring','staff'].includes(role)?role:'admin',name:x.sales?.Name||x.employee?.Name||x.username||(role==='monitoring'?'Monitoring':'Administrator'),salesId:x.salesId||'',employeeId:x.employeeId||x.employee?.EmployeeID||'',active:true};
-            // Login manual selalu mulai dari Beranda Sales. Draft lama hanya dipertahankan
-            // selama sesi yang sama (refresh/tutup browser tanpa logout).
             if(currentUser.role==='sales') clearWorkflowDraft();
             saveSession();
             if(currentUser.salesId && x.sales){const mapped=mapSales(x.sales); if(!db.sales.some(s=>s.id===mapped.id))db.sales.push(mapped);}
             document.getElementById('login-screen').classList.add('hidden'); switchRole(currentUser.role==='sales'?'sales':currentUser.role==='staff'?'staff':'admin');
             document.getElementById('current-user-name').innerText=currentUser.name; document.getElementById('current-user-role').innerText=currentUser.role==='sales'?'Sales · '+(db.sales.find(s=>s.id===currentUser.salesId)?.area||''):String(x.role||'Admin').toUpperCase();
             await refreshOnlineData(false); renderMaster();renderDynamicForms();refreshVisitKpi();applyAccessUI();if(currentUser?.role==='admin'){loadMonitoringUsers();loadHrAdmin();} if(currentUser?.role==='sales')workflowHome(); if(currentUser?.role==='staff'){loadAttendanceToday();loadMyAttendanceHistory();loadMyPayroll();} if(currentUser?.role==='sales')loadAttendanceToday(); showToast('Login online berhasil');
-          }catch(err){showToast('Login gagal: '+err.message);}
+          }catch(err){
+            const msg=String(err?.message||err||'Login gagal');
+            if(errBox){errBox.textContent='Login gagal: '+msg;errBox.classList.remove('hidden');}
+            showToast('Login gagal: '+msg);
+          }finally{
+            if(btn){btn.disabled=false;btn.textContent=btn.dataset.oldText||'Masuk';}
+          }
         }
         function uid(prefix){return prefix+Date.now().toString(36)+Math.random().toString(36).slice(2,5)}
         async function loadMonitoringUsers(){
@@ -968,6 +988,38 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
           stores.forEach(s=>{const p=nativeMapWorld(s.lat,s.lng,z),color=salesMapColor(s,s._orders,s._visited);const b=document.createElement('button');b.type='button';b.title=s.name||'Toko';b.style.cssText=`position:absolute;z-index:20;left:${p.x-left}px;top:${p.y-top}px;width:20px;height:20px;border-radius:50%;transform:translate(-50%,-50%);background:${color};border:3px solid white;box-shadow:0 2px 8px rgba(15,23,42,.35);cursor:pointer;`;b.onclick=()=>{el.querySelectorAll('.sales-map-popup').forEach(x=>x.remove());const pop=document.createElement('div');pop.className='sales-map-popup';pop.style.cssText=`position:absolute;z-index:40;left:${Math.min(w-235,Math.max(8,p.x-left+12))}px;top:${Math.min(hgt-145,Math.max(8,p.y-top-20))}px;width:225px;background:white;border:1px solid #e2e8f0;border-radius:12px;padding:11px;box-shadow:0 10px 30px rgba(15,23,42,.22);font-size:11px;line-height:1.45;`;pop.innerHTML=`<button type="button" style="float:right;font-size:16px;line-height:1" aria-label="Tutup">×</button><b style="font-size:13px">${escapeHtml(s.name||'-')}</b><br><span style="color:#64748b">${escapeHtml(s.owner||'-')}${s.wa?' · '+escapeHtml(s.wa):''}</span><hr style="margin:7px 0;border:0;border-top:1px solid #e2e8f0"><b>Pembelian:</b> ${s._orders.length}x${s._orders.length?' · '+rupiah(s._orders.reduce((n,o)=>n+Number(o.total||0),0)):''}<br><b>Kunjungan hari ini:</b> ${s._visited?'Sudah':'Belum'}<br><button type="button" class="mt-2 w-full bg-indigo-600 text-white rounded-lg py-2 text-[10px] font-bold">Lihat Riwayat Pembelian</button>`;pop.querySelector('button').onclick=()=>pop.remove();const action=pop.querySelectorAll('button')[1];action.onclick=()=>openSalesPurchaseHistory(s.id);el.appendChild(pop);};el.appendChild(b);});
           const controls=document.createElement('div');controls.style.cssText='position:absolute;z-index:30;right:10px;top:10px;display:flex;flex-direction:column;gap:4px';controls.innerHTML='<button type="button" style="width:34px;height:34px;background:white;border:1px solid #cbd5e1;border-radius:9px;font-size:20px;box-shadow:0 2px 8px rgba(0,0,0,.12)">+</button><button type="button" style="width:34px;height:34px;background:white;border:1px solid #cbd5e1;border-radius:9px;font-size:20px;box-shadow:0 2px 8px rgba(0,0,0,.12)">−</button>';controls.children[0].onclick=()=>{salesMapState.zoom=Math.min(19,(salesMapState.zoom||10)+1);renderSalesStoreMap(true)};controls.children[1].onclick=()=>{salesMapState.zoom=Math.max(5,(salesMapState.zoom||10)-1);renderSalesStoreMap(true)};el.appendChild(controls);
           const fit=document.createElement('button');fit.type='button';fit.textContent='Fit Semua';fit.style.cssText='position:absolute;z-index:30;left:10px;top:10px;background:white;border:1px solid #cbd5e1;border-radius:9px;padding:8px 10px;font-size:10px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.12)';fit.onclick=()=>{salesMapState.center=null;salesMapState.zoom=null;renderSalesStoreMap(false)};el.appendChild(fit);
+          // Mobile/desktop pan: drag the map with one finger or mouse.
+          // Do not start panning when interacting with markers, controls, popups, or filter UI.
+          if(!el.__salesPanBound){
+            el.__salesPanBound=true;
+            let pan=null, raf=0;
+            const isInteractive=(t)=>!!(t&&t.closest&&t.closest('button,.sales-map-popup'));
+            el.addEventListener('pointerdown',e=>{
+              if(isInteractive(e.target))return;
+              if(e.pointerType==='mouse'&&e.button!==0)return;
+              pan={x:e.clientX,y:e.clientY,startX:e.clientX,startY:e.clientY,center:{...salesMapState.center},moved:false,pointerId:e.pointerId};
+              el.setPointerCapture?.(e.pointerId);
+            });
+            el.addEventListener('pointermove',e=>{
+              if(!pan||e.pointerId!==pan.pointerId)return;
+              const dx=e.clientX-pan.startX,dy=e.clientY-pan.startY;
+              if(Math.abs(dx)+Math.abs(dy)<3)return;
+              pan.moved=true;
+              const cp=nativeMapWorld(pan.center.lat,pan.center.lng,salesMapState.zoom||10);
+              const next=nativeMapLatLngFromWorld(cp.x-dx,cp.y-dy,salesMapState.zoom||10);
+              salesMapState.center=next;
+              if(!raf){raf=requestAnimationFrame(()=>{raf=0;renderSalesStoreMap(true);});}
+              e.preventDefault();
+            },{passive:false});
+            const endPan=e=>{
+              if(!pan||e.pointerId!==pan.pointerId)return;
+              pan=null;
+              if(raf){cancelAnimationFrame(raf);raf=0;}
+              e.preventDefault?.();
+            };
+            el.addEventListener('pointerup',endPan);
+            el.addEventListener('pointercancel',endPan);
+          }
           const attr=document.createElement('div');attr.style.cssText='position:absolute;z-index:25;right:4px;bottom:3px;background:rgba(255,255,255,.85);padding:2px 5px;font-size:9px;color:#475569;border-radius:4px';attr.innerHTML='© OpenStreetMap contributors';el.appendChild(attr);
         }
 
@@ -1684,6 +1736,38 @@ function renderDynamicForms(){
           const controls=document.createElement('div');controls.style.cssText='position:absolute;z-index:30;right:10px;top:10px;display:flex;flex-direction:column;gap:4px';
           controls.innerHTML='<button type="button" onclick="adminNativeMapZoom(1)" style="width:34px;height:34px;background:white;border:1px solid #cbd5e1;border-radius:9px;font-size:20px;box-shadow:0 2px 8px rgba(0,0,0,.12)">+</button><button type="button" onclick="adminNativeMapZoom(-1)" style="width:34px;height:34px;background:white;border:1px solid #cbd5e1;border-radius:9px;font-size:20px;box-shadow:0 2px 8px rgba(0,0,0,.12)">−</button>';
           el.appendChild(controls);
+          // Mobile/desktop pan: drag the map with one finger or mouse.
+          // Do not start panning when interacting with markers, controls, popups, or filter UI.
+          if(!el.__salesPanBound){
+            el.__salesPanBound=true;
+            let pan=null, raf=0;
+            const isInteractive=(t)=>!!(t&&t.closest&&t.closest('button,.sales-map-popup'));
+            el.addEventListener('pointerdown',e=>{
+              if(isInteractive(e.target))return;
+              if(e.pointerType==='mouse'&&e.button!==0)return;
+              pan={x:e.clientX,y:e.clientY,startX:e.clientX,startY:e.clientY,center:{...salesMapState.center},moved:false,pointerId:e.pointerId};
+              el.setPointerCapture?.(e.pointerId);
+            });
+            el.addEventListener('pointermove',e=>{
+              if(!pan||e.pointerId!==pan.pointerId)return;
+              const dx=e.clientX-pan.startX,dy=e.clientY-pan.startY;
+              if(Math.abs(dx)+Math.abs(dy)<3)return;
+              pan.moved=true;
+              const cp=nativeMapWorld(pan.center.lat,pan.center.lng,salesMapState.zoom||10);
+              const next=nativeMapLatLngFromWorld(cp.x-dx,cp.y-dy,salesMapState.zoom||10);
+              salesMapState.center=next;
+              if(!raf){raf=requestAnimationFrame(()=>{raf=0;renderSalesStoreMap(true);});}
+              e.preventDefault();
+            },{passive:false});
+            const endPan=e=>{
+              if(!pan||e.pointerId!==pan.pointerId)return;
+              pan=null;
+              if(raf){cancelAnimationFrame(raf);raf=0;}
+              e.preventDefault?.();
+            };
+            el.addEventListener('pointerup',endPan);
+            el.addEventListener('pointercancel',endPan);
+          }
           const attr=document.createElement('div');attr.style.cssText='position:absolute;z-index:25;right:4px;bottom:3px;background:rgba(255,255,255,.85);padding:2px 5px;font-size:9px;color:#475569;border-radius:4px';attr.innerHTML='© OpenStreetMap contributors';el.appendChild(attr);
           bindAdminNativeMapInteractions(el,w,hgt);
         }
