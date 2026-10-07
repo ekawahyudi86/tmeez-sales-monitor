@@ -58,7 +58,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
     <div id="login-screen" class="fixed inset-0 z-[100] bg-slate-950/95 flex items-center justify-center p-4">
       <div class="bg-white w-full max-w-md rounded-3xl p-7 shadow-2xl">
         <div class="text-center mb-6"><div class="w-14 h-14 mx-auto bg-brand-600 text-white rounded-2xl flex items-center justify-center mb-3"><i data-lucide="bar-chart-3"></i></div><h2 class="text-xl font-bold">Tmeez Sales Monitor</h2><p class="text-xs text-slate-500 mt-1">Masuk sebagai Admin, Monitoring, Sales, atau Staff</p></div>
-        <form onsubmit="loginApp(event)" class="space-y-3"><input id="login-user" required placeholder="Username" class="w-full border rounded-xl px-4 py-3 text-sm"><input id="login-pass" required type="password" placeholder="Password" class="w-full border rounded-xl px-4 py-3 text-sm"><button class="w-full py-3 bg-brand-600 text-white rounded-xl font-semibold text-sm">Masuk</button></form><div id="login-error" class="hidden mt-2 rounded-lg bg-red-50 border border-red-200 text-red-700 px-3 py-2 text-xs"></div>
+        <form id="login-form" class="space-y-3"><input id="login-user" required placeholder="Username" class="w-full border rounded-xl px-4 py-3 text-sm"><input id="login-pass" required type="password" placeholder="Password" class="w-full border rounded-xl px-4 py-3 text-sm"><button class="w-full py-3 bg-brand-600 text-white rounded-xl font-semibold text-sm">Masuk</button></form><div id="login-error" class="hidden mt-2 rounded-lg bg-red-50 border border-red-200 text-red-700 px-3 py-2 text-xs"></div>
         <p class="text-[11px] text-slate-400 mt-4 text-center">Akun Admin dan Sales dikelola oleh Administrator.</p>
       </div>
     </div>
@@ -804,38 +804,56 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
         function saveDb(){localStorage.setItem(DBKEY,JSON.stringify(db));}
         window.addEventListener('storage',e=>{if(e.key===DBKEY && e.newValue){try{db=JSON.parse(e.newValue);renderMaster();renderDynamicForms();refreshVisitKpi();}catch(err){}}});
         async function loginApp(e){
-          e.preventDefault();
+          if(e&&e.preventDefault)e.preventDefault();
           const errBox=document.getElementById('login-error');
           if(errBox){errBox.classList.add('hidden');errBox.textContent='';}
           clearSession();
-          const u=document.getElementById('login-user').value.trim(),p=document.getElementById('login-pass').value;
-          const btn=e?.submitter||document.querySelector('#login-screen form button');
+          const u=document.getElementById('login-user')?.value.trim()||'',p=document.getElementById('login-pass')?.value||'';
+          const btn=document.querySelector('#login-form button');
+          if(!u||!p){if(errBox){errBox.textContent='Username dan password wajib diisi.';errBox.classList.remove('hidden');}return false;}
           if(btn){btn.disabled=true;btn.dataset.oldText=btn.textContent;btn.textContent='Memeriksa...';}
           try{
+            // Jangan biarkan login menggantung tanpa pesan.
+            const timeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error('Koneksi ke server login timeout. Periksa internet atau URL Google Apps Script.')),20000));
             let res;
-            try{ res=await apiPost({action:'login',username:u,password:p}); }
+            try{ res=await Promise.race([apiPost({action:'login',username:u,password:p}),timeout]); }
             catch(firstErr){
               const msg=String(firstErr?.message||firstErr||'');
-              if(/Password salah|Username tidak ditemukan|Akun tidak aktif|wajib diisi/i.test(msg)) throw firstErr;
+              if(/Password salah|Username tidak ditemukan|Akun tidak aktif|wajib diisi|timeout/i.test(msg)) throw firstErr;
               await new Promise(r=>setTimeout(r,700));
-              res=await apiPost({action:'login',username:u,password:p});
+              res=await Promise.race([apiPost({action:'login',username:u,password:p}),timeout]);
             }
+            if(!res||!res.success||!res.token)throw new Error(res?.message||'Server login tidak mengembalikan token.');
             sessionToken=res.token||''; const x=res.user||{}; const role=String(x.role||'').toLowerCase();
             currentUser={username:x.username||u,role:['sales','monitoring','staff'].includes(role)?role:'admin',name:x.sales?.Name||x.employee?.Name||x.username||(role==='monitoring'?'Monitoring':'Administrator'),salesId:x.salesId||'',employeeId:x.employeeId||x.employee?.EmployeeID||'',active:true};
             if(currentUser.role==='sales') clearWorkflowDraft();
             saveSession();
             if(currentUser.salesId && x.sales){const mapped=mapSales(x.sales); if(!db.sales.some(s=>s.id===mapped.id))db.sales.push(mapped);}
-            document.getElementById('login-screen').classList.add('hidden'); switchRole(currentUser.role==='sales'?'sales':currentUser.role==='staff'?'staff':'admin');
+            // Pindah halaman segera setelah autentikasi berhasil. Sinkronisasi data tidak boleh mengembalikan modal login.
+            document.getElementById('login-screen').classList.add('hidden');
+            switchRole(currentUser.role==='sales'?'sales':currentUser.role==='staff'?'staff':'admin');
             document.getElementById('current-user-name').innerText=currentUser.name; document.getElementById('current-user-role').innerText=currentUser.role==='sales'?'Sales · '+(db.sales.find(s=>s.id===currentUser.salesId)?.area||''):String(x.role||'Admin').toUpperCase();
-            await refreshOnlineData(false); renderMaster();renderDynamicForms();refreshVisitKpi();applyAccessUI();if(currentUser?.role==='admin'){loadMonitoringUsers();loadHrAdmin();} if(currentUser?.role==='sales')workflowHome(); if(currentUser?.role==='staff'){loadAttendanceToday();loadMyAttendanceHistory();loadMyPayroll();} if(currentUser?.role==='sales')loadAttendanceToday(); showToast('Login online berhasil');
+            // Data dimuat setelah tampilan sudah berpindah.
+            try{await refreshOnlineData(false);}catch(syncErr){showToast('Login berhasil, tetapi sinkronisasi data gagal: '+syncErr.message);}
+            renderMaster();renderDynamicForms();refreshVisitKpi();applyAccessUI();
+            if(currentUser?.role==='admin'){loadMonitoringUsers();loadHrAdmin();}
+            if(currentUser?.role==='sales')workflowHome();
+            if(currentUser?.role==='staff'){loadAttendanceToday();loadMyAttendanceHistory();loadMyPayroll();}
+            if(currentUser?.role==='sales')loadAttendanceToday();
+            showToast('Login online berhasil');
+            return true;
           }catch(err){
             const msg=String(err?.message||err||'Login gagal');
+            document.getElementById('login-screen')?.classList.remove('hidden');
             if(errBox){errBox.textContent='Login gagal: '+msg;errBox.classList.remove('hidden');}
             showToast('Login gagal: '+msg);
+            return false;
           }finally{
             if(btn){btn.disabled=false;btn.textContent=btn.dataset.oldText||'Masuk';}
           }
         }
+        window.loginApp=loginApp;
+        document.addEventListener('DOMContentLoaded',()=>{const f=document.getElementById('login-form');if(f&&!f.dataset.bound){f.dataset.bound='1';f.addEventListener('submit',loginApp);}});
         function uid(prefix){return prefix+Date.now().toString(36)+Math.random().toString(36).slice(2,5)}
         async function loadMonitoringUsers(){
           if(currentUser?.role!=='admin')return;
@@ -1343,8 +1361,6 @@ function renderDynamicForms(){
           const c=document.getElementById('payment-confirm-btn');if(c){c.disabled=true;c.innerText='Bayar & Selesaikan Kunjungan';c.className='w-full py-3 bg-slate-300 text-white rounded-xl font-bold cursor-not-allowed';}
           const t=document.getElementById('payment-selected');if(t)t.innerText='Belum memilih metode pembayaran';
           document.getElementById('payment-due-wrap')?.classList.add('hidden');
-        }
-          if(name==='home' && currentUser?.role==='sales'){renderSalesStoreMap();setTimeout(()=>renderSalesStoreMap(true),120);}
         }
         function workflowHome(){activeVisit=null;lastSavedOrder=null;lastInvoiceFingerprint='';resetWorkflowPaymentUI();showSalesStep('home');renderWorkflowToday();}
         async function startNextWorkflow(){clearWorkflowDraft();try{await refreshOnlineData(false);}catch(_e){}workflowHome();}
