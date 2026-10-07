@@ -641,6 +641,9 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
 
     <!-- Script Logic for Frontend Interactivity -->
     <script>
+        var APP_TIMEZONE='Asia/Jakarta';
+        var activeVisit = null;
+        var visitStats = {calls:0,effective:0,newOutlet:0};
         async function restoreSession(){
             const raw=localStorage.getItem(SESSIONKEY);
             if(!raw) return false;
@@ -1550,7 +1553,6 @@ function renderDynamicForms(){
         }
         window.captureGps=captureGps;window.triggerCamera=triggerCamera;window.handleStorePhoto=handleStorePhoto;window.handleStoreSubmit=handleStoreSubmit;
         function fillCurrentStoreGps(){if(!navigator.geolocation){showToast('GPS tidak tersedia');return;} navigator.geolocation.getCurrentPosition(p=>{document.getElementById('m-store-lat').value=p.coords.latitude.toFixed(7);document.getElementById('m-store-lng').value=p.coords.longitude.toFixed(7);showToast('Koordinat terisi');},e=>showToast('GPS gagal: '+e.message),{enableHighAccuracy:true});}
-        const APP_TIMEZONE='Asia/Jakarta';
         function jakartaParts(value=new Date()){
           const d=value instanceof Date?value:new Date(value);
           if(isNaN(d))return null;
@@ -1902,7 +1904,6 @@ function renderDynamicForms(){
           const vt=document.getElementById('visit-progress-text'),vb=document.getElementById('visit-progress-bar'),vr=document.getElementById('visit-remaining');
           if(vt)vt.innerText=`${visits} / ${targetVisit} Toko`;if(vb)vb.style.width=(targetVisit?Math.min(100,visits/targetVisit*100):0)+'%';if(vr)vr.innerText=targetVisit?(visits>=targetVisit?'Target tercapai':`Kurang ${targetVisit-visits} toko lagi`):'Target belum ditetapkan';
         }
-        var activeVisit = null; var visitStats = {calls:0,effective:0,newOutlet:0};
         function distanceMeters(a,b,c,d){ const R=6371000, p=Math.PI/180; const x=(c-a)*p, y=(d-b)*p; const h=Math.sin(x/2)**2+Math.cos(a*p)*Math.cos(c*p)*Math.sin(y/2)**2; return 2*R*Math.asin(Math.sqrt(h)); }
         function checkInVisit(){
           const sel=document.getElementById('visit-store');if(!sel?.value){showToast('Toko kunjungan belum dipilih');return;}if(!window.isSecureContext){showToast('GPS membutuhkan HTTPS');return;}if(!navigator.geolocation){showToast('GPS tidak didukung perangkat');return;}
