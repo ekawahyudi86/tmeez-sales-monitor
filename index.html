@@ -36,6 +36,8 @@
       #sales-route-map.leaflet-container { position: relative; width: 100%; height: 55vh; min-height: 360px; overflow: hidden; display: block; }
       #sales-route-map .leaflet-tile-pane, #sales-route-map .leaflet-overlay-pane, #sales-route-map .leaflet-marker-pane, #sales-route-map .leaflet-shadow-pane, #sales-route-map .leaflet-tooltip-pane, #sales-route-map .leaflet-popup-pane { pointer-events: none; }
       #sales-route-map .leaflet-marker-icon, #sales-route-map .leaflet-marker-shadow, #sales-route-map .leaflet-popup, #sales-route-map .leaflet-control { pointer-events: auto; }
+      #sales-store-map { touch-action: none; -webkit-user-select: none; user-select: none; }
+      #sales-store-map img { -webkit-user-drag: none; }
         body { font-family: 'Inter', sans-serif; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -968,6 +970,38 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
           stores.forEach(s=>{const p=nativeMapWorld(s.lat,s.lng,z),color=salesMapColor(s,s._orders,s._visited);const b=document.createElement('button');b.type='button';b.title=s.name||'Toko';b.style.cssText=`position:absolute;z-index:20;left:${p.x-left}px;top:${p.y-top}px;width:20px;height:20px;border-radius:50%;transform:translate(-50%,-50%);background:${color};border:3px solid white;box-shadow:0 2px 8px rgba(15,23,42,.35);cursor:pointer;`;b.onclick=()=>{el.querySelectorAll('.sales-map-popup').forEach(x=>x.remove());const pop=document.createElement('div');pop.className='sales-map-popup';pop.style.cssText=`position:absolute;z-index:40;left:${Math.min(w-235,Math.max(8,p.x-left+12))}px;top:${Math.min(hgt-145,Math.max(8,p.y-top-20))}px;width:225px;background:white;border:1px solid #e2e8f0;border-radius:12px;padding:11px;box-shadow:0 10px 30px rgba(15,23,42,.22);font-size:11px;line-height:1.45;`;pop.innerHTML=`<button type="button" style="float:right;font-size:16px;line-height:1" aria-label="Tutup">×</button><b style="font-size:13px">${escapeHtml(s.name||'-')}</b><br><span style="color:#64748b">${escapeHtml(s.owner||'-')}${s.wa?' · '+escapeHtml(s.wa):''}</span><hr style="margin:7px 0;border:0;border-top:1px solid #e2e8f0"><b>Pembelian:</b> ${s._orders.length}x${s._orders.length?' · '+rupiah(s._orders.reduce((n,o)=>n+Number(o.total||0),0)):''}<br><b>Kunjungan hari ini:</b> ${s._visited?'Sudah':'Belum'}<br><button type="button" class="mt-2 w-full bg-indigo-600 text-white rounded-lg py-2 text-[10px] font-bold">Lihat Riwayat Pembelian</button>`;pop.querySelector('button').onclick=()=>pop.remove();const action=pop.querySelectorAll('button')[1];action.onclick=()=>openSalesPurchaseHistory(s.id);el.appendChild(pop);};el.appendChild(b);});
           const controls=document.createElement('div');controls.style.cssText='position:absolute;z-index:30;right:10px;top:10px;display:flex;flex-direction:column;gap:4px';controls.innerHTML='<button type="button" style="width:34px;height:34px;background:white;border:1px solid #cbd5e1;border-radius:9px;font-size:20px;box-shadow:0 2px 8px rgba(0,0,0,.12)">+</button><button type="button" style="width:34px;height:34px;background:white;border:1px solid #cbd5e1;border-radius:9px;font-size:20px;box-shadow:0 2px 8px rgba(0,0,0,.12)">−</button>';controls.children[0].onclick=()=>{salesMapState.zoom=Math.min(19,(salesMapState.zoom||10)+1);renderSalesStoreMap(true)};controls.children[1].onclick=()=>{salesMapState.zoom=Math.max(5,(salesMapState.zoom||10)-1);renderSalesStoreMap(true)};el.appendChild(controls);
           const fit=document.createElement('button');fit.type='button';fit.textContent='Fit Semua';fit.style.cssText='position:absolute;z-index:30;left:10px;top:10px;background:white;border:1px solid #cbd5e1;border-radius:9px;padding:8px 10px;font-size:10px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.12)';fit.onclick=()=>{salesMapState.center=null;salesMapState.zoom=null;renderSalesStoreMap(false)};el.appendChild(fit);
+          // Mobile/desktop pan: drag the map with one finger or mouse.
+          // Do not start panning when interacting with markers, controls, popups, or filter UI.
+          if(!el.__salesPanBound){
+            el.__salesPanBound=true;
+            let pan=null, raf=0;
+            const isInteractive=(t)=>!!(t&&t.closest&&t.closest('button,.sales-map-popup'));
+            el.addEventListener('pointerdown',e=>{
+              if(isInteractive(e.target))return;
+              if(e.pointerType==='mouse'&&e.button!==0)return;
+              pan={x:e.clientX,y:e.clientY,startX:e.clientX,startY:e.clientY,center:{...salesMapState.center},moved:false,pointerId:e.pointerId};
+              el.setPointerCapture?.(e.pointerId);
+            });
+            el.addEventListener('pointermove',e=>{
+              if(!pan||e.pointerId!==pan.pointerId)return;
+              const dx=e.clientX-pan.startX,dy=e.clientY-pan.startY;
+              if(Math.abs(dx)+Math.abs(dy)<3)return;
+              pan.moved=true;
+              const cp=nativeMapWorld(pan.center.lat,pan.center.lng,salesMapState.zoom||10);
+              const next=nativeMapLatLngFromWorld(cp.x-dx,cp.y-dy,salesMapState.zoom||10);
+              salesMapState.center=next;
+              if(!raf){raf=requestAnimationFrame(()=>{raf=0;renderSalesStoreMap(true);});}
+              e.preventDefault();
+            },{passive:false});
+            const endPan=e=>{
+              if(!pan||e.pointerId!==pan.pointerId)return;
+              pan=null;
+              if(raf){cancelAnimationFrame(raf);raf=0;}
+              e.preventDefault?.();
+            };
+            el.addEventListener('pointerup',endPan);
+            el.addEventListener('pointercancel',endPan);
+          }
           const attr=document.createElement('div');attr.style.cssText='position:absolute;z-index:25;right:4px;bottom:3px;background:rgba(255,255,255,.85);padding:2px 5px;font-size:9px;color:#475569;border-radius:4px';attr.innerHTML='© OpenStreetMap contributors';el.appendChild(attr);
         }
 
@@ -1684,6 +1718,38 @@ function renderDynamicForms(){
           const controls=document.createElement('div');controls.style.cssText='position:absolute;z-index:30;right:10px;top:10px;display:flex;flex-direction:column;gap:4px';
           controls.innerHTML='<button type="button" onclick="adminNativeMapZoom(1)" style="width:34px;height:34px;background:white;border:1px solid #cbd5e1;border-radius:9px;font-size:20px;box-shadow:0 2px 8px rgba(0,0,0,.12)">+</button><button type="button" onclick="adminNativeMapZoom(-1)" style="width:34px;height:34px;background:white;border:1px solid #cbd5e1;border-radius:9px;font-size:20px;box-shadow:0 2px 8px rgba(0,0,0,.12)">−</button>';
           el.appendChild(controls);
+          // Mobile/desktop pan: drag the map with one finger or mouse.
+          // Do not start panning when interacting with markers, controls, popups, or filter UI.
+          if(!el.__salesPanBound){
+            el.__salesPanBound=true;
+            let pan=null, raf=0;
+            const isInteractive=(t)=>!!(t&&t.closest&&t.closest('button,.sales-map-popup'));
+            el.addEventListener('pointerdown',e=>{
+              if(isInteractive(e.target))return;
+              if(e.pointerType==='mouse'&&e.button!==0)return;
+              pan={x:e.clientX,y:e.clientY,startX:e.clientX,startY:e.clientY,center:{...salesMapState.center},moved:false,pointerId:e.pointerId};
+              el.setPointerCapture?.(e.pointerId);
+            });
+            el.addEventListener('pointermove',e=>{
+              if(!pan||e.pointerId!==pan.pointerId)return;
+              const dx=e.clientX-pan.startX,dy=e.clientY-pan.startY;
+              if(Math.abs(dx)+Math.abs(dy)<3)return;
+              pan.moved=true;
+              const cp=nativeMapWorld(pan.center.lat,pan.center.lng,salesMapState.zoom||10);
+              const next=nativeMapLatLngFromWorld(cp.x-dx,cp.y-dy,salesMapState.zoom||10);
+              salesMapState.center=next;
+              if(!raf){raf=requestAnimationFrame(()=>{raf=0;renderSalesStoreMap(true);});}
+              e.preventDefault();
+            },{passive:false});
+            const endPan=e=>{
+              if(!pan||e.pointerId!==pan.pointerId)return;
+              pan=null;
+              if(raf){cancelAnimationFrame(raf);raf=0;}
+              e.preventDefault?.();
+            };
+            el.addEventListener('pointerup',endPan);
+            el.addEventListener('pointercancel',endPan);
+          }
           const attr=document.createElement('div');attr.style.cssText='position:absolute;z-index:25;right:4px;bottom:3px;background:rgba(255,255,255,.85);padding:2px 5px;font-size:9px;color:#475569;border-radius:4px';attr.innerHTML='© OpenStreetMap contributors';el.appendChild(attr);
           bindAdminNativeMapInteractions(el,w,hgt);
         }
