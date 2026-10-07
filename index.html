@@ -167,6 +167,26 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
                 </div>
                 <section class="pt-4 border-t">
                   <div class="flex items-center justify-between gap-2 mb-3">
+                    <div class="min-w-0"><h3 class="font-bold text-slate-900">Peta Toko Saya</h3><p class="text-[11px] text-slate-500 mt-1">Hanya menampilkan toko yang menjadi tanggung jawab Anda.</p></div>
+                    <span id="sales-map-count" class="shrink-0 text-[10px] font-bold bg-slate-100 text-slate-600 rounded-lg px-2 py-1">0 toko</span>
+                  </div>
+                  <div class="flex items-center gap-1.5 mb-2 overflow-x-auto pb-0.5">
+                    <button type="button" id="sales-map-filter-all" onclick="setSalesMapFilter('all')" class="shrink-0 px-2.5 py-1.5 rounded-lg bg-indigo-600 text-white text-[10px] font-bold">Semua</button>
+                    <button type="button" id="sales-map-filter-bought" onclick="setSalesMapFilter('bought')" class="shrink-0 px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-bold">Sudah Beli</button>
+                    <button type="button" id="sales-map-filter-unbought" onclick="setSalesMapFilter('unbought')" class="shrink-0 px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-bold">Belum Beli</button>
+                    <button type="button" id="sales-map-filter-visited" onclick="setSalesMapFilter('visited')" class="shrink-0 px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-bold">Sudah Dikunjungi</button>
+                    <button type="button" id="sales-map-filter-unvisited" onclick="setSalesMapFilter('unvisited')" class="shrink-0 px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-bold">Belum Dikunjungi</button>
+                  </div>
+                  <div id="sales-store-map" class="w-full rounded-2xl border overflow-hidden bg-slate-100 relative" style="height:360px"></div>
+                  <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[10px] text-slate-500">
+                    <span><i class="inline-block w-2.5 h-2.5 rounded-full bg-blue-600 mr-1"></i>Sudah beli</span>
+                    <span><i class="inline-block w-2.5 h-2.5 rounded-full bg-red-500 mr-1"></i>Belum beli</span>
+                    <span><i class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 mr-1"></i>Sudah dikunjungi hari ini</span>
+                    <span><i class="inline-block w-2.5 h-2.5 rounded-full bg-amber-500 mr-1"></i>Belum dikunjungi hari ini</span>
+                  </div>
+                </section>
+                <section class="pt-4 border-t">
+                  <div class="flex items-center justify-between gap-2 mb-3">
                     <div class="min-w-0"><h3 class="font-bold text-slate-900">Toko Saya</h3><p class="text-[11px] text-slate-500 mt-1">Daftar toko yang Anda daftarkan. Hanya untuk dilihat.</p></div>
                     <span class="shrink-0 text-[10px] font-bold bg-slate-100 text-slate-600 rounded-lg px-2 py-1"><span id="sales-my-store-count">0</span> toko</span>
                   </div>
@@ -910,6 +930,46 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
         function salesStoreOrders(storeId,sid){
           return (db.orders||[]).filter(o=>String(o.salesId||'')===String(sid||'')&&String(o.storeId||'')===String(storeId||''));
         }
+        let salesMapFilter='all';
+        let salesMapState={center:null,zoom:null};
+        function setSalesMapFilter(filter){
+          salesMapFilter=['all','bought','unbought','visited','unvisited'].includes(filter)?filter:'all';
+          renderSalesStoreMap();
+        }
+        function salesStoreVisitedToday(storeId){
+          const sid=String(currentUser?.salesId||'');
+          return (db.visits||[]).some(v=>String(v.salesId||'')===sid&&String(v.storeId||'')===String(storeId||'')&&String(v.checkIn||v.date||'').slice(0,10)===new Date().toISOString().slice(0,10));
+        }
+        function salesMapColor(store,orders,visited){
+          if(visited)return '#10b981';
+          return orders.length?'#2563eb':'#ef4444';
+        }
+        function renderSalesStoreMap(keepView=false){
+          if(currentUser?.role!=='sales')return;
+          const el=document.getElementById('sales-store-map');if(!el)return;
+          const sid=String(currentUser.salesId||'');
+          const base=(db.stores||[]).filter(s=>String(s.createdBySalesId||'')===sid&&String(s.status||'').toLowerCase()==='active'&&isFinite(Number(s.lat))&&isFinite(Number(s.lng))&&Number(s.lat)!==0&&Number(s.lng)!==0);
+          const enriched=base.map(s=>{const orders=salesStoreOrders(s.id,sid);return {...s,_orders:orders,_bought:orders.length>0,_visited:salesStoreVisitedToday(s.id)}});
+          let stores=enriched;
+          if(salesMapFilter==='bought')stores=stores.filter(s=>s._bought);
+          if(salesMapFilter==='unbought')stores=stores.filter(s=>!s._bought);
+          if(salesMapFilter==='visited')stores=stores.filter(s=>s._visited);
+          if(salesMapFilter==='unvisited')stores=stores.filter(s=>!s._visited);
+          const count=document.getElementById('sales-map-count');if(count)count.innerText=stores.length+' toko';
+          ['all','bought','unbought','visited','unvisited'].forEach(k=>{const b=document.getElementById('sales-map-filter-'+k);if(!b)return;const active=salesMapFilter===k;b.className=active?'shrink-0 px-2.5 py-1.5 rounded-lg bg-indigo-600 text-white text-[10px] font-bold':'shrink-0 px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-bold';});
+          el.innerHTML='';el.style.position='relative';el.style.overflow='hidden';el.style.background='#e2e8f0';
+          if(!stores.length){el.innerHTML='<div class="h-full flex items-center justify-center p-6 text-center text-sm text-slate-500">Tidak ada toko dengan koordinat GPS untuk filter ini.</div>';return;}
+          const w=Math.max(300,el.clientWidth||700),hgt=Math.max(280,el.clientHeight||360);
+          if(!keepView||!salesMapState.center||!salesMapState.zoom){const fit=nativeMapFit(stores,w,hgt);salesMapState.center=fit.center;salesMapState.zoom=fit.zoom;}
+          const z=salesMapState.zoom,center=salesMapState.center,cp=nativeMapWorld(center.lat,center.lng,z),left=cp.x-w/2,top=cp.y-hgt/2,n=Math.pow(2,z);
+          const x0=Math.floor(left/256),x1=Math.floor((left+w)/256),y0=Math.floor(top/256),y1=Math.floor((top+hgt)/256);
+          for(let ty=y0;ty<=y1;ty++)for(let tx=x0;tx<=x1;tx++){if(ty<0||ty>=n)continue;const wrapped=((tx%n)+n)%n;const img=document.createElement('img');img.alt='';img.draggable=false;img.src=`https://tile.openstreetmap.org/${z}/${wrapped}/${ty}.png`;img.style.cssText=`position:absolute;width:256px;height:256px;left:${tx*256-left}px;top:${ty*256-top}px;max-width:none;user-select:none;pointer-events:none;`;img.onerror=()=>img.style.opacity='.15';el.appendChild(img);}
+          stores.forEach(s=>{const p=nativeMapWorld(s.lat,s.lng,z),color=salesMapColor(s,s._orders,s._visited);const b=document.createElement('button');b.type='button';b.title=s.name||'Toko';b.style.cssText=`position:absolute;z-index:20;left:${p.x-left}px;top:${p.y-top}px;width:20px;height:20px;border-radius:50%;transform:translate(-50%,-50%);background:${color};border:3px solid white;box-shadow:0 2px 8px rgba(15,23,42,.35);cursor:pointer;`;b.onclick=()=>{el.querySelectorAll('.sales-map-popup').forEach(x=>x.remove());const pop=document.createElement('div');pop.className='sales-map-popup';pop.style.cssText=`position:absolute;z-index:40;left:${Math.min(w-235,Math.max(8,p.x-left+12))}px;top:${Math.min(hgt-145,Math.max(8,p.y-top-20))}px;width:225px;background:white;border:1px solid #e2e8f0;border-radius:12px;padding:11px;box-shadow:0 10px 30px rgba(15,23,42,.22);font-size:11px;line-height:1.45;`;pop.innerHTML=`<button type="button" style="float:right;font-size:16px;line-height:1" aria-label="Tutup">×</button><b style="font-size:13px">${escapeHtml(s.name||'-')}</b><br><span style="color:#64748b">${escapeHtml(s.owner||'-')}${s.wa?' · '+escapeHtml(s.wa):''}</span><hr style="margin:7px 0;border:0;border-top:1px solid #e2e8f0"><b>Pembelian:</b> ${s._orders.length}x${s._orders.length?' · '+rupiah(s._orders.reduce((n,o)=>n+Number(o.total||0),0)):''}<br><b>Kunjungan hari ini:</b> ${s._visited?'Sudah':'Belum'}<br><button type="button" class="mt-2 w-full bg-indigo-600 text-white rounded-lg py-2 text-[10px] font-bold">Lihat Riwayat Pembelian</button>`;pop.querySelector('button').onclick=()=>pop.remove();const action=pop.querySelectorAll('button')[1];action.onclick=()=>openSalesPurchaseHistory(s.id);el.appendChild(pop);};el.appendChild(b);});
+          const controls=document.createElement('div');controls.style.cssText='position:absolute;z-index:30;right:10px;top:10px;display:flex;flex-direction:column;gap:4px';controls.innerHTML='<button type="button" style="width:34px;height:34px;background:white;border:1px solid #cbd5e1;border-radius:9px;font-size:20px;box-shadow:0 2px 8px rgba(0,0,0,.12)">+</button><button type="button" style="width:34px;height:34px;background:white;border:1px solid #cbd5e1;border-radius:9px;font-size:20px;box-shadow:0 2px 8px rgba(0,0,0,.12)">−</button>';controls.children[0].onclick=()=>{salesMapState.zoom=Math.min(19,(salesMapState.zoom||10)+1);renderSalesStoreMap(true)};controls.children[1].onclick=()=>{salesMapState.zoom=Math.max(5,(salesMapState.zoom||10)-1);renderSalesStoreMap(true)};el.appendChild(controls);
+          const fit=document.createElement('button');fit.type='button';fit.textContent='Fit Semua';fit.style.cssText='position:absolute;z-index:30;left:10px;top:10px;background:white;border:1px solid #cbd5e1;border-radius:9px;padding:8px 10px;font-size:10px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.12)';fit.onclick=()=>{salesMapState.center=null;salesMapState.zoom=null;renderSalesStoreMap(false)};el.appendChild(fit);
+          const attr=document.createElement('div');attr.style.cssText='position:absolute;z-index:25;right:4px;bottom:3px;background:rgba(255,255,255,.85);padding:2px 5px;font-size:9px;color:#475569;border-radius:4px';attr.innerHTML='© OpenStreetMap contributors';el.appendChild(attr);
+        }
+
         function renderSalesMyStores(){
           if(currentUser?.role!=='sales')return;
           const box=document.getElementById('sales-my-store-list');if(!box)return;
@@ -975,6 +1035,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
                 <button type="button" onclick="salesMyStorePage=Math.min(${totalPages},salesMyStorePage+1);renderSalesMyStores()" ${salesMyStorePage>=totalPages?'disabled':''} class="w-8 h-8 rounded-lg border text-xs font-bold ${salesMyStorePage>=totalPages?'text-slate-300 bg-slate-50':'text-slate-700 bg-white hover:bg-slate-50'}">›</button>
               </div>`;
           }
+          renderSalesStoreMap();
         }
         function salesOwnStore(storeId){
           if(currentUser?.role!=='sales')return null;
