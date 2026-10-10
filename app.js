@@ -279,8 +279,20 @@ function renderDynamicForms(){
         const WA_QUEUE_STATUSES=['Menunggu Dikirim','Sudah Dibuka di WhatsApp','Terkirim (konfirmasi manual)'];
         async function loadWhatsAppQueue(showMessage=false){
           if(currentUser?.role!=='admin')return;
-          try{const r=await apiGet('whatsappQueue');whatsappQueueRows=r.data||[];renderWhatsAppQueue();if(showMessage)showToast('Antrean WhatsApp diperbarui dari server');}
-          catch(err){const el=document.getElementById('wa-queue-list');if(el)el.innerHTML='<p class="text-xs text-rose-600">Antrean belum bisa dimuat. Pastikan backend Apps Script versi terbaru sudah di-deploy.</p>';if(showMessage)showToast('Gagal memuat antrean: '+err.message);}
+          const list=document.getElementById('wa-queue-list');
+          if(list)list.innerHTML='<p class="text-xs text-slate-400">Memuat antrean...</p>';
+          try{
+            // Refresh transaksi secara mandiri agar antrean tidak bergantung pada cache tampilan sebelumnya.
+            const results=await Promise.all([apiGet('whatsappQueue'),apiGet('orders',{limit:500}),apiGet('stores')]);
+            whatsappQueueRows=results[0].data||[];
+            db.orders=(results[1].data||[]).map(mapOrderPack);
+            db.stores=(results[2].data||[]).map(mapStore);
+            renderWhatsAppQueue();
+            if(showMessage)showToast('Antrean WhatsApp diperbarui dari server');
+          }catch(err){
+            if(list)list.innerHTML='<p class="text-xs text-rose-600">Antrean belum bisa dimuat. Periksa deployment backend Apps Script dan koneksi, lalu tekan Perbarui antrean. Detail: '+escapeHtml(err.message||String(err))+'</p>';
+            if(showMessage)showToast('Gagal memuat antrean: '+err.message);
+          }
         }
         function normalizeWaPhone(v){let n=String(v||'').replace(/\D/g,'');if(n.startsWith('0'))n='62'+n.slice(1);if(n.startsWith('8'))n='62'+n;return n;}
         function waQueueForOrder(o){return whatsappQueueRows.find(x=>String(x.OrderID)===String(o.id))||{OrderID:o.id,Status:'Menunggu Dikirim'};}
