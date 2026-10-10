@@ -757,7 +757,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
           const rawDateKey=o.OrderDateKey||o.orderDateKey||o.CreatedDateKey||''; const dateKey=rawDateKey?dateKeyJakarta(rawDateKey):'';
           const flag=v=>v===undefined||v===null||v===''?null:(v===true||String(v).toLowerCase()==='true');
           const itemQty=items.reduce((n,z)=>n+Number(z.QtyPcs??z.qtyPcs??0),0);
-          return {id:String(o.OrderID||o.orderId||''),visitId:String(o.VisitID||o.visitId||''),salesId:String(o.SalesID||o.salesId||''),storeId:String(o.StoreID||o.storeId||''),date,dateKey,createdAt:o.CreatedAt||o.createdAt||'',isToday:flag(o.IsToday),isLast7Days:flag(o.IsLast7Days),isThisMonth:flag(o.IsThisMonth),serverTodayKey:String(o.ServerTodayKey||''),qty:itemQty>0?itemQty:Number(o.TotalQtyPcs??o.totalQtyPcs??o.QtyPcs??o.qty??0),subtotal:+(o.Subtotal??o.subtotal)||0,discount:+(o.Discount??o.discount)||0,total:+(o.GrandTotal??o.grandTotal??o.Total??o.total)||0,paymentType:String(o.PaymentType||o.paymentType||''),paymentStatus:String(o.PaymentStatus||o.paymentStatus||''),verifiedAt:String(o.PaymentVerifiedAt||''),items};
+          return {id:String(o.OrderID||o.orderId||''),visitId:String(o.VisitID||o.visitId||''),salesId:String(o.SalesID||o.salesId||''),storeId:String(o.StoreID||o.storeId||''),customerType:String(o.CustomerType||o.customerType||'Store'),customerName:String(o.CustomerName||o.customerName||''),customerWhatsApp:String(o.CustomerWhatsApp||o.customerWhatsApp||''),customerAddress:String(o.CustomerAddress||o.customerAddress||''),retailCustomerId:String(o.RetailCustomerID||o.retailCustomerId||''),date,dateKey,createdAt:o.CreatedAt||o.createdAt||'',isToday:flag(o.IsToday),isLast7Days:flag(o.IsLast7Days),isThisMonth:flag(o.IsThisMonth),serverTodayKey:String(o.ServerTodayKey||''),qty:itemQty>0?itemQty:Number(o.TotalQtyPcs??o.totalQtyPcs??o.QtyPcs??o.qty??0),subtotal:+(o.Subtotal??o.subtotal)||0,discount:+(o.Discount??o.discount)||0,total:+(o.GrandTotal??o.grandTotal??o.Total??o.total)||0,paymentType:String(o.PaymentType||o.paymentType||''),paymentStatus:String(o.PaymentStatus||o.paymentStatus||''),verifiedAt:String(o.PaymentVerifiedAt||''),items};
         }
         function mapProduct(x){return {id:String(x.ProductID||''),name:String(x.ProductName||''),price:+(x.PricePerPcs!==''&&x.PricePerPcs!==undefined?x.PricePerPcs:x.PricePerBox)||0,pack:+x.UnitsPerBox||10,sku:String(x.SKU||''),status:String(x.Status||'Active')};}
         async function refreshOnlineData(showMessage=false){
@@ -1351,12 +1351,12 @@ function renderDynamicForms(){
           if(currentUser?.role!=='sales')return;
           const sid=String(currentUser.salesId||'');
           const rows=(db.orders||[]).filter(o=>String(o.salesId)===sid&&['transfer','qris'].includes(String(o.paymentType||'').toLowerCase())&&String(o.paymentStatus||'').toLowerCase()==='menunggu verifikasi');
-          const storeIds=new Set(rows.map(o=>String(o.storeId||'')).filter(Boolean));
+          const customerIds=new Set(rows.map(o=>String(o.customerType||'').toLowerCase()==='retail'?'retail:'+String(o.customerWhatsApp||o.customerName||o.id):'store:'+String(o.storeId||'')).filter(x=>!x.endsWith(':')));
           const total=rows.reduce((n,o)=>n+Number(o.total||0),0);
           const sc=document.getElementById('sales-pending-store-count'),tt=document.getElementById('sales-pending-total'),box=document.getElementById('sales-pending-payment-list');
-          if(sc)sc.innerText=storeIds.size;if(tt)tt.innerText=rupiah(total);if(!box)return;
-          const storeName=id=>(db.stores.find(s=>String(s.id)===String(id))||{}).name||id||'Toko';
-          box.innerHTML=rows.length?rows.slice().sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))).map(o=>`<div class="bg-white rounded-xl p-2.5 border border-amber-100"><div class="flex justify-between gap-2"><div class="min-w-0"><b class="text-xs text-slate-900">${escapeHtml(storeName(o.storeId))}</b><p class="text-[10px] text-slate-500">${escapeHtml(o.paymentType||'')} · ${escapeHtml(o.dateKey||String(o.date||''))}</p><p class="text-[9px] text-slate-400">Order: ${escapeHtml(o.id||'-')}</p></div><div class="text-right shrink-0"><b class="text-xs">${rupiah(Number(o.total||0))}</b><p class="text-[9px] text-amber-700 font-bold">Menunggu Verifikasi</p></div></div></div>`).join(''):'<p class="text-[10px] text-slate-500">Tidak ada pembayaran menunggu verifikasi.</p>';
+          if(sc)sc.innerText=customerIds.size;if(tt)tt.innerText=rupiah(total);if(!box)return;
+          const storeName=o=>String(o.customerType||'').toLowerCase()==='retail'?(o.customerName||'Customer Perorangan'):((db.stores.find(s=>String(s.id)===String(o.storeId))||{}).name||o.storeId||'Toko');
+          box.innerHTML=rows.length?rows.slice().sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))).map(o=>`<div class="bg-white rounded-xl p-2.5 border border-amber-100"><div class="flex justify-between gap-2"><div class="min-w-0"><b class="text-xs text-slate-900">${escapeHtml(storeName(o))}</b><p class="text-[10px] text-slate-500">${String(o.customerType||'').toLowerCase()==='retail'?'Retail · ':''}${escapeHtml(o.paymentType||'')} · ${escapeHtml(o.dateKey||String(o.date||''))}</p><p class="text-[9px] text-slate-400">Order: ${escapeHtml(o.id||'-')}</p></div><div class="text-right shrink-0"><b class="text-xs">${rupiah(Number(o.total||0))}</b><p class="text-[9px] text-amber-700 font-bold">Menunggu Verifikasi</p></div></div></div>`).join(''):'<p class="text-[10px] text-slate-500">Tidak ada pembayaran menunggu verifikasi.</p>';
         }
         function renderWorkflowToday(){
           if(currentUser?.role!=='sales')return;
@@ -1374,7 +1374,7 @@ function renderDynamicForms(){
           const targetPcs=salesTargetForPeriod(sales.targetBox,period),targetVisit=salesTargetForPeriod(sales.targetVisit,period);
           const set=(id,val)=>{const e=document.getElementById(id);if(e)e.innerText=val;};
           set('sales-dashboard-period-label',period==='daily'?'Ringkasan hari ini':period==='weekly'?'Ringkasan 7 hari terakhir':'Ringkasan bulan ini');
-          set('sales-dash-omzet',rupiah(omzet));set('sales-dash-orders',orders.length+' order');
+          const retailOrders=orders.filter(o=>String(o.customerType||'').toLowerCase()==='retail').length;const storeOrders=orders.length-retailOrders;set('sales-dash-omzet',rupiah(omzet));set('sales-dash-orders',`${orders.length} order · ${storeOrders} toko · ${retailOrders} retail`);
           set('sales-dash-pcs',pcs+' PCS');set('sales-dash-visits',visits.length+' Toko');set('sales-dash-effective',effective);set('sales-dash-strike','Strike Rate '+strike+'%');
           set('sales-dash-pcs-target',targetPcs?`Target ${targetPcs} PCS`:'Target belum ditetapkan');set('sales-dash-visit-target',targetVisit?`Target ${targetVisit} toko`:'Target belum ditetapkan');
           set('sales-pcs-progress-text',`${pcs} / ${targetPcs} PCS`);set('sales-visit-progress-text',`${visits.length} / ${targetVisit} Toko`);
@@ -1673,8 +1673,9 @@ function renderDynamicForms(){
           const omzet=orders.reduce((n,o)=>n+Number(o.total||0),0);
           const pcs=orders.reduce((n,o)=>n+Number(o.qty||0),0);
           const set=(id,v)=>{const e=document.getElementById(id);if(e)e.innerText=v;};
+          const retailOrders=orders.filter(o=>String(o.customerType||'').toLowerCase()==='retail');const storeOrders=orders.filter(o=>String(o.customerType||'').toLowerCase()!=='retail');const retailRevenue=retailOrders.reduce((n,o)=>n+Number(o.total||0),0);const storeRevenue=storeOrders.reduce((n,o)=>n+Number(o.total||0),0);
           set('admin-total-omzet',rupiah(omzet));set('admin-total-visits',visits.length+' Toko');set('admin-total-pcs',pcs+' PCS');set('admin-active-sales',activeSales.length+' Orang');
-          set('admin-omzet-status',orders.length?`${orders.length} transaksi · ${periodLabel(period)}`:'Belum ada transaksi');
+          set('admin-omzet-status',orders.length?`${orders.length} transaksi · Toko ${rupiah(storeRevenue)} · Retail ${rupiah(retailRevenue)} · ${periodLabel(period)}`:'Belum ada transaksi');
           set('admin-visits-status',visits.length?`${visits.length} kunjungan · ${periodLabel(period)}`:'Belum ada kunjungan');
           const factor=period==='daily'?1:period==='weekly'?7:25;
           const targetPcs=activeSales.reduce((n,s)=>n+(period==='monthly'?Number(s.targetBox||0):Math.ceil(Number(s.targetBox||0)/25*factor)),0);
