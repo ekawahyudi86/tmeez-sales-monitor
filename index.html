@@ -703,6 +703,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
                 userName.innerText = currentUser?.name || "Administrator";
                 userRole.innerText = currentUser?.role==='monitoring' ? "Monitoring Sales" : "Administrator";
                 applyAccessUI();
+                if (currentUser?.role === 'admin') { loadWhatsAppQueue(false); loadWhatsAppTemplates(false); }
             }
         }
 
@@ -2279,6 +2280,166 @@ function renderHrAttendance(rows){const b=document.getElementById('hr-attendance
         async function reopenPayrollAdmin(id){const reason=prompt('Alasan membuka kembali payroll ini');if(!reason)return;try{const r=await apiPost({action:'reopenPayroll',payrollId:id,reason});showToast(r.message);await loadHrAdmin()}catch(e){showToast(e.message)}}
         async function paidPayrollAdmin(id){if(!confirm('Tandai payroll ini sudah dibayar?'))return;try{await apiPost({action:'markPayrollPaid',payrollId:id});showToast('Payroll ditandai dibayar');await loadHrAdmin()}catch(e){showToast(e.message)}}
         async function archiveYearAdmin(){const year=document.getElementById('hr-archive-year').value;if(!year)return showToast('Isi tahun arsip');if(!confirm('Arsipkan transaksi tahun '+year+' ke Google Sheet baru? Data tahun tersebut akan dibersihkan dari database aktif.'))return;try{const r=await apiPost({action:'archiveYear',year});document.getElementById('hr-archive-status').innerHTML=`Berhasil. <a class="underline text-brand-700" href="${r.url}" target="_blank">Buka Arsip</a>`;showToast(r.message)}catch(e){showToast(e.message)}}
+
+
+// WhatsApp customer queue: frontend functions (V6.18.8 queue repair)
+let waQueueRows = [];
+let waQueueOrders = [];
+let waQueueStores = [];
+let waQueueLoading = false;
+
+function waQueueRupiah(value) {
+  return 'Rp ' + Math.round(Number(value || 0)).toLocaleString('id-ID');
+}
+function waQueueNormalizePhone(value) {
+  let n = String(value || '').replace(/\D/g, '');
+  if (!n) return '';
+  if (n.startsWith('00')) n = n.slice(2);
+  if (n.startsWith('0')) n = '62' + n.slice(1);
+  else if (n.startsWith('8')) n = '62' + n;
+  return n;
+}
+function waQueueOrderDate(order) {
+  const raw = String(order.OrderDateDisplay || order.OrderDate || order.CreatedAt || '');
+  if (!raw) return '-';
+  const iso = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (iso) return `${iso[3].padStart(2,'0')}/${iso[2].padStart(2,'0')}/${iso[1]}`;
+  const d = new Date(raw);
+  return isNaN(d.getTime()) ? raw : d.toLocaleDateString('id-ID');
+}
+function waQueueMakeMessage(order, items, store) {
+  const productLines = (items || []).map(i => `${String(i.ProductName || i.productName || 'Produk')} x${Number(i.QtyPcs || i.qtyPcs || 0)}`).filter(Boolean);
+  const totalQty = (items || []).reduce((n, i) => n + Number(i.QtyPcs || i.qtyPcs || 0), 0) || Number(order.TotalQtyPcs || 0);
+  const buyerName = String(store.OwnerName || order.OwnerName || 'Bapak/Ibu').trim();
+  const vars = {
+    nama_pembeli: buyerName || 'Bapak/Ibu',
+    nama_toko: String(store.StoreName || order.StoreName || 'Pelanggan').trim(),
+    nomor_transaksi: String(order.OrderID || ''),
+    rincian_produk: productLines.join('\n• ') || 'Rincian produk tidak tersedia',
+    total_jumlah: String(totalQty),
+    total_pembelian: waQueueRupiah(order.GrandTotal || 0),
+    tanggal_transaksi: waQueueOrderDate(order)
+  };
+  const kind = 'store';
+  const template = (typeof whatsappTemplates !== 'undefined' && whatsappTemplates[kind]) || (typeof WA_TEMPLATE_DEFAULTS !== 'undefined' && WA_TEMPLATE_DEFAULTS[kind]) || 'Halo {{nama_pembeli}}, terima kasih telah membeli produk TMEEZ. No. Nota: {{nomor_transaksi}}. Total: {{total_pembelian}}.';
+  return fillWhatsAppTemplate(template, vars);
+}
+function waQueueGetStatus(row) {
+  return String(row.Status || 'Menunggu Dikirim');
+}
+function renderWhatsAppQueue() {
+  const list = document.getElementById('wa-queue-list');
+  if (!list) return;
+  const query = String(document.getElementById('wa-queue-search')?.value || '').trim().toLowerCase();
+  const filter = String(document.getElementById('wa-queue-filter')?.value || '');
+  const orderMap = new Map(waQueueOrders.map(x => [String((x.order || {}).OrderID || ''), x]));
+  const storeMap = new Map(waQueueStores.map(s => [String(s.StoreID || ''), s]));
+  const rows = waQueueRows.map(q => {
+    const entry = orderMap.get(String(q.OrderID || ''));
+    const order = entry?.order || {};
+    const store = storeMap.get(String(order.StoreID || '')) || {};
+    return { queue:q, entry, order, store, status:waQueueGetStatus(q) };
+  }).filter(x => {
+    const haystack = [x.order.OrderID, x.store.StoreName, x.store.OwnerName, x.store.WhatsApp].join(' ').toLowerCase();
+    return (!query || haystack.includes(query)) && (!filter || x.status === filter);
+  });
+  const counts = {'Menunggu Dikirim':0,'Sudah Dibuka di WhatsApp':0,'Terkirim (konfirmasi manual)':0};
+  waQueueRows.forEach(q => { const s=waQueueGetStatus(q); if (Object.prototype.hasOwnProperty.call(counts,s)) counts[s]++; });
+  const pending=document.getElementById('wa-queue-pending');
+  const opened=document.getElementById('wa-queue-opened');
+  const sent=document.getElementById('wa-queue-sent');
+  if(pending)pending.textContent=counts['Menunggu Dikirim'];
+  if(opened)opened.textContent=counts['Sudah Dibuka di WhatsApp'];
+  if(sent)sent.textContent=counts['Terkirim (konfirmasi manual)'];
+  if (waQueueLoading && !waQueueRows.length) {
+    list.innerHTML='<p class="text-xs text-slate-400">Memuat antrean dari server…</p>';
+    return;
+  }
+  if (!rows.length) {
+    list.innerHTML = waQueueRows.length
+      ? '<p class="text-xs text-slate-500 rounded-xl border p-4">Tidak ada transaksi yang sesuai pencarian/filter.</p>'
+      : '<p class="text-xs text-slate-500 rounded-xl border p-4">Antrean berhasil dimuat, tetapi belum ada transaksi toko yang tersedia. Pastikan transaksi tersimpan di sheet Orders.</p>';
+    return;
+  }
+  list.innerHTML = rows.map(x => {
+    const id=String(x.queue.OrderID || '');
+    const phone=waQueueNormalizePhone(x.store.WhatsApp || x.order.StoreWhatsApp || '');
+    const message=x.entry ? waQueueMakeMessage(x.order, x.entry.items || [], x.store) : '';
+    const statusClass=x.status==='Terkirim (konfirmasi manual)'?'bg-emerald-50 text-emerald-700':x.status==='Sudah Dibuka di WhatsApp'?'bg-sky-50 text-sky-700':'bg-amber-50 text-amber-800';
+    const details=x.entry
+      ? `<p class="text-xs text-slate-500 mt-1">${escapeHtml(waQueueOrderDate(x.order))} · ${Number(x.order.TotalQtyPcs || (x.entry.items||[]).reduce((n,i)=>n+Number(i.QtyPcs||0),0))} PCS</p><p class="text-xs text-slate-600 mt-2 whitespace-pre-line">${escapeHtml((x.entry.items||[]).map(i=>`${i.ProductName||'Produk'} x${Number(i.QtyPcs||0)}`).join('\\n') || 'Rincian produk tidak tersedia')}</p><p class="text-sm font-bold mt-2">${escapeHtml(waQueueRupiah(x.order.GrandTotal || 0))}</p>`
+      : '<p class="text-xs text-red-600 mt-2">Data transaksi tidak ditemukan pada 500 transaksi terakhir. Periksa sheet Orders.</p>';
+    const sendButton=x.entry && phone
+      ? `<button type="button" onclick="openWhatsAppQueueMessage('${encodeURIComponent(id)}')" class="px-3 py-2 rounded-lg bg-emerald-600 text-white text-xs font-bold">Buka WhatsApp & Siapkan Pesan</button>`
+      : `<button type="button" disabled class="px-3 py-2 rounded-lg bg-slate-100 text-slate-400 text-xs font-bold">${x.entry?'Nomor WhatsApp belum tersedia':'Data order tidak ditemukan'}</button>`;
+    const markSent=x.status!=='Terkirim (konfirmasi manual)' && x.entry
+      ? `<button type="button" onclick="setWhatsAppQueueStatus('${encodeURIComponent(id)}','Terkirim (konfirmasi manual)')" class="px-3 py-2 rounded-lg border text-xs font-semibold">Tandai terkirim</button>`:'';
+    const reset=x.status!=='Menunggu Dikirim'
+      ? `<button type="button" onclick="setWhatsAppQueueStatus('${encodeURIComponent(id)}','Menunggu Dikirim')" class="px-3 py-2 rounded-lg border text-xs font-semibold">Reset status</button>`:'';
+    return `<article class="border rounded-xl p-4 bg-white"><div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3"><div class="min-w-0"><div class="flex flex-wrap items-center gap-2"><h3 class="font-bold text-sm">${escapeHtml(x.store.StoreName || x.order.StoreName || 'Toko tidak diketahui')}</h3><span class="text-[10px] rounded-full px-2 py-1 ${statusClass}">${escapeHtml(x.status)}</span></div><p class="text-xs text-slate-500 mt-1">Nota: ${escapeHtml(id)} · WA: ${escapeHtml(x.store.WhatsApp || x.order.StoreWhatsApp || 'Belum ada nomor')}</p>${details}</div><div class="flex flex-wrap gap-2 sm:justify-end">${sendButton}${markSent}${reset}</div></div></article>`;
+  }).join('');
+}
+async function loadWhatsAppQueue(showMessage=false) {
+  const list=document.getElementById('wa-queue-list');
+  if (waQueueLoading) return;
+  waQueueLoading=true;
+  if(list)list.innerHTML='<p class="text-xs text-slate-400">Memuat antrean dari server…</p>';
+  try {
+    // Endpoint ini juga menyinkronkan order lama ke WhatsAppQueue secara idempotent.
+    const results=await Promise.all([
+      apiGet('whatsappQueue'),
+      apiGet('orders',{limit:500}),
+      apiGet('stores')
+    ]);
+    waQueueRows=Array.isArray(results[0].data)?results[0].data:[];
+    waQueueOrders=Array.isArray(results[1].data)?results[1].data:[];
+    waQueueStores=Array.isArray(results[2].data)?results[2].data:[];
+    renderWhatsAppQueue();
+    if(showMessage)showToast(`Antrean dimuat: ${waQueueRows.length} transaksi.`);
+  } catch(e) {
+    if(list)list.innerHTML=`<div class="rounded-xl border border-red-200 bg-red-50 p-4 text-xs text-red-700"><b>Antrean gagal dimuat.</b><p class="mt-1">${escapeHtml(e?.message || String(e))}</p><p class="mt-1">Periksa login admin, URL deployment Apps Script, dan versi backend.</p></div>`;
+    if(showMessage)showToast('Gagal memuat antrean WhatsApp: '+(e?.message||e));
+    console.error('loadWhatsAppQueue failed',e);
+  } finally {
+    waQueueLoading=false;
+  }
+}
+async function openWhatsAppQueueMessage(encodedOrderId) {
+  const orderId=decodeURIComponent(String(encodedOrderId||''));
+  const entry=waQueueOrders.find(x=>String((x.order||{}).OrderID||'')===orderId);
+  if(!entry)return showToast('Data transaksi tidak ditemukan. Muat ulang antrean.');
+  const order=entry.order||{};
+  const store=waQueueStores.find(s=>String(s.StoreID||'')===String(order.StoreID||''))||{};
+  const phone=waQueueNormalizePhone(store.WhatsApp||order.StoreWhatsApp||'');
+  if(!phone)return showToast('Nomor WhatsApp toko belum diisi.');
+  const message=waQueueMakeMessage(order,entry.items||[],store);
+  const url='https://wa.me/'+phone+'?text='+encodeURIComponent(message);
+  const openedWindow=window.open(url,'_blank');
+  if(!openedWindow) {
+    showToast('Popup diblokir browser. Izinkan popup untuk membuka WhatsApp.');
+    return;
+  }
+  try {
+    await apiPost({action:'updateWhatsAppQueue',orderId,status:'Sudah Dibuka di WhatsApp'});
+    const row=waQueueRows.find(q=>String(q.OrderID||'')===orderId);
+    if(row){row.Status='Sudah Dibuka di WhatsApp';row.OpenedAt=new Date().toISOString();}
+    renderWhatsAppQueue();
+  } catch(e) {
+    showToast('WhatsApp dibuka, tetapi status antrean gagal disimpan: '+(e?.message||e));
+  }
+}
+async function setWhatsAppQueueStatus(encodedOrderId,status) {
+  const orderId=decodeURIComponent(String(encodedOrderId||''));
+  try {
+    await apiPost({action:'updateWhatsAppQueue',orderId,status});
+    const row=waQueueRows.find(q=>String(q.OrderID||'')===orderId);
+    if(row){row.Status=status;if(status==='Terkirim (konfirmasi manual)')row.ConfirmedAt=new Date().toISOString();}
+    renderWhatsAppQueue();
+    showToast('Status antrean diperbarui.');
+  } catch(e) {
+    showToast('Gagal memperbarui status: '+(e?.message||e));
+  }
+}
 
 const WA_TEMPLATE_DEFAULTS={
  store:'Halo Bapak/Ibu {{nama_pembeli}} 👋\n\nTerima kasih telah melakukan pembelian produk TMEEZ. 💚\n\n🧾 Ringkasan Pembelian\n• Toko: {{nama_toko}}\n• No. Nota: {{nomor_transaksi}}\n• Produk: {{rincian_produk}}\n• Jumlah: {{total_jumlah}} PCS\n• Total: {{total_pembelian}}\n• Tanggal: {{tanggal_transaksi}}\n\nJika membutuhkan stok kembali atau ada pertanyaan, silakan balas pesan ini. Kami siap membantu.\n\nTerima kasih atas kepercayaan Anda kepada TMEEZ.\nTMEEZ — Solusi Kebersihan Rumah Anda 💚',
