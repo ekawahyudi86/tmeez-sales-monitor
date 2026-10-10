@@ -1364,10 +1364,26 @@ function renderDynamicForms(){
           // Compatibility with existing KPI code.
           const calls=document.getElementById('kpi-calls');if(calls)calls.innerText=visits.length;
         }
-        async function downloadLastOrderPdf(){if(!lastSavedOrder){showToast('Data order belum tersedia');return;}await downloadPdfInvoice();}
+        async function downloadLastOrderPdf(){
+          const order=lastSavedOrder;
+          if(!order){showToast('Data order belum tersedia. Simpan transaksi terlebih dahulu.');return;}
+          try{await generateOrderPdf(order);}catch(err){showToast('PDF gagal: '+(err?.message||err));}
+        }
         function shareLastOrderWhatsApp(){
-          const order=lastSavedOrder;if(!order){showToast('Data order belum tersedia');return;}const store=db.stores.find(s=>String(s.id)===String(order.storeId));let wa=String(store?.wa||order.storeWhatsApp||'').replace(/\D/g,'');if(wa.startsWith('0'))wa='62'+wa.slice(1);if(!wa){showToast('Nomor WhatsApp toko belum tersedia');return;}
-          const lines=['*Tmeez - Nota Penjualan*','No: '+order.orderId,'Toko: '+order.storeName,'Sales: '+order.salesName,'Pembayaran: '+workflowPaymentMethod,'',...order.items.map((x,i)=>`${i+1}. ${x.productName}\n${x.qtyPcs} PCS × ${rupiah(x.unitPricePcs)}${x.discountPerPcs?'\nDiskon '+rupiah(x.discountPerPcs)+'/PCS':''}\n= ${rupiah(x.total)}`),'','*TOTAL: '+rupiah(order.grandTotal)+'*','','Terima kasih.'];window.open('https://wa.me/'+wa+'?text='+encodeURIComponent(lines.join('\n')),'_blank','noopener');
+          const order=lastSavedOrder;
+          if(!order){showToast('Data order belum tersedia. Simpan transaksi terlebih dahulu.');return;}
+          const storeId=String(order.storeId||order.StoreID||'');
+          const store=(db.stores||[]).find(s=>String(s.id||s.StoreID)===storeId);
+          let wa=String(store?.wa||store?.WhatsApp||order.storeWhatsApp||order.WhatsApp||'').replace(/\D/g,'');
+          if(wa.startsWith('0'))wa='62'+wa.slice(1);else if(wa.startsWith('8'))wa='62'+wa;
+          const items=Array.isArray(order.items)?order.items:[];
+          const lines=['*Tmeez - Nota Penjualan*','No: '+String(order.orderId||order.OrderID||'-'),'Toko: '+String(order.storeName||order.StoreName||store?.name||'-'),'Sales: '+String(order.salesName||order.SalesName||currentUser?.name||'-'),'Pembayaran: '+String(order.paymentType||order.PaymentType||workflowPaymentMethod||'-'),''];
+          items.forEach((x,i)=>{const name=x.productName||x.ProductName||x.name||'Produk';const qty=Number(x.qtyPcs??x.QtyPcs??x.qty??0);const price=Number(x.unitPricePcs??x.UnitPricePcs??x.unitPrice??0);const disc=Number(x.discountPerPcs??x.DiscountPerPcs??0);const total=Number(x.total??x.Total??x.lineTotal??Math.max(0,qty*(price-disc)));lines.push(`${i+1}. ${name}`,`${qty} PCS × ${rupiah(price)}${disc?' (diskon '+rupiah(disc)+'/PCS)':''}`,`= ${rupiah(total)}`,'');});
+          lines.push('*TOTAL: '+rupiah(order.grandTotal??order.GrandTotal??order.total??order.Total)+'*','','Terima kasih telah berbelanja produk Tmeez.');
+          const url='https://wa.me/'+(wa||'')+'?text='+encodeURIComponent(lines.join('\n'));
+          const win=window.open(url,'_blank');
+          if(!win){showToast('Popup WhatsApp diblokir browser. Izinkan popup untuk aplikasi ini lalu coba lagi.');return;}
+          if(!wa)showToast('WhatsApp dibuka dengan nota. Nomor toko belum tersimpan, silakan pilih penerima.');
         }
         window.captureGps=captureGps;window.triggerCamera=triggerCamera;window.handleStorePhoto=handleStorePhoto;window.handleStoreSubmit=handleStoreSubmit;
         function fillCurrentStoreGps(){if(!navigator.geolocation){showToast('GPS tidak tersedia');return;} navigator.geolocation.getCurrentPosition(p=>{document.getElementById('m-store-lat').value=p.coords.latitude.toFixed(7);document.getElementById('m-store-lng').value=p.coords.longitude.toFixed(7);showToast('Koordinat terisi');},e=>showToast('GPS gagal: '+e.message),{enableHighAccuracy:true});}
