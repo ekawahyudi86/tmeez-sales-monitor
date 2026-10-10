@@ -1612,8 +1612,15 @@ function renderDynamicForms(){
             b.onclick=()=>{
               el.querySelectorAll('.native-map-popup').forEach(x=>x.remove());
               const pop=document.createElement('div');pop.className='native-map-popup';pop.style.cssText=`position:absolute;z-index:40;left:${Math.min(w-230,Math.max(8,p.x-left+12))}px;top:${Math.min(hgt-155,Math.max(8,p.y-top-25))}px;width:220px;background:white;border:1px solid #e2e8f0;border-radius:12px;padding:12px;box-shadow:0 10px 30px rgba(15,23,42,.22);font-size:11px;line-height:1.45;`;
-              pop.innerHTML=`<button type="button" style="float:right;font-size:16px;line-height:1" aria-label="Tutup">×</button><b style="font-size:13px">${escapeHtml(s.name||'-')}</b><br><span style="color:#64748b">${escapeHtml(s.address||'Alamat belum diisi')}</span><hr style="margin:7px 0;border:0;border-top:1px solid #e2e8f0"><b>Sales:</b> ${escapeHtml(sales?.name||s.createdByName||'-')}<br><b>Status:</b> ${escapeHtml(s.status||'-')}<br><b>Kunjungan hari ini:</b> ${done?'Sudah':'Belum'}<br><b>Ditambahkan:</b> ${escapeHtml(String(s.createdAt||'-'))}`;
-              pop.querySelector('button').onclick=()=>pop.remove();el.appendChild(pop);
+              pop.innerHTML=`<button type="button" style="float:right;font-size:16px;line-height:1" aria-label="Tutup">×</button><b style="font-size:13px">${escapeHtml(s.name||'-')}</b><br><span style="color:#64748b">${escapeHtml(s.address||'Alamat belum diisi')}</span><hr style="margin:7px 0;border:0;border-top:1px solid #e2e8f0"><b>Sales:</b> ${escapeHtml(sales?.name||s.createdByName||'-')}<br><b>Status:</b> ${escapeHtml(s.status||'-')}<br><b>Kunjungan hari ini:</b> ${done?'Sudah':'Belum'}<br><b>Ditambahkan:</b> ${escapeHtml(String(s.createdAt||'-'))}<button type="button" class="native-map-share-whatsapp" style="display:block;width:100%;margin-top:10px;padding:9px 10px;background:#16a34a;color:white;border:0;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">Bagikan ke WhatsApp</button>`;
+              pop.querySelector('button[aria-label="Tutup"]').onclick=()=>pop.remove();
+              pop.querySelector('.native-map-share-whatsapp').onclick=()=>{
+                const lat=Number(s.lat),lng=Number(s.lng);
+                const mapUrl=`https://www.google.com/maps?q=${encodeURIComponent(lat+','+lng)}`;
+                const message=['📍 *LOKASI TOKO TMEEZ*','',`Nama toko: ${s.name||'-'}`,`Alamat: ${s.address||'Belum diisi'}`,`Sales: ${sales?.name||s.createdByName||'-'}`,'','📌 Buka lokasi di Google Maps:',mapUrl].join('\n');
+                window.open('https://wa.me/?text='+encodeURIComponent(message),'_blank','noopener,noreferrer');
+              };
+              el.appendChild(pop);
             };el.appendChild(b);
           });
           const controls=document.createElement('div');controls.style.cssText='position:absolute;z-index:30;right:10px;top:10px;display:flex;flex-direction:column;gap:4px';
