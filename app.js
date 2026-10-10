@@ -141,7 +141,7 @@
             }
             db.stores=(st.data||[]).map(mapStore);
             if(currentUser?.role==='sales')db.stores=db.stores.filter(x=>String(x.createdBySalesId)===String(currentUser.salesId)&&String(x.status).toLowerCase()==='active');
-            db.products=(pr.data||[]).map(mapProduct);apiOnline=true;saveDb();renderMaster();renderDynamicForms();refreshVisitKpi();renderAdminDashboard(currentAdminPeriod||'monthly');
+            db.products=(pr.data||[]).map(mapProduct);apiOnline=true;saveDb();if(currentUser?.role==='admin')loadWhatsAppQueue(false);renderMaster();renderDynamicForms();refreshVisitKpi();renderAdminDashboard(currentAdminPeriod||'monthly');
             if(showMessage)showToast('Data Google Sheet berhasil disinkronkan');
           }catch(err){apiOnline=false;if(showMessage)showToast('Sinkronisasi gagal: '+err.message);}
         }
@@ -275,6 +275,29 @@ function renderDynamicForms(){
 
         function fillCurrentStoreGps(){if(!navigator.geolocation){showToast('GPS tidak tersedia');return;} navigator.geolocation.getCurrentPosition(p=>{document.getElementById('m-store-lat').value=p.coords.latitude.toFixed(7);document.getElementById('m-store-lng').value=p.coords.longitude.toFixed(7);showToast('Koordinat terisi');},e=>showToast('GPS gagal: '+e.message),{enableHighAccuracy:true});}
         function periodMatch(dateStr,period){const d=new Date(dateStr),n=new Date();if(isNaN(d))return false;if(period==='daily')return d.toDateString()===n.toDateString();if(period==='weekly'){const x=new Date(n);x.setDate(n.getDate()-6);x.setHours(0,0,0,0);return d>=x&&d<=n;}return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth();}
+        let whatsappQueueRows=[];
+        const WA_QUEUE_STATUSES=['Menunggu Dikirim','Sudah Dibuka di WhatsApp','Terkirim (konfirmasi manual)'];
+        async function loadWhatsAppQueue(showMessage=false){
+          if(currentUser?.role!=='admin')return;
+          try{const r=await apiGet('whatsappQueue');whatsappQueueRows=r.data||[];renderWhatsAppQueue();if(showMessage)showToast('Antrean WhatsApp diperbarui dari server');}
+          catch(err){const el=document.getElementById('wa-queue-list');if(el)el.innerHTML='<p class="text-xs text-rose-600">Antrean belum bisa dimuat. Pastikan backend Apps Script versi terbaru sudah di-deploy.</p>';if(showMessage)showToast('Gagal memuat antrean: '+err.message);}
+        }
+        function normalizeWaPhone(v){let n=String(v||'').replace(/\D/g,'');if(n.startsWith('0'))n='62'+n.slice(1);if(n.startsWith('8'))n='62'+n;return n;}
+        function waQueueForOrder(o){return whatsappQueueRows.find(x=>String(x.OrderID)===String(o.id))||{OrderID:o.id,Status:'Menunggu Dikirim'};}
+        function renderWhatsAppQueue(){
+          const list=document.getElementById('wa-queue-list');if(!list)return;
+          const stores=db.stores||[];const orders=(db.orders||[]).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+          const rows=orders.map(o=>{const st=stores.find(s=>String(s.id)===String(o.storeId))||{};const q=waQueueForOrder(o);return {o,st,q};});
+          const search=String(document.getElementById('wa-queue-search')?.value||'').toLowerCase();const filter=String(document.getElementById('wa-queue-filter')?.value||'');
+          const filtered=rows.filter(x=>(!search||[x.st.name,x.o.id,x.st.wa].some(v=>String(v||'').toLowerCase().includes(search)))&&(!filter||x.q.Status===filter));
+          const count=s=>rows.filter(x=>x.q.Status===s).length;
+          const p=document.getElementById('wa-queue-pending'),op=document.getElementById('wa-queue-opened'),se=document.getElementById('wa-queue-sent');if(p)p.innerText=count('Menunggu Dikirim');if(op)op.innerText=count('Sudah Dibuka di WhatsApp');if(se)se.innerText=count('Terkirim (konfirmasi manual)');
+          if(!filtered.length){list.innerHTML='<p class="text-xs text-slate-400">Tidak ada transaksi untuk antrean ini. Tekan Perbarui antrean setelah transaksi baru masuk.</p>';return;}
+          list.innerHTML=filtered.map(({o,st,q})=>{const phone=normalizeWaPhone(st.wa);const items=(o.items||[]).map(i=>`${i.ProductName||i.productName||i.ProductID||'Produk'} x${i.QtyPcs||i.qtyPcs||0}`).join(', ');const msg=`Terima kasih telah berbelanja produk Tmeez!\n\nYth. ${st.owner||st.name||'Bapak/Ibu'}, pesanan Anda telah kami catat.\nToko: ${st.name||'-'}\nNo. transaksi: ${o.id}\nProduk: ${items||'Tmeez'}\nJumlah: ${o.qty||0} PCS\nTotal: ${rupiah(o.total||0)}\n\nTerima kasih telah memilih Tmeez. Untuk pemesanan kembali, silakan hubungi kami.`;const waUrl=phone?`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`:'';const status=q.Status||'Menunggu Dikirim';const statusClass=status==='Terkirim (konfirmasi manual)'?'bg-emerald-100 text-emerald-800':status==='Sudah Dibuka di WhatsApp'?'bg-sky-100 text-sky-800':'bg-amber-100 text-amber-800';return `<article class="border rounded-xl p-3"><div class="flex flex-wrap justify-between gap-2"><div><b class="text-sm">${escapeHtml(st.name||'Toko tidak ditemukan')}</b><p class="text-[11px] text-slate-500">Transaksi ${escapeHtml(o.id)} · ${escapeHtml(o.date||'-')}</p><p class="text-xs mt-1">${escapeHtml(items||`${o.qty||0} PCS`)}</p><p class="font-bold text-sm mt-1">${rupiah(o.total||0)}</p><p class="text-[11px] text-slate-500">WA: ${escapeHtml(st.wa||'Nomor belum tersedia')}</p></div><span class="h-fit rounded-full px-2 py-1 text-[10px] ${statusClass}">${escapeHtml(status)}</span></div><div class="grid sm:grid-cols-2 gap-2 mt-3">${phone?`<button onclick="openWhatsAppQueueMessage('${String(o.id).replace(/'/g,'')}','${waUrl.replace(/&/g,'&amp;')}')" class="rounded-lg bg-emerald-600 text-white py-2 text-xs font-bold">Buka WhatsApp & Siapkan Pesan</button>`:'<button disabled class="rounded-lg bg-slate-100 text-slate-400 py-2 text-xs">Nomor WA belum tersedia</button>'}<select aria-label="Status pesan" onchange="setWhatsAppQueueStatus('${String(o.id).replace(/'/g,'')}',this.value)" class="border rounded-lg px-2 py-2 text-xs"><option ${status==='Menunggu Dikirim'?'selected':''}>Menunggu Dikirim</option><option ${status==='Sudah Dibuka di WhatsApp'?'selected':''}>Sudah Dibuka di WhatsApp</option><option ${status==='Terkirim (konfirmasi manual)'?'selected':''}>Terkirim (konfirmasi manual)</option></select></div></article>`;}).join('');
+        }
+        async function openWhatsAppQueueMessage(orderId,url){try{window.open(url,'_blank','noopener,noreferrer');await setWhatsAppQueueStatus(orderId,'Sudah Dibuka di WhatsApp',true);}catch(e){showToast('Tidak dapat membuka WhatsApp.');}}
+        async function setWhatsAppQueueStatus(orderId,status,silent=false){orderId=String(orderId||'').trim();try{await apiPost({action:'updateWhatsAppQueue',orderId,status});await loadWhatsAppQueue(false);if(!silent)showToast('Status antrean disimpan. Status terkirim dikonfirmasi manual.');}catch(err){showToast('Gagal menyimpan status. Pastikan backend terbaru sudah di-deploy: '+err.message);}}
+
         function renderAdminDashboard(period='monthly'){
           const visits=(db.visits||[]).filter(v=>periodMatch(v.checkIn||v.date,period));
           const orders=(db.orders||[]).filter(o=>periodMatch(o.date,period));
