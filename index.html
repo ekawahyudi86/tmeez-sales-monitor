@@ -164,7 +164,6 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
                 <div class="grid sm:grid-cols-2 gap-4">
                   <button onclick="startNewStoreWorkflow()" class="text-left p-5 rounded-2xl border-2 border-brand-100 bg-brand-50 hover:border-brand-400 transition"><div class="w-11 h-11 rounded-xl bg-brand-600 text-white flex items-center justify-center mb-3"><i data-lucide="store" class="w-5 h-5"></i></div><b>Tambah Toko Baru</b><p class="text-xs text-slate-500 mt-1">Daftarkan toko, GPS dan foto, lalu check-in.</p></button>
                   <button onclick="startExistingVisitWorkflow()" class="text-left p-5 rounded-2xl border-2 border-indigo-100 bg-indigo-50 hover:border-indigo-400 transition"><div class="w-11 h-11 rounded-xl bg-indigo-600 text-white flex items-center justify-center mb-3"><i data-lucide="map-pin" class="w-5 h-5"></i></div><b>Kunjungan Toko</b><p class="text-xs text-slate-500 mt-1">Pilih toko yang sudah terdaftar lalu check-in GPS.</p></button>
-                  <button onclick="openRetailSaleModal()" class="text-left p-5 rounded-2xl border-2 border-emerald-100 bg-emerald-50 hover:border-emerald-400 transition"><div class="w-11 h-11 rounded-xl bg-emerald-600 text-white flex items-center justify-center mb-3"><i data-lucide="house" class="w-5 h-5"></i></div><b>Penjualan Retail / Customer Perorangan</b><p class="text-xs text-slate-500 mt-1">Jual langsung ke warga, simpan data pelanggan, dan catat pembelian tanpa mendaftarkan sebagai toko.</p></button>
                 </div>
                 <section class="pt-4 border-t">
                   <div class="flex items-center justify-between gap-2 mb-3">
@@ -183,7 +182,6 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
                   <div id="sales-my-store-list" class="space-y-1"></div>
                   <div id="sales-my-store-pagination" class="mt-3 flex items-center justify-between gap-2"></div>
                 </section>
-                <div id="retail-sale-modal" class="hidden fixed inset-0 z-[90] bg-slate-950/60 p-3 sm:p-5 overflow-y-auto" onclick="if(event.target===this)closeRetailSaleModal()"><div class="max-w-3xl mx-auto my-3 bg-white rounded-2xl shadow-2xl overflow-hidden"><div class="p-4 sm:p-5 bg-emerald-700 text-white flex items-start justify-between gap-3"><div><p class="text-[10px] uppercase tracking-wider text-emerald-100 font-bold">Penjualan Door-to-Door</p><h3 class="text-lg font-bold">Penjualan Retail / Customer Perorangan</h3><p class="text-xs text-emerald-100 mt-1">Data pelanggan disimpan terpisah dari master toko.</p></div><button type="button" onclick="closeRetailSaleModal()" class="rounded-xl bg-white/15 px-3 py-2">✕</button></div><form id="retail-sale-form" class="p-4 sm:p-5 space-y-4" onsubmit="submitRetailSale(event)"><div class="grid sm:grid-cols-2 gap-3"><label class="text-xs font-semibold">Nama pelanggan *<input id="retail-customer-name" required maxlength="120" placeholder="Nama pembeli" class="mt-1 w-full border rounded-xl p-3 text-sm"></label><label class="text-xs font-semibold">Nomor WhatsApp *<input id="retail-customer-wa" required type="tel" maxlength="24" placeholder="08xxxxxxxxxx" class="mt-1 w-full border rounded-xl p-3 text-sm"></label></div><label class="block text-xs font-semibold">Alamat pelanggan <textarea id="retail-customer-address" rows="2" maxlength="500" placeholder="Alamat rumah / patokan (opsional)" class="mt-1 w-full border rounded-xl p-3 text-sm"></textarea></label><div><div class="flex items-center justify-between gap-2 mb-2"><h4 class="font-bold text-sm">Produk yang dibeli</h4><span class="text-[10px] text-slate-500">Harga dan jumlah dapat disesuaikan</span></div><div id="retail-sale-products" class="space-y-2"></div></div><div class="grid sm:grid-cols-2 gap-3"><label class="text-xs font-semibold">Metode pembayaran<select id="retail-payment-method" required class="mt-1 w-full border rounded-xl p-3 text-sm"><option value="Cash">Cash</option><option value="Transfer">Transfer</option><option value="QRIS">QRIS</option><option value="Tempo">Tempo / Piutang</option></select></label><label id="retail-due-wrap" class="hidden text-xs font-semibold">Tanggal jatuh tempo<input id="retail-due-date" type="date" class="mt-1 w-full border rounded-xl p-3 text-sm"></label></div><label class="block text-xs font-semibold">Catatan (opsional)<input id="retail-sale-notes" maxlength="300" placeholder="Catatan transaksi" class="mt-1 w-full border rounded-xl p-3 text-sm"></label><div class="rounded-xl bg-emerald-50 border border-emerald-100 p-4 flex items-center justify-between gap-3"><div><p class="text-xs text-slate-600">Total penjualan</p><b id="retail-sale-total" class="text-xl text-emerald-800">Rp 0</b><p id="retail-sale-qty" class="text-[10px] text-slate-500 mt-1">0 PCS</p></div><div class="text-right text-[10px] text-slate-500 max-w-44">Pelanggan disimpan sebagai retail, bukan toko.</div></div><div class="flex flex-col sm:flex-row gap-2"><button type="button" onclick="closeRetailSaleModal()" class="border rounded-xl px-4 py-3 text-sm font-bold">Batal</button><button id="retail-sale-submit" type="submit" class="flex-1 bg-emerald-600 text-white rounded-xl px-4 py-3 text-sm font-bold">Simpan Penjualan Retail</button></div><p id="retail-sale-status" class="text-xs text-slate-500"></p></form></div></div>
                 <div id="sales-purchase-modal" class="hidden fixed inset-0 z-[80] bg-slate-950/50 p-4 overflow-y-auto" onclick="if(event.target===this)closeSalesPurchaseModal()"><div class="max-w-2xl mx-auto mt-8 bg-white rounded-2xl shadow-2xl overflow-hidden"><div class="p-4 border-b flex items-start justify-between gap-3"><div><p class="text-[10px] uppercase tracking-wide text-brand-600 font-bold">Riwayat Pembelian</p><h3 id="sales-purchase-title" class="text-lg font-bold text-slate-900">Toko</h3><p id="sales-purchase-subtitle" class="text-[11px] text-slate-500 mt-1">Pembelian toko ini</p></div><button type="button" onclick="closeSalesPurchaseModal()" class="w-9 h-9 rounded-xl border text-slate-500 hover:bg-slate-50">✕</button></div><div id="sales-purchase-list" class="p-4 space-y-3"></div></div></div>
                 <div class="pt-4 border-t"><div class="flex items-center justify-between gap-2"><div><h3 class="font-bold text-slate-900">Tutup Hari</h3><p class="text-[11px] text-slate-500">Rangkuman barang dan uang hari ini.</p></div><button onclick="loadSalesCloseDay()" class="px-3 py-2 border rounded-xl text-[11px] font-bold">Perbarui</button></div><div class="grid grid-cols-2 gap-2 mt-3 text-xs"><div class="bg-indigo-50 p-3 rounded-xl"><span class="text-slate-500">Sisa Barang</span><b id="sales-stock-summary" class="block text-base">0 PCS</b></div><div class="bg-amber-50 p-3 rounded-xl"><span class="text-slate-500">Piutang Belum Tertagih</span><b id="sales-receivable-summary" class="block text-base">Rp 0</b></div><div class="bg-emerald-50 p-3 rounded-xl"><span class="text-slate-500">Cash Wajib Disetor</span><b id="sales-close-cash" class="block text-base">Rp 0</b><small id="sales-close-cash-detail" class="text-[10px] text-slate-500"></small></div><div class="bg-sky-50 p-3 rounded-xl"><span class="text-slate-500">Non-Cash ke Perusahaan</span><b id="sales-close-noncash" class="block text-base">Rp 0</b><small id="sales-close-noncash-detail" class="text-[10px] text-slate-500"></small></div></div><div id="sales-stock-breakdown" class="mt-2 text-[11px] bg-slate-50 rounded-xl p-3"></div><div id="sales-pending-payment-card" class="mt-3 rounded-2xl border border-amber-200 bg-amber-50 p-3">
   <div class="flex items-center justify-between gap-2"><div><b class="text-xs text-amber-900">Transfer/QRIS Menunggu Verifikasi</b><p class="text-[10px] text-amber-700">Pembayaran toko yang belum dikonfirmasi perusahaan.</p></div><button onclick="refreshOnlineData(true)" class="px-2 py-1 border border-amber-300 bg-white rounded-lg text-[10px] font-bold">↻</button></div>
@@ -496,23 +494,6 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
                 <div id="pending-payment-list" class="space-y-3"><p class="text-xs text-slate-400">Tidak ada pembayaran menunggu verifikasi.</p></div>
               </section>
 
-
-              <section id="admin-whatsapp-queue-section" class="lg:col-span-2 bg-white rounded-2xl p-6 border shadow-sm">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4"><div><h2 class="font-bold">Pesan WhatsApp Pelanggan</h2><p class="text-xs text-slate-500">Antrean transaksi toko. WhatsApp kantor dibuka di perangkat admin; tekan Kirim di WhatsApp untuk mengirim pesan.</p></div><button onclick="loadWhatsAppQueue(true)" class="border rounded-xl px-3 py-2 text-xs font-bold">↻ Perbarui antrean</button></div>
-                <div class="grid grid-cols-3 gap-2 mb-4 text-center"><div class="rounded-xl bg-amber-50 p-3"><b id="wa-queue-pending" class="text-xl">0</b><p class="text-[10px] text-amber-800">Menunggu Dikirim</p></div><div class="rounded-xl bg-sky-50 p-3"><b id="wa-queue-opened" class="text-xl">0</b><p class="text-[10px] text-sky-800">Dibuka di WhatsApp</p></div><div class="rounded-xl bg-emerald-50 p-3"><b id="wa-queue-sent" class="text-xl">0</b><p class="text-[10px] text-emerald-800">Terkirim (manual)</p></div></div>
-                <div class="flex flex-col sm:flex-row gap-2 mb-3"><input id="wa-queue-search" oninput="renderWhatsAppQueue()" placeholder="Cari toko atau nomor transaksi" class="flex-1 border rounded-xl px-3 py-2 text-xs"><select id="wa-queue-filter" onchange="renderWhatsAppQueue()" class="border rounded-xl px-3 py-2 text-xs bg-white"><option value="">Semua status</option><option>Menunggu Dikirim</option><option>Sudah Dibuka di WhatsApp</option><option>Terkirim (konfirmasi manual)</option></select></div>
-                <div id="wa-queue-list" class="space-y-3"><p class="text-xs text-slate-400">Memuat antrean...</p></div>
-              </section>
-
-              <section id="admin-whatsapp-template-section" class="lg:col-span-2 bg-white rounded-2xl p-6 border shadow-sm">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4"><div><h2 class="font-bold">Pengaturan Template WhatsApp</h2><p class="text-xs text-slate-500">Template tersimpan di server. Admin tetap menekan Kirim di WhatsApp.</p></div><button onclick="loadWhatsAppTemplates(true)" class="border rounded-xl px-3 py-2 text-xs font-bold">Muat Template</button></div>
-                <div class="grid lg:grid-cols-2 gap-4">
-                  <div class="border rounded-xl p-4"><h3 class="font-bold text-sm mb-2">Template untuk Toko</h3><textarea id="wa-template-store" rows="10" class="w-full border rounded-lg p-3 text-xs leading-relaxed" placeholder="Template pesan toko"></textarea><button onclick="previewWhatsAppTemplate('store')" class="mt-2 border rounded-lg px-3 py-2 text-xs font-semibold">Pratinjau</button><div id="wa-template-store-preview" class="hidden mt-3 rounded-lg bg-slate-50 border p-3 text-xs whitespace-pre-wrap"></div></div>
-                  <div class="border rounded-xl p-4"><h3 class="font-bold text-sm mb-2">Template untuk Pelanggan Retail</h3><textarea id="wa-template-retail" rows="10" class="w-full border rounded-lg p-3 text-xs leading-relaxed" placeholder="Template pesan pelanggan retail"></textarea><button onclick="previewWhatsAppTemplate('retail')" class="mt-2 border rounded-lg px-3 py-2 text-xs font-semibold">Pratinjau</button><div id="wa-template-retail-preview" class="hidden mt-3 rounded-lg bg-slate-50 border p-3 text-xs whitespace-pre-wrap"></div></div>
-                </div>
-                <div class="mt-3 rounded-lg bg-sky-50 p-3 text-xs text-sky-900"><b>Variabel:</b> {{nama_pembeli}}, {{nama_toko}}, {{nomor_transaksi}}, {{rincian_produk}}, {{total_jumlah}}, {{total_pembelian}}, {{tanggal_transaksi}}.</div>
-                <div class="flex flex-wrap gap-2 mt-3"><button onclick="saveWhatsAppTemplates()" class="bg-emerald-600 text-white rounded-xl px-4 py-2.5 text-xs font-bold">Simpan Template</button><button onclick="resetWhatsAppTemplates()" class="border rounded-xl px-4 py-2.5 text-xs font-bold">Pulihkan Default</button><span id="wa-template-status" class="self-center text-xs text-slate-500"></span></div>
-              </section>
               <section id="admin-sales-management-section" class="lg:col-span-2 bg-white rounded-2xl p-6 border shadow-sm">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4"><div><h2 class="font-bold">Kelola Sales</h2><p class="text-xs text-slate-500">Pilih sales untuk mengubah profil, target, akun login, atau melihat aktivitasnya.</p></div><input id="sales-search" oninput="renderSalesManagement()" placeholder="Cari nama / area / username" class="border rounded-xl px-3 py-2 text-xs w-full sm:w-64"></div>
                 <div id="sales-list" class="grid md:grid-cols-2 xl:grid-cols-3 gap-3"></div>
@@ -705,7 +686,6 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
                 userName.innerText = currentUser?.name || "Administrator";
                 userRole.innerText = currentUser?.role==='monitoring' ? "Monitoring Sales" : "Administrator";
                 applyAccessUI();
-                if (currentUser?.role === 'admin') { loadWhatsAppQueue(false); loadWhatsAppTemplates(false); }
             }
         }
 
@@ -757,7 +737,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
           const rawDateKey=o.OrderDateKey||o.orderDateKey||o.CreatedDateKey||''; const dateKey=rawDateKey?dateKeyJakarta(rawDateKey):'';
           const flag=v=>v===undefined||v===null||v===''?null:(v===true||String(v).toLowerCase()==='true');
           const itemQty=items.reduce((n,z)=>n+Number(z.QtyPcs??z.qtyPcs??0),0);
-          return {id:String(o.OrderID||o.orderId||''),visitId:String(o.VisitID||o.visitId||''),salesId:String(o.SalesID||o.salesId||''),storeId:String(o.StoreID||o.storeId||''),customerType:String(o.CustomerType||o.customerType||'Store'),customerName:String(o.CustomerName||o.customerName||''),customerWhatsApp:String(o.CustomerWhatsApp||o.customerWhatsApp||''),customerAddress:String(o.CustomerAddress||o.customerAddress||''),retailCustomerId:String(o.RetailCustomerID||o.retailCustomerId||''),date,dateKey,createdAt:o.CreatedAt||o.createdAt||'',isToday:flag(o.IsToday),isLast7Days:flag(o.IsLast7Days),isThisMonth:flag(o.IsThisMonth),serverTodayKey:String(o.ServerTodayKey||''),qty:itemQty>0?itemQty:Number(o.TotalQtyPcs??o.totalQtyPcs??o.QtyPcs??o.qty??0),subtotal:+(o.Subtotal??o.subtotal)||0,discount:+(o.Discount??o.discount)||0,total:+(o.GrandTotal??o.grandTotal??o.Total??o.total)||0,paymentType:String(o.PaymentType||o.paymentType||''),paymentStatus:String(o.PaymentStatus||o.paymentStatus||''),verifiedAt:String(o.PaymentVerifiedAt||''),items};
+          return {id:String(o.OrderID||o.orderId||''),visitId:String(o.VisitID||o.visitId||''),salesId:String(o.SalesID||o.salesId||''),storeId:String(o.StoreID||o.storeId||''),date,dateKey,createdAt:o.CreatedAt||o.createdAt||'',isToday:flag(o.IsToday),isLast7Days:flag(o.IsLast7Days),isThisMonth:flag(o.IsThisMonth),serverTodayKey:String(o.ServerTodayKey||''),qty:itemQty>0?itemQty:Number(o.TotalQtyPcs??o.totalQtyPcs??o.QtyPcs??o.qty??0),subtotal:+(o.Subtotal??o.subtotal)||0,discount:+(o.Discount??o.discount)||0,total:+(o.GrandTotal??o.grandTotal??o.Total??o.total)||0,paymentType:String(o.PaymentType||o.paymentType||''),paymentStatus:String(o.PaymentStatus||o.paymentStatus||''),verifiedAt:String(o.PaymentVerifiedAt||''),items};
         }
         function mapProduct(x){return {id:String(x.ProductID||''),name:String(x.ProductName||''),price:+(x.PricePerPcs!==''&&x.PricePerPcs!==undefined?x.PricePerPcs:x.PricePerBox)||0,pack:+x.UnitsPerBox||10,sku:String(x.SKU||''),status:String(x.Status||'Active')};}
         async function refreshOnlineData(showMessage=false){
@@ -812,7 +792,7 @@ button:disabled,.btn:disabled,.pay-btn:disabled{opacity:.48!important;cursor:not
             if(currentUser.salesId && x.sales){const mapped=mapSales(x.sales); if(!db.sales.some(s=>s.id===mapped.id))db.sales.push(mapped);}
             document.getElementById('login-screen').classList.add('hidden'); switchRole(currentUser.role==='sales'?'sales':currentUser.role==='staff'?'staff':'admin');
             document.getElementById('current-user-name').innerText=currentUser.name; document.getElementById('current-user-role').innerText=currentUser.role==='sales'?'Sales · '+(db.sales.find(s=>s.id===currentUser.salesId)?.area||''):String(x.role||'Admin').toUpperCase();
-            await refreshOnlineData(false); renderMaster();renderDynamicForms();refreshVisitKpi();applyAccessUI();if(currentUser?.role==='admin'){loadMonitoringUsers();loadHrAdmin();loadWhatsAppTemplates(false);} if(currentUser?.role==='sales')workflowHome(); if(currentUser?.role==='staff'){loadAttendanceToday();loadMyAttendanceHistory();loadMyPayroll();} if(currentUser?.role==='sales')loadAttendanceToday(); showToast('Login online berhasil');
+            await refreshOnlineData(false); renderMaster();renderDynamicForms();refreshVisitKpi();applyAccessUI();if(currentUser?.role==='admin'){loadMonitoringUsers();loadHrAdmin();} if(currentUser?.role==='sales')workflowHome(); if(currentUser?.role==='staff'){loadAttendanceToday();loadMyAttendanceHistory();loadMyPayroll();} if(currentUser?.role==='sales')loadAttendanceToday(); showToast('Login online berhasil');
           }catch(err){showToast('Login gagal: '+err.message);}
         }
         function uid(prefix){return prefix+Date.now().toString(36)+Math.random().toString(36).slice(2,5)}
@@ -1351,12 +1331,12 @@ function renderDynamicForms(){
           if(currentUser?.role!=='sales')return;
           const sid=String(currentUser.salesId||'');
           const rows=(db.orders||[]).filter(o=>String(o.salesId)===sid&&['transfer','qris'].includes(String(o.paymentType||'').toLowerCase())&&String(o.paymentStatus||'').toLowerCase()==='menunggu verifikasi');
-          const customerIds=new Set(rows.map(o=>String(o.customerType||'').toLowerCase()==='retail'?'retail:'+String(o.customerWhatsApp||o.customerName||o.id):'store:'+String(o.storeId||'')).filter(x=>!x.endsWith(':')));
+          const storeIds=new Set(rows.map(o=>String(o.storeId||'')).filter(Boolean));
           const total=rows.reduce((n,o)=>n+Number(o.total||0),0);
           const sc=document.getElementById('sales-pending-store-count'),tt=document.getElementById('sales-pending-total'),box=document.getElementById('sales-pending-payment-list');
-          if(sc)sc.innerText=customerIds.size;if(tt)tt.innerText=rupiah(total);if(!box)return;
-          const storeName=o=>String(o.customerType||'').toLowerCase()==='retail'?(o.customerName||'Customer Perorangan'):((db.stores.find(s=>String(s.id)===String(o.storeId))||{}).name||o.storeId||'Toko');
-          box.innerHTML=rows.length?rows.slice().sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))).map(o=>`<div class="bg-white rounded-xl p-2.5 border border-amber-100"><div class="flex justify-between gap-2"><div class="min-w-0"><b class="text-xs text-slate-900">${escapeHtml(storeName(o))}</b><p class="text-[10px] text-slate-500">${String(o.customerType||'').toLowerCase()==='retail'?'Retail · ':''}${escapeHtml(o.paymentType||'')} · ${escapeHtml(o.dateKey||String(o.date||''))}</p><p class="text-[9px] text-slate-400">Order: ${escapeHtml(o.id||'-')}</p></div><div class="text-right shrink-0"><b class="text-xs">${rupiah(Number(o.total||0))}</b><p class="text-[9px] text-amber-700 font-bold">Menunggu Verifikasi</p></div></div></div>`).join(''):'<p class="text-[10px] text-slate-500">Tidak ada pembayaran menunggu verifikasi.</p>';
+          if(sc)sc.innerText=storeIds.size;if(tt)tt.innerText=rupiah(total);if(!box)return;
+          const storeName=id=>(db.stores.find(s=>String(s.id)===String(id))||{}).name||id||'Toko';
+          box.innerHTML=rows.length?rows.slice().sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))).map(o=>`<div class="bg-white rounded-xl p-2.5 border border-amber-100"><div class="flex justify-between gap-2"><div class="min-w-0"><b class="text-xs text-slate-900">${escapeHtml(storeName(o.storeId))}</b><p class="text-[10px] text-slate-500">${escapeHtml(o.paymentType||'')} · ${escapeHtml(o.dateKey||String(o.date||''))}</p><p class="text-[9px] text-slate-400">Order: ${escapeHtml(o.id||'-')}</p></div><div class="text-right shrink-0"><b class="text-xs">${rupiah(Number(o.total||0))}</b><p class="text-[9px] text-amber-700 font-bold">Menunggu Verifikasi</p></div></div></div>`).join(''):'<p class="text-[10px] text-slate-500">Tidak ada pembayaran menunggu verifikasi.</p>';
         }
         function renderWorkflowToday(){
           if(currentUser?.role!=='sales')return;
@@ -1374,7 +1354,7 @@ function renderDynamicForms(){
           const targetPcs=salesTargetForPeriod(sales.targetBox,period),targetVisit=salesTargetForPeriod(sales.targetVisit,period);
           const set=(id,val)=>{const e=document.getElementById(id);if(e)e.innerText=val;};
           set('sales-dashboard-period-label',period==='daily'?'Ringkasan hari ini':period==='weekly'?'Ringkasan 7 hari terakhir':'Ringkasan bulan ini');
-          const retailOrders=orders.filter(o=>String(o.customerType||'').toLowerCase()==='retail').length;const storeOrders=orders.length-retailOrders;set('sales-dash-omzet',rupiah(omzet));set('sales-dash-orders',`${orders.length} order · ${storeOrders} toko · ${retailOrders} retail`);
+          set('sales-dash-omzet',rupiah(omzet));set('sales-dash-orders',orders.length+' order');
           set('sales-dash-pcs',pcs+' PCS');set('sales-dash-visits',visits.length+' Toko');set('sales-dash-effective',effective);set('sales-dash-strike','Strike Rate '+strike+'%');
           set('sales-dash-pcs-target',targetPcs?`Target ${targetPcs} PCS`:'Target belum ditetapkan');set('sales-dash-visit-target',targetVisit?`Target ${targetVisit} toko`:'Target belum ditetapkan');
           set('sales-pcs-progress-text',`${pcs} / ${targetPcs} PCS`);set('sales-visit-progress-text',`${visits.length} / ${targetVisit} Toko`);
@@ -1384,26 +1364,10 @@ function renderDynamicForms(){
           // Compatibility with existing KPI code.
           const calls=document.getElementById('kpi-calls');if(calls)calls.innerText=visits.length;
         }
-        async function downloadLastOrderPdf(){
-          const order=lastSavedOrder;
-          if(!order){showToast('Data order belum tersedia. Simpan transaksi terlebih dahulu.');return;}
-          try{await generateOrderPdf(order);}catch(err){showToast('PDF gagal: '+(err?.message||err));}
-        }
+        async function downloadLastOrderPdf(){if(!lastSavedOrder){showToast('Data order belum tersedia');return;}await downloadPdfInvoice();}
         function shareLastOrderWhatsApp(){
-          const order=lastSavedOrder;
-          if(!order){showToast('Data order belum tersedia. Simpan transaksi terlebih dahulu.');return;}
-          const storeId=String(order.storeId||order.StoreID||'');
-          const store=(db.stores||[]).find(s=>String(s.id||s.StoreID)===storeId);
-          let wa=String(store?.wa||store?.WhatsApp||order.storeWhatsApp||order.WhatsApp||'').replace(/\D/g,'');
-          if(wa.startsWith('0'))wa='62'+wa.slice(1);else if(wa.startsWith('8'))wa='62'+wa;
-          const items=Array.isArray(order.items)?order.items:[];
-          const lines=['*Tmeez - Nota Penjualan*','No: '+String(order.orderId||order.OrderID||'-'),'Toko: '+String(order.storeName||order.StoreName||store?.name||'-'),'Sales: '+String(order.salesName||order.SalesName||currentUser?.name||'-'),'Pembayaran: '+String(order.paymentType||order.PaymentType||workflowPaymentMethod||'-'),''];
-          items.forEach((x,i)=>{const name=x.productName||x.ProductName||x.name||'Produk';const qty=Number(x.qtyPcs??x.QtyPcs??x.qty??0);const price=Number(x.unitPricePcs??x.UnitPricePcs??x.unitPrice??0);const disc=Number(x.discountPerPcs??x.DiscountPerPcs??0);const total=Number(x.total??x.Total??x.lineTotal??Math.max(0,qty*(price-disc)));lines.push(`${i+1}. ${name}`,`${qty} PCS × ${rupiah(price)}${disc?' (diskon '+rupiah(disc)+'/PCS)':''}`,`= ${rupiah(total)}`,'');});
-          lines.push('*TOTAL: '+rupiah(order.grandTotal??order.GrandTotal??order.total??order.Total)+'*','','Terima kasih telah berbelanja produk Tmeez.');
-          const url='https://wa.me/'+(wa||'')+'?text='+encodeURIComponent(lines.join('\n'));
-          const win=window.open(url,'_blank');
-          if(!win){showToast('Popup WhatsApp diblokir browser. Izinkan popup untuk aplikasi ini lalu coba lagi.');return;}
-          if(!wa)showToast('WhatsApp dibuka dengan nota. Nomor toko belum tersimpan, silakan pilih penerima.');
+          const order=lastSavedOrder;if(!order){showToast('Data order belum tersedia');return;}const store=db.stores.find(s=>String(s.id)===String(order.storeId));let wa=String(store?.wa||order.storeWhatsApp||'').replace(/\D/g,'');if(wa.startsWith('0'))wa='62'+wa.slice(1);if(!wa){showToast('Nomor WhatsApp toko belum tersedia');return;}
+          const lines=['*Tmeez - Nota Penjualan*','No: '+order.orderId,'Toko: '+order.storeName,'Sales: '+order.salesName,'Pembayaran: '+workflowPaymentMethod,'',...order.items.map((x,i)=>`${i+1}. ${x.productName}\n${x.qtyPcs} PCS × ${rupiah(x.unitPricePcs)}${x.discountPerPcs?'\nDiskon '+rupiah(x.discountPerPcs)+'/PCS':''}\n= ${rupiah(x.total)}`),'','*TOTAL: '+rupiah(order.grandTotal)+'*','','Terima kasih.'];window.open('https://wa.me/'+wa+'?text='+encodeURIComponent(lines.join('\n')),'_blank','noopener');
         }
         window.captureGps=captureGps;window.triggerCamera=triggerCamera;window.handleStorePhoto=handleStorePhoto;window.handleStoreSubmit=handleStoreSubmit;
         function fillCurrentStoreGps(){if(!navigator.geolocation){showToast('GPS tidak tersedia');return;} navigator.geolocation.getCurrentPosition(p=>{document.getElementById('m-store-lat').value=p.coords.latitude.toFixed(7);document.getElementById('m-store-lng').value=p.coords.longitude.toFixed(7);showToast('Koordinat terisi');},e=>showToast('GPS gagal: '+e.message),{enableHighAccuracy:true});}
@@ -1648,15 +1612,8 @@ function renderDynamicForms(){
             b.onclick=()=>{
               el.querySelectorAll('.native-map-popup').forEach(x=>x.remove());
               const pop=document.createElement('div');pop.className='native-map-popup';pop.style.cssText=`position:absolute;z-index:40;left:${Math.min(w-230,Math.max(8,p.x-left+12))}px;top:${Math.min(hgt-155,Math.max(8,p.y-top-25))}px;width:220px;background:white;border:1px solid #e2e8f0;border-radius:12px;padding:12px;box-shadow:0 10px 30px rgba(15,23,42,.22);font-size:11px;line-height:1.45;`;
-              pop.innerHTML=`<button type="button" style="float:right;font-size:16px;line-height:1" aria-label="Tutup">×</button><b style="font-size:13px">${escapeHtml(s.name||'-')}</b><br><span style="color:#64748b">${escapeHtml(s.address||'Alamat belum diisi')}</span><hr style="margin:7px 0;border:0;border-top:1px solid #e2e8f0"><b>Sales:</b> ${escapeHtml(sales?.name||s.createdByName||'-')}<br><b>Status:</b> ${escapeHtml(s.status||'-')}<br><b>Kunjungan hari ini:</b> ${done?'Sudah':'Belum'}<br><b>Ditambahkan:</b> ${escapeHtml(String(s.createdAt||'-'))}<button type="button" class="native-map-share-whatsapp" style="display:block;width:100%;margin-top:10px;padding:9px 10px;background:#16a34a;color:white;border:0;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">Bagikan ke WhatsApp</button>`;
-              pop.querySelector('button[aria-label="Tutup"]').onclick=()=>pop.remove();
-              pop.querySelector('.native-map-share-whatsapp').onclick=()=>{
-                const lat=Number(s.lat),lng=Number(s.lng);
-                const mapUrl=`https://www.google.com/maps?q=${encodeURIComponent(lat+','+lng)}`;
-                const message=['📍 *LOKASI TOKO TMEEZ*','',`Nama toko: ${s.name||'-'}`,`Alamat: ${s.address||'Belum diisi'}`,`Sales: ${sales?.name||s.createdByName||'-'}`,'','📌 Buka lokasi di Google Maps:',mapUrl].join('\n');
-                window.open('https://wa.me/?text='+encodeURIComponent(message),'_blank','noopener,noreferrer');
-              };
-              el.appendChild(pop);
+              pop.innerHTML=`<button type="button" style="float:right;font-size:16px;line-height:1" aria-label="Tutup">×</button><b style="font-size:13px">${escapeHtml(s.name||'-')}</b><br><span style="color:#64748b">${escapeHtml(s.address||'Alamat belum diisi')}</span><hr style="margin:7px 0;border:0;border-top:1px solid #e2e8f0"><b>Sales:</b> ${escapeHtml(sales?.name||s.createdByName||'-')}<br><b>Status:</b> ${escapeHtml(s.status||'-')}<br><b>Kunjungan hari ini:</b> ${done?'Sudah':'Belum'}<br><b>Ditambahkan:</b> ${escapeHtml(String(s.createdAt||'-'))}`;
+              pop.querySelector('button').onclick=()=>pop.remove();el.appendChild(pop);
             };el.appendChild(b);
           });
           const controls=document.createElement('div');controls.style.cssText='position:absolute;z-index:30;right:10px;top:10px;display:flex;flex-direction:column;gap:4px';
@@ -1673,9 +1630,8 @@ function renderDynamicForms(){
           const omzet=orders.reduce((n,o)=>n+Number(o.total||0),0);
           const pcs=orders.reduce((n,o)=>n+Number(o.qty||0),0);
           const set=(id,v)=>{const e=document.getElementById(id);if(e)e.innerText=v;};
-          const retailOrders=orders.filter(o=>String(o.customerType||'').toLowerCase()==='retail');const storeOrders=orders.filter(o=>String(o.customerType||'').toLowerCase()!=='retail');const retailRevenue=retailOrders.reduce((n,o)=>n+Number(o.total||0),0);const storeRevenue=storeOrders.reduce((n,o)=>n+Number(o.total||0),0);
           set('admin-total-omzet',rupiah(omzet));set('admin-total-visits',visits.length+' Toko');set('admin-total-pcs',pcs+' PCS');set('admin-active-sales',activeSales.length+' Orang');
-          set('admin-omzet-status',orders.length?`${orders.length} transaksi · Toko ${rupiah(storeRevenue)} · Retail ${rupiah(retailRevenue)} · ${periodLabel(period)}`:'Belum ada transaksi');
+          set('admin-omzet-status',orders.length?`${orders.length} transaksi · ${periodLabel(period)}`:'Belum ada transaksi');
           set('admin-visits-status',visits.length?`${visits.length} kunjungan · ${periodLabel(period)}`:'Belum ada kunjungan');
           const factor=period==='daily'?1:period==='weekly'?7:25;
           const targetPcs=activeSales.reduce((n,s)=>n+(period==='monthly'?Number(s.targetBox||0):Math.ceil(Number(s.targetBox||0)/25*factor)),0);
@@ -2221,7 +2177,7 @@ const hs=document.getElementById('sales-head-status');if(hs)hs.innerText=stat;co
         async function downloadPayrollSlipPdf(id){try{const p=(window.myPayrollRows||[]).find(x=>String(x.PayrollID)===String(id))||(window.hrPayrollRows||[]).find(x=>String(x.PayrollID)===String(id));if(!p)throw new Error('Data payroll tidak ditemukan.');if(!window.jspdf?.jsPDF)throw new Error('Modul PDF belum termuat. Pastikan internet aktif lalu muat ulang aplikasi.');const {jsPDF}=window.jspdf;const doc=new jsPDF({unit:'mm',format:'a4'});const left=18,right=192;let y=18;const line=6;const money=v=>rupiah(v);const text=(v,x=left)=>{doc.text(String(v??''),x,y);y+=line};doc.setFont('helvetica','bold');doc.setFontSize(16);doc.text('TMEEZ',105,y,{align:'center'});y+=8;doc.setFontSize(12);doc.text('SLIP GAJI KARYAWAN',105,y,{align:'center'});y+=6;doc.setFont('helvetica','normal');doc.setFontSize(9);doc.text(String(payrollPeriodLabelUi(p)),105,y,{align:'center'});y+=10;doc.setDrawColor(210);doc.line(left,y,right,y);y+=8;doc.setFontSize(10);doc.setFont('helvetica','bold');doc.text('DATA KARYAWAN',left,y);y+=7;doc.setFont('helvetica','normal');doc.text('Nama',left,y);doc.text(String(p.EmployeeName||currentUser?.name||'-'),65,y);y+=6;doc.text('Periode',left,y);doc.text(String(payrollPeriodLabelUi(p)),65,y);y+=6;doc.text('Hari kerja',left,y);doc.text(String(Number(p.WorkDays||0))+' hari',65,y);y+=6;doc.text('Hari dibayar',left,y);doc.text(String(Number(p.PaidDays||0))+' hari',65,y);y+=9;doc.setFont('helvetica','bold');doc.text('KEHADIRAN',left,y);y+=7;doc.setFont('helvetica','normal');doc.text('Hadir',left,y);doc.text(String(Number(p.PresentDays||0)),65,y);y+=6;doc.text('Terlambat',left,y);doc.text(String(Number(p.LateDays||0)),65,y);y+=6;doc.text('Izin / Sakit / Cuti / Alpha',left,y);doc.text([p.PermitDays,p.SickDays,p.LeaveDays,p.AlphaDays].map(v=>Number(v||0)).join(' / '),65,y);y+=9;doc.setFont('helvetica','bold');doc.text('KOMPONEN PENGHASILAN',left,y);y+=7;const row=(label,val)=>{doc.setFont('helvetica','normal');doc.text(String(label),left,y);doc.text(money(val),right,y,{align:'right'});y+=6;};row('Gaji Pokok',p.BasicSalaryFull);row('Gaji Pokok Dibayar',p.BasicSalaryPaid);row('Transport',p.TransportFull);row('Transport Dibayar',p.TransportPaid);row('Tunjangan Perawatan Motor',p.MotorcycleMaintenanceAllowance);row('Tunjangan Sembako',p.GroceryAllowance);if(Number(p.Commission||0))row('Komisi Sales ('+Number(p.SalesQtyPcs||0)+' PCS × '+money(p.CommissionRatePcs)+'/PCS)',p.Commission);row('Bonus',p.Bonus);row('Lembur',p.Overtime);row('Lain-lain',p.OtherAdjustment);y+=2;doc.setDrawColor(30);doc.line(left,y,right,y);y+=8;doc.setFont('helvetica','bold');doc.setFontSize(13);doc.text('TAKE HOME PAY',left,y);doc.text(money(p.TakeHomePay),right,y,{align:'right'});y+=10;doc.setFontSize(9);doc.setFont('helvetica','normal');doc.text('Status: '+String(p.Status||'-'),left,y);y+=6;doc.text('Dokumen dibuat dari Tmeez Sales Monitor',left,y);const safe=String(p.EmployeeName||'Karyawan').replace(/[^a-z0-9_-]+/gi,'_');doc.save('Slip_Gaji_'+safe+'_'+String(p.Period||'').replace(/[^0-9-]/g,'')+'.pdf');showToast('PDF slip gaji berhasil diunduh');}catch(e){showToast('PDF gagal: '+e.message)}}
         let hrEmployees=[]; let hrAttendanceRows=[]; let hrPayrollPeriods=[];
         async function loadHrAdmin(){if(currentUser?.role!=='admin')return;try{const period=document.getElementById('hr-period')?.value||jakartaTodayKey().slice(0,7);if(document.getElementById('hr-period')&&!document.getElementById('hr-period').value)document.getElementById('hr-period').value=period;const [e,a,p,c,pp,at]=await Promise.all([apiGet('employees'),apiGet('attendanceSettings'),apiGet('payroll',{period}),apiGet('workCalendar',{period}),apiGet('payrollPeriods',{period}),apiGet('attendance',{period})]);hrEmployees=e.data||[];window.hrPayrollRows=p.data||[];hrPayrollPeriods=pp.data||[];hrAttendanceRows=at.data||[];const st=a.data||{},loc=document.getElementById('hr-office-location');if(loc)loc.innerHTML=st.officeLat?`GPS: <b>${Number(st.officeLat).toFixed(6)}, ${Number(st.officeLng).toFixed(6)}</b><br>Radius: ${st.radius} m · Akurasi max: ${st.maxAccuracy||75} m`:'Titik tempat kerja belum diatur.';if(document.getElementById('hr-radius'))document.getElementById('hr-radius').value=st.radius||100;if(document.getElementById('hr-accuracy'))document.getElementById('hr-accuracy').value=st.maxAccuracy||75;const periodInfo=payrollPeriodBoundsUi(period),pl=document.getElementById('hr-period-label');if(pl)pl.innerText=periodInfo?`Periode: ${periodInfo.label}`:'Pilih bulan payroll';const periodRow=hrPayrollPeriods[0],ps=document.getElementById('hr-period-status');if(ps)ps.innerHTML=periodRow?.Status==='Closed'?`<b class="text-emerald-700">Periode Ditutup</b> · ${escapeHtml(String(periodRow.ClosedAt||''))}`:'<b class="text-amber-700">Periode Belum Ditutup</b>';const sel=document.getElementById('hr-att-employee');if(sel)sel.innerHTML=hrEmployees.map(x=>`<option value="${x.EmployeeID}">${escapeHtml(x.Name)} · ${escapeHtml(x.Position||x.EmployeeType||'')}</option>`).join('');renderHrEmployees();renderHrPayroll(window.hrPayrollRows);renderWorkCalendar(c.data||[]);renderHrAttendance(hrAttendanceRows);}catch(e){showToast(e.message)}}
-        function renderHrEmployees(){const b=document.getElementById('hr-employees');if(!b)return;b.innerHTML='<table class="w-full whitespace-nowrap"><thead><tr class="bg-slate-50"><th class="p-2 text-left">Karyawan</th><th>Jenis</th><th>Jadwal</th><th>Mulai</th><th>Selesai</th><th>Gaji Pokok</th><th>Transport</th><th>Perawatan Motor</th><th>Sembako</th><th>Status</th><th>Aksi</th></tr></thead><tbody>'+hrEmployees.map(e=>`<tr class="border-t"><td class="p-2"><b>${escapeHtml(e.Name)}</b><br><span class="text-[10px] text-slate-400">${escapeHtml(e.Position||'')}</span></td><td>${escapeHtml(e.EmployeeType||'')}</td><td>${escapeHtml(e.WorkStart||'07:00')} – ${escapeHtml(e.WorkEnd||'15:00')}</td><td>${escapeHtml(String(e.StartDate||'').slice(0,10))}</td><td>${escapeHtml(String(e.EndDate||'').slice(0,10)||'-')}</td><td>${rupiah(e.BasicSalary)}</td><td>${rupiah(e.TransportAllowance)}</td><td>${rupiah(e.MotorcycleMaintenanceAllowance||0)}</td><td>${rupiah(e.GroceryAllowance||125000)}</td><td>${escapeHtml(e.Status)}</td><td><button onclick="editEmployeeAdmin('${e.EmployeeID}')" class="border rounded px-2 py-1">Edit</button> <button onclick="resetStaffPasswordAdmin('${e.EmployeeID}')" class="border rounded px-2 py-1">Reset PW</button></td></tr>`).join('')+'</tbody></table>'}
+        function renderHrEmployees(){const b=document.getElementById('hr-employees');if(!b)return;b.innerHTML='<table class="w-full whitespace-nowrap"><thead><tr class="bg-slate-50"><th class="p-2 text-left">Karyawan</th><th>Jenis</th><th>Mulai</th><th>Selesai</th><th>Gaji Pokok</th><th>Transport</th><th>Perawatan Motor</th><th>Sembako</th><th>Status</th><th>Aksi</th></tr></thead><tbody>'+hrEmployees.map(e=>`<tr class="border-t"><td class="p-2"><b>${escapeHtml(e.Name)}</b><br><span class="text-[10px] text-slate-400">${escapeHtml(e.Position||'')}</span></td><td>${escapeHtml(e.EmployeeType||'')}</td><td>${escapeHtml(String(e.StartDate||'').slice(0,10))}</td><td>${escapeHtml(String(e.EndDate||'').slice(0,10)||'-')}</td><td>${rupiah(e.BasicSalary)}</td><td>${rupiah(e.TransportAllowance)}</td><td>${rupiah(e.MotorcycleMaintenanceAllowance||0)}</td><td>${rupiah(e.GroceryAllowance||125000)}</td><td>${escapeHtml(e.Status)}</td><td><button onclick="editEmployeeAdmin('${e.EmployeeID}')" class="border rounded px-2 py-1">Edit</button> <button onclick="resetStaffPasswordAdmin('${e.EmployeeID}')" class="border rounded px-2 py-1">Reset PW</button></td></tr>`).join('')+'</tbody></table>'}
         
 let salesRouteMap=null,salesRouteLine=null,salesRouteMarkers=[];
 async function openSalesRoute(employeeId,date){
@@ -2264,7 +2220,7 @@ function renderSalesRouteMap(pts,a){
   setTimeout(()=>salesRouteMap?.invalidateSize({pan:false,animate:false}),300);
 }
 function renderHrAttendance(rows){const b=document.getElementById('hr-attendance');if(!b)return;const em={};hrEmployees.forEach(e=>em[e.EmployeeID]=e);b.innerHTML='<table class="w-full whitespace-nowrap"><thead><tr class="bg-slate-50"><th class="p-2 text-left">Tanggal</th><th>Karyawan</th><th>Masuk</th><th>Pulang</th><th>Status</th><th>Terlambat</th><th>Pulang Cepat</th><th>GPS</th><th>Perjalanan</th><th>Koreksi</th></tr></thead><tbody>'+rows.slice().reverse().map(a=>{const e=em[a.EmployeeID]||{};const isSales=!!e.SalesID;return `<tr class="border-t"><td class="p-2">${escapeHtml(String(a.Date||'').slice(0,10))}</td><td>${escapeHtml(e.Name||a.EmployeeID)}</td><td>${escapeHtml(attClockV615(a.CheckIn)||'-')}</td><td>${escapeHtml(attClockV615(a.CheckOut)||'-')}</td><td><b>${escapeHtml(a.Status||'-')}</b></td><td>${Number.isFinite(Number(a.LateMinutes))&&Number(a.LateMinutes)>=0?Math.round(Number(a.LateMinutes)):'-'} menit</td><td>${Number.isFinite(Number(a.EarlyLeaveMinutes))&&Number(a.EarlyLeaveMinutes)>=0?Math.round(Number(a.EarlyLeaveMinutes)):'-'} menit</td><td>${a.CheckInDistance!==''&&a.CheckInDistance!==undefined?Number(a.CheckInDistance)+' m':'-'}</td><td>${isSales?`<button onclick="openSalesRoute('${String(a.EmployeeID).replace(/'/g,"\\'")}','${String(a.Date||'').slice(0,10)}')" class="px-2 py-1 rounded-lg bg-indigo-50 text-indigo-700 font-bold">Lihat rute</button>`:'-'}</td><td>${a.CorrectionReason?escapeHtml(a.CorrectionReason):'-'}</td></tr>`}).join('')+'</tbody></table>'+(rows.length?'':'Belum ada data absensi pada periode ini.')}
-        async function editEmployeeAdmin(id){const e=hrEmployees.find(x=>String(x.EmployeeID)===String(id));if(!e)return;const name=prompt('Nama karyawan',e.Name||'');if(name===null)return;const pos=prompt('Jabatan / bagian',e.Position||'');if(pos===null)return;const basic=prompt('Gaji pokok per bulan',String(Number(e.BasicSalary||0)));if(basic===null)return;const transport=prompt('Transport per bulan',String(Number(e.TransportAllowance||0)));if(transport===null)return;const motor=prompt('Tunjangan perawatan motor per bulan',String(Number(e.MotorcycleMaintenanceAllowance??(String(e.EmployeeType||'').toLowerCase()==='sales'?250000:0))));if(motor===null)return;const workStart=prompt('Jam masuk kerja (HH:MM)',e.WorkStart||'07:00');if(workStart===null)return;const workEnd=prompt('Jam pulang kerja (HH:MM)',e.WorkEnd||'15:00');if(workEnd===null)return;const start=prompt('Tanggal mulai YYYY-MM-DD',String(e.StartDate||'').slice(0,10));if(start===null)return;const end=prompt('Tanggal selesai YYYY-MM-DD, kosong jika masih aktif',String(e.EndDate||'').slice(0,10));if(end===null)return;const status=confirm('OK = Aktif, Cancel = Nonaktif');try{await apiPost({action:'updateStaffAccount',employeeId:id,name,position:pos,startDate:start,endDate:end,status:status?'Active':'Inactive'});await apiPost({action:'updateEmployeeCompensation',employeeId:id,basicSalary:Number(basic||0),transportAllowance:Number(transport||0),motorcycleMaintenanceAllowance:Number(motor||0),position:pos,status:status?'Active':'Inactive'});await apiPost({action:'updateEmployeeSchedule',employeeId:id,workStart,workEnd});showToast('Data karyawan, jadwal kerja, dan komponen gaji diperbarui');await loadHrAdmin();}catch(e){showToast(e.message)}}
+        async function editEmployeeAdmin(id){const e=hrEmployees.find(x=>String(x.EmployeeID)===String(id));if(!e)return;const name=prompt('Nama karyawan',e.Name||'');if(name===null)return;const pos=prompt('Jabatan / bagian',e.Position||'');if(pos===null)return;const basic=prompt('Gaji pokok per bulan',String(Number(e.BasicSalary||0)));if(basic===null)return;const transport=prompt('Transport per bulan',String(Number(e.TransportAllowance||0)));if(transport===null)return;const motor=prompt('Tunjangan perawatan motor per bulan',String(Number(e.MotorcycleMaintenanceAllowance??(String(e.EmployeeType||'').toLowerCase()==='sales'?250000:0))));if(motor===null)return;const start=prompt('Tanggal mulai YYYY-MM-DD',String(e.StartDate||'').slice(0,10));if(start===null)return;const end=prompt('Tanggal selesai YYYY-MM-DD, kosong jika masih aktif',String(e.EndDate||'').slice(0,10));if(end===null)return;const status=confirm('OK = Aktif, Cancel = Nonaktif');try{await apiPost({action:'updateStaffAccount',employeeId:id,name,position:pos,startDate:start,endDate:end,status:status?'Active':'Inactive'});await apiPost({action:'updateEmployeeCompensation',employeeId:id,basicSalary:Number(basic||0),transportAllowance:Number(transport||0),motorcycleMaintenanceAllowance:Number(motor||0),position:pos,status:status?'Active':'Inactive'});showToast('Data karyawan dan komponen gaji diperbarui');await loadHrAdmin();}catch(e){showToast(e.message)}}
         async function resetStaffPasswordAdmin(id){const p=prompt('Password baru minimal 6 karakter');if(!p)return;try{await apiPost({action:'resetStaffPassword',employeeId:id,password:p});showToast('Password berhasil direset');}catch(e){showToast(e.message)}}
         async function addStaffAdmin(){try{const pass=document.getElementById('hr-pass').value;if(pass.length<6)return showToast('Password minimal 6 karakter');await apiPost({action:'addStaff',name:document.getElementById('hr-name').value,position:document.getElementById('hr-position').value,username:document.getElementById('hr-user').value,password:pass});['hr-name','hr-position','hr-user','hr-pass'].forEach(id=>document.getElementById(id).value='');showToast('Staff dibuat');await loadHrAdmin();}catch(e){showToast(e.message)}}
         async function saveOfficeLocation(){try{const g=await getGpsNow();await apiPost({action:'updateAttendanceSettings',officeLat:g.latitude,officeLng:g.longitude,radius:+document.getElementById('hr-radius').value||100,maxAccuracy:+document.getElementById('hr-accuracy').value||75});showToast('Lokasi tempat kerja disimpan');await loadHrAdmin();}catch(e){showToast(e.message)}}
@@ -2283,203 +2239,6 @@ function renderHrAttendance(rows){const b=document.getElementById('hr-attendance
         async function reopenPayrollAdmin(id){const reason=prompt('Alasan membuka kembali payroll ini');if(!reason)return;try{const r=await apiPost({action:'reopenPayroll',payrollId:id,reason});showToast(r.message);await loadHrAdmin()}catch(e){showToast(e.message)}}
         async function paidPayrollAdmin(id){if(!confirm('Tandai payroll ini sudah dibayar?'))return;try{await apiPost({action:'markPayrollPaid',payrollId:id});showToast('Payroll ditandai dibayar');await loadHrAdmin()}catch(e){showToast(e.message)}}
         async function archiveYearAdmin(){const year=document.getElementById('hr-archive-year').value;if(!year)return showToast('Isi tahun arsip');if(!confirm('Arsipkan transaksi tahun '+year+' ke Google Sheet baru? Data tahun tersebut akan dibersihkan dari database aktif.'))return;try{const r=await apiPost({action:'archiveYear',year});document.getElementById('hr-archive-status').innerHTML=`Berhasil. <a class="underline text-brand-700" href="${r.url}" target="_blank">Buka Arsip</a>`;showToast(r.message)}catch(e){showToast(e.message)}}
-
-
-// Direct-to-consumer retail sales: separate from Stores master data.
-let retailSaleSubmitting=false;
-function openRetailSaleModal(){
-  if(currentUser?.role!=='sales'){showToast('Fitur penjualan retail ini tersedia untuk akun Sales.');return;}
-  const box=document.getElementById('retail-sale-products');
-  if(box){box.innerHTML=(db.products||[]).filter(p=>String(p.status||'Active').toLowerCase()==='active').map(p=>`<div class="retail-product-row border rounded-xl p-3" data-product-id="${escapeHtml(p.id)}"><div class="flex items-start justify-between gap-2"><b class="text-xs">${escapeHtml(p.name)}</b><span class="text-[10px] text-slate-500">Harga acuan ${rupiah(p.price)}/PCS</span></div><div class="grid grid-cols-3 gap-2 mt-2"><label class="text-[10px] text-slate-500">Jumlah PCS<input type="number" min="0" step="1" value="0" class="retail-qty mt-1 w-full border rounded-lg p-2 text-xs" oninput="calculateRetailSaleTotal()"></label><label class="text-[10px] text-slate-500">Harga/PCS<input type="number" min="0" step="1" value="${Number(p.price)||0}" class="retail-price mt-1 w-full border rounded-lg p-2 text-xs" oninput="calculateRetailSaleTotal()"></label><label class="text-[10px] text-slate-500">Diskon/PCS<input type="number" min="0" step="1" value="0" class="retail-discount mt-1 w-full border rounded-lg p-2 text-xs" oninput="calculateRetailSaleTotal()"></label></div><p class="text-right text-[10px] text-emerald-700 mt-1">Subtotal: <b class="retail-line-total">Rp 0</b></p></div>`).join('')||'<p class="text-xs text-amber-700 border rounded-xl p-3">Belum ada produk aktif. Hubungi admin untuk mengisi master produk.</p>';}
-  const f=document.getElementById('retail-sale-form');if(f)f.reset();const due=document.getElementById('retail-due-wrap');if(due)due.classList.add('hidden');const st=document.getElementById('retail-sale-status');if(st)st.textContent='';const b=document.getElementById('retail-sale-submit');if(b){b.disabled=false;b.textContent='Simpan Penjualan Retail';}document.getElementById('retail-sale-modal')?.classList.remove('hidden');calculateRetailSaleTotal();
-}
-function closeRetailSaleModal(){if(!retailSaleSubmitting)document.getElementById('retail-sale-modal')?.classList.add('hidden');}
-function calculateRetailSaleTotal(){let qty=0,total=0;document.querySelectorAll('#retail-sale-products .retail-product-row').forEach(row=>{const q=Math.max(0,Math.floor(Number(row.querySelector('.retail-qty')?.value||0))),p=Math.max(0,Number(row.querySelector('.retail-price')?.value||0)),d=Math.max(0,Number(row.querySelector('.retail-discount')?.value||0));const sub=q*Math.max(0,p-d);qty+=q;total+=sub;const el=row.querySelector('.retail-line-total');if(el)el.textContent=rupiah(sub);});const t=document.getElementById('retail-sale-total'),q=document.getElementById('retail-sale-qty');if(t)t.textContent=rupiah(total);if(q)q.textContent=qty+' PCS';return {qty,total};}
-document.addEventListener('change',e=>{if(e.target?.id==='retail-payment-method'){document.getElementById('retail-due-wrap')?.classList.toggle('hidden',e.target.value!=='Tempo');}});
-async function submitRetailSale(e){
-  e.preventDefault();if(retailSaleSubmitting)return;
-  const name=String(document.getElementById('retail-customer-name')?.value||'').trim(),wa=String(document.getElementById('retail-customer-wa')?.value||'').trim(),address=String(document.getElementById('retail-customer-address')?.value||'').trim(),method=String(document.getElementById('retail-payment-method')?.value||'Cash');
-  if(!name||!wa){showToast('Nama dan nomor WhatsApp pelanggan wajib diisi.');return;}
-  if(method==='Tempo'&&!document.getElementById('retail-due-date')?.value){showToast('Isi tanggal jatuh tempo piutang.');return;}
-  const items=[...document.querySelectorAll('#retail-sale-products .retail-product-row')].map(row=>({productId:row.dataset.productId,qtyPcs:Math.floor(Number(row.querySelector('.retail-qty')?.value||0)),unitPricePcs:Number(row.querySelector('.retail-price')?.value||0),discountPerPcs:Number(row.querySelector('.retail-discount')?.value||0)})).filter(x=>x.qtyPcs>0);
-  if(!items.length){showToast('Masukkan jumlah minimal satu produk.');return;}
-  const totals=calculateRetailSaleTotal();if(totals.total<=0){showToast('Total transaksi harus lebih dari Rp 0.');return;}
-  retailSaleSubmitting=true;const btn=document.getElementById('retail-sale-submit');if(btn){btn.disabled=true;btn.textContent='Menyimpan transaksi...';}const st=document.getElementById('retail-sale-status');if(st)st.textContent='Menyimpan data pelanggan dan transaksi...';
-  const clientTxnId='RTL-'+String(currentUser?.salesId||'SALES')+'-'+Date.now()+'-'+Math.random().toString(36).slice(2,8);
-  try{const r=await apiPost({action:'createRetailOrder',clientTxnId,customerName:name,customerWhatsApp:wa,customerAddress:address,notes:String(document.getElementById('retail-sale-notes')?.value||'').trim(),paymentType:method,dueDate:document.getElementById('retail-due-date')?.value||'',items});const o=r.order||{};if(st)st.textContent='Transaksi tersimpan: '+(o.orderId||'')+' · '+rupiah(o.grandTotal||0);showToast('Penjualan retail berhasil disimpan.');await refreshOnlineData(false);if(confirm('Penjualan berhasil disimpan. Buka WhatsApp untuk mengirim ucapan terima kasih kepada pelanggan?')){const phone=waQueueNormalizePhone(wa);const msg=fillWhatsAppTemplate(whatsappTemplates?.retail||WA_TEMPLATE_DEFAULTS.retail,{nama_pembeli:name,nama_toko:name,nomor_transaksi:o.orderId||'',rincian_produk:(o.items||[]).map(x=>`${x.productName} x${x.qtyPcs}`).join(', '),total_jumlah:o.totalQtyPcs||totals.qty,total_pembelian:rupiah(o.grandTotal||totals.total),tanggal_transaksi:new Date().toLocaleDateString('id-ID')});if(phone)window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg),'_blank','noopener');else showToast('Nomor WhatsApp pelanggan tidak valid.');}document.getElementById('retail-sale-modal')?.classList.add('hidden');}
-  catch(err){if(st)st.textContent='Gagal menyimpan: '+(err.message||err);showToast('Penjualan retail gagal: '+(err.message||err));}
-  finally{retailSaleSubmitting=false;if(btn){btn.disabled=false;btn.textContent='Simpan Penjualan Retail';}}
-}
-
-// WhatsApp customer queue: frontend functions (V6.18.8 queue repair)
-let waQueueRows = [];
-let waQueueOrders = [];
-let waQueueStores = [];
-let waQueueLoading = false;
-
-function waQueueRupiah(value) {
-  return 'Rp ' + Math.round(Number(value || 0)).toLocaleString('id-ID');
-}
-function waQueueNormalizePhone(value) {
-  let n = String(value || '').replace(/\D/g, '');
-  if (!n) return '';
-  if (n.startsWith('00')) n = n.slice(2);
-  if (n.startsWith('0')) n = '62' + n.slice(1);
-  else if (n.startsWith('8')) n = '62' + n;
-  return n;
-}
-function waQueueOrderDate(order) {
-  const raw = String(order.OrderDateDisplay || order.OrderDate || order.CreatedAt || '');
-  if (!raw) return '-';
-  const iso = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
-  if (iso) return `${iso[3].padStart(2,'0')}/${iso[2].padStart(2,'0')}/${iso[1]}`;
-  const d = new Date(raw);
-  return isNaN(d.getTime()) ? raw : d.toLocaleDateString('id-ID');
-}
-function waQueueMakeMessage(order, items, store) {
-  const productLines = (items || []).map(i => `${String(i.ProductName || i.productName || 'Produk')} x${Number(i.QtyPcs || i.qtyPcs || 0)}`).filter(Boolean);
-  const totalQty = (items || []).reduce((n, i) => n + Number(i.QtyPcs || i.qtyPcs || 0), 0) || Number(order.TotalQtyPcs || 0);
-  const buyerName = String(store.OwnerName || order.OwnerName || 'Bapak/Ibu').trim();
-  const vars = {
-    nama_pembeli: buyerName || 'Bapak/Ibu',
-    nama_toko: String(store.StoreName || order.StoreName || 'Pelanggan').trim(),
-    nomor_transaksi: String(order.OrderID || ''),
-    rincian_produk: productLines.join('\n• ') || 'Rincian produk tidak tersedia',
-    total_jumlah: String(totalQty),
-    total_pembelian: waQueueRupiah(order.GrandTotal || 0),
-    tanggal_transaksi: waQueueOrderDate(order)
-  };
-  const kind = 'store';
-  const template = (typeof whatsappTemplates !== 'undefined' && whatsappTemplates[kind]) || (typeof WA_TEMPLATE_DEFAULTS !== 'undefined' && WA_TEMPLATE_DEFAULTS[kind]) || 'Halo {{nama_pembeli}}, terima kasih telah membeli produk TMEEZ. No. Nota: {{nomor_transaksi}}. Total: {{total_pembelian}}.';
-  return fillWhatsAppTemplate(template, vars);
-}
-function waQueueGetStatus(row) {
-  return String(row.Status || 'Menunggu Dikirim');
-}
-function renderWhatsAppQueue() {
-  const list = document.getElementById('wa-queue-list');
-  if (!list) return;
-  const query = String(document.getElementById('wa-queue-search')?.value || '').trim().toLowerCase();
-  const filter = String(document.getElementById('wa-queue-filter')?.value || '');
-  const orderMap = new Map(waQueueOrders.map(x => [String((x.order || {}).OrderID || ''), x]));
-  const storeMap = new Map(waQueueStores.map(s => [String(s.StoreID || ''), s]));
-  const rows = waQueueRows.map(q => {
-    const entry = orderMap.get(String(q.OrderID || ''));
-    const order = entry?.order || {};
-    const store = storeMap.get(String(order.StoreID || '')) || {};
-    return { queue:q, entry, order, store, status:waQueueGetStatus(q) };
-  }).filter(x => {
-    const haystack = [x.order.OrderID, x.store.StoreName, x.store.OwnerName, x.store.WhatsApp].join(' ').toLowerCase();
-    return (!query || haystack.includes(query)) && (!filter || x.status === filter);
-  });
-  const counts = {'Menunggu Dikirim':0,'Sudah Dibuka di WhatsApp':0,'Terkirim (konfirmasi manual)':0};
-  waQueueRows.forEach(q => { const s=waQueueGetStatus(q); if (Object.prototype.hasOwnProperty.call(counts,s)) counts[s]++; });
-  const pending=document.getElementById('wa-queue-pending');
-  const opened=document.getElementById('wa-queue-opened');
-  const sent=document.getElementById('wa-queue-sent');
-  if(pending)pending.textContent=counts['Menunggu Dikirim'];
-  if(opened)opened.textContent=counts['Sudah Dibuka di WhatsApp'];
-  if(sent)sent.textContent=counts['Terkirim (konfirmasi manual)'];
-  if (waQueueLoading && !waQueueRows.length) {
-    list.innerHTML='<p class="text-xs text-slate-400">Memuat antrean dari server…</p>';
-    return;
-  }
-  if (!rows.length) {
-    list.innerHTML = waQueueRows.length
-      ? '<p class="text-xs text-slate-500 rounded-xl border p-4">Tidak ada transaksi yang sesuai pencarian/filter.</p>'
-      : '<p class="text-xs text-slate-500 rounded-xl border p-4">Antrean berhasil dimuat, tetapi belum ada transaksi toko yang tersedia. Pastikan transaksi tersimpan di sheet Orders.</p>';
-    return;
-  }
-  list.innerHTML = rows.map(x => {
-    const id=String(x.queue.OrderID || '');
-    const phone=waQueueNormalizePhone(x.store.WhatsApp || x.order.StoreWhatsApp || '');
-    const message=x.entry ? waQueueMakeMessage(x.order, x.entry.items || [], x.store) : '';
-    const statusClass=x.status==='Terkirim (konfirmasi manual)'?'bg-emerald-50 text-emerald-700':x.status==='Sudah Dibuka di WhatsApp'?'bg-sky-50 text-sky-700':'bg-amber-50 text-amber-800';
-    const details=x.entry
-      ? `<p class="text-xs text-slate-500 mt-1">${escapeHtml(waQueueOrderDate(x.order))} · ${Number(x.order.TotalQtyPcs || (x.entry.items||[]).reduce((n,i)=>n+Number(i.QtyPcs||0),0))} PCS</p><p class="text-xs text-slate-600 mt-2 whitespace-pre-line">${escapeHtml((x.entry.items||[]).map(i=>`${i.ProductName||'Produk'} x${Number(i.QtyPcs||0)}`).join('\\n') || 'Rincian produk tidak tersedia')}</p><p class="text-sm font-bold mt-2">${escapeHtml(waQueueRupiah(x.order.GrandTotal || 0))}</p>`
-      : '<p class="text-xs text-red-600 mt-2">Data transaksi tidak ditemukan pada 500 transaksi terakhir. Periksa sheet Orders.</p>';
-    const sendButton=x.entry && phone
-      ? `<button type="button" onclick="openWhatsAppQueueMessage('${encodeURIComponent(id)}')" class="px-3 py-2 rounded-lg bg-emerald-600 text-white text-xs font-bold">Buka WhatsApp & Siapkan Pesan</button>`
-      : `<button type="button" disabled class="px-3 py-2 rounded-lg bg-slate-100 text-slate-400 text-xs font-bold">${x.entry?'Nomor WhatsApp belum tersedia':'Data order tidak ditemukan'}</button>`;
-    const markSent=x.status!=='Terkirim (konfirmasi manual)' && x.entry
-      ? `<button type="button" onclick="setWhatsAppQueueStatus('${encodeURIComponent(id)}','Terkirim (konfirmasi manual)')" class="px-3 py-2 rounded-lg border text-xs font-semibold">Tandai terkirim</button>`:'';
-    const reset=x.status!=='Menunggu Dikirim'
-      ? `<button type="button" onclick="setWhatsAppQueueStatus('${encodeURIComponent(id)}','Menunggu Dikirim')" class="px-3 py-2 rounded-lg border text-xs font-semibold">Reset status</button>`:'';
-    return `<article class="border rounded-xl p-4 bg-white"><div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3"><div class="min-w-0"><div class="flex flex-wrap items-center gap-2"><h3 class="font-bold text-sm">${escapeHtml(x.store.StoreName || x.order.StoreName || 'Toko tidak diketahui')}</h3><span class="text-[10px] rounded-full px-2 py-1 ${statusClass}">${escapeHtml(x.status)}</span></div><p class="text-xs text-slate-500 mt-1">Nota: ${escapeHtml(id)} · WA: ${escapeHtml(x.store.WhatsApp || x.order.StoreWhatsApp || 'Belum ada nomor')}</p>${details}</div><div class="flex flex-wrap gap-2 sm:justify-end">${sendButton}${markSent}${reset}</div></div></article>`;
-  }).join('');
-}
-async function loadWhatsAppQueue(showMessage=false) {
-  const list=document.getElementById('wa-queue-list');
-  if (waQueueLoading) return;
-  waQueueLoading=true;
-  if(list)list.innerHTML='<p class="text-xs text-slate-400">Memuat antrean dari server…</p>';
-  try {
-    // Endpoint ini juga menyinkronkan order lama ke WhatsAppQueue secara idempotent.
-    const results=await Promise.all([
-      apiGet('whatsappQueue'),
-      apiGet('orders',{limit:500}),
-      apiGet('stores')
-    ]);
-    waQueueRows=Array.isArray(results[0].data)?results[0].data:[];
-    waQueueOrders=Array.isArray(results[1].data)?results[1].data:[];
-    waQueueStores=Array.isArray(results[2].data)?results[2].data:[];
-    renderWhatsAppQueue();
-    if(showMessage)showToast(`Antrean dimuat: ${waQueueRows.length} transaksi.`);
-  } catch(e) {
-    if(list)list.innerHTML=`<div class="rounded-xl border border-red-200 bg-red-50 p-4 text-xs text-red-700"><b>Antrean gagal dimuat.</b><p class="mt-1">${escapeHtml(e?.message || String(e))}</p><p class="mt-1">Periksa login admin, URL deployment Apps Script, dan versi backend.</p></div>`;
-    if(showMessage)showToast('Gagal memuat antrean WhatsApp: '+(e?.message||e));
-    console.error('loadWhatsAppQueue failed',e);
-  } finally {
-    waQueueLoading=false;
-  }
-}
-async function openWhatsAppQueueMessage(encodedOrderId) {
-  const orderId=decodeURIComponent(String(encodedOrderId||''));
-  const entry=waQueueOrders.find(x=>String((x.order||{}).OrderID||'')===orderId);
-  if(!entry)return showToast('Data transaksi tidak ditemukan. Muat ulang antrean.');
-  const order=entry.order||{};
-  const store=waQueueStores.find(s=>String(s.StoreID||'')===String(order.StoreID||''))||{};
-  const phone=waQueueNormalizePhone(store.WhatsApp||order.StoreWhatsApp||'');
-  if(!phone)return showToast('Nomor WhatsApp toko belum diisi.');
-  const message=waQueueMakeMessage(order,entry.items||[],store);
-  const url='https://wa.me/'+phone+'?text='+encodeURIComponent(message);
-  const openedWindow=window.open(url,'_blank');
-  if(!openedWindow) {
-    showToast('Popup diblokir browser. Izinkan popup untuk membuka WhatsApp.');
-    return;
-  }
-  try {
-    await apiPost({action:'updateWhatsAppQueue',orderId,status:'Sudah Dibuka di WhatsApp'});
-    const row=waQueueRows.find(q=>String(q.OrderID||'')===orderId);
-    if(row){row.Status='Sudah Dibuka di WhatsApp';row.OpenedAt=new Date().toISOString();}
-    renderWhatsAppQueue();
-  } catch(e) {
-    showToast('WhatsApp dibuka, tetapi status antrean gagal disimpan: '+(e?.message||e));
-  }
-}
-async function setWhatsAppQueueStatus(encodedOrderId,status) {
-  const orderId=decodeURIComponent(String(encodedOrderId||''));
-  try {
-    await apiPost({action:'updateWhatsAppQueue',orderId,status});
-    const row=waQueueRows.find(q=>String(q.OrderID||'')===orderId);
-    if(row){row.Status=status;if(status==='Terkirim (konfirmasi manual)')row.ConfirmedAt=new Date().toISOString();}
-    renderWhatsAppQueue();
-    showToast('Status antrean diperbarui.');
-  } catch(e) {
-    showToast('Gagal memperbarui status: '+(e?.message||e));
-  }
-}
-
-const WA_TEMPLATE_DEFAULTS={
- store:'Halo Bapak/Ibu {{nama_pembeli}} 👋\n\nTerima kasih telah melakukan pembelian produk TMEEZ. 💚\n\n🧾 Ringkasan Pembelian\n• Toko: {{nama_toko}}\n• No. Nota: {{nomor_transaksi}}\n• Produk: {{rincian_produk}}\n• Jumlah: {{total_jumlah}} PCS\n• Total: {{total_pembelian}}\n• Tanggal: {{tanggal_transaksi}}\n\nJika membutuhkan stok kembali atau ada pertanyaan, silakan balas pesan ini. Kami siap membantu.\n\nTerima kasih atas kepercayaan Anda kepada TMEEZ.\nTMEEZ — Solusi Kebersihan Rumah Anda 💚',
- retail:'Halo Bapak/Ibu {{nama_pembeli}} 👋\n\nTerima kasih telah memilih produk TMEEZ dan mempercayakan kebutuhan kebersihan Anda kepada kami. 💚\n\n🧾 Ringkasan Pembelian\n• No. Nota: {{nomor_transaksi}}\n• Produk: {{rincian_produk}}\n• Jumlah: {{total_jumlah}} PCS\n• Total: {{total_pembelian}}\n• Tanggal: {{tanggal_transaksi}}\n\nSemoga TMEEZ bermanfaat untuk menjaga kebersihan rumah Anda. Jika ada pertanyaan atau ingin memesan kembali, silakan balas pesan ini. Kami siap membantu.\n\nTerima kasih atas kepercayaan Anda.\nTMEEZ — Solusi Kebersihan Rumah Anda 💚'
-};
-let whatsappTemplates={...WA_TEMPLATE_DEFAULTS};
-async function loadWhatsAppTemplates(showMessage=false){try{const r=await apiGet('whatsappTemplates');const d=r.data||{};whatsappTemplates={store:String(d.StoreTemplate||WA_TEMPLATE_DEFAULTS.store),retail:String(d.RetailTemplate||WA_TEMPLATE_DEFAULTS.retail)};const a=document.getElementById('wa-template-store'),b=document.getElementById('wa-template-retail');if(a)a.value=whatsappTemplates.store;if(b)b.value=whatsappTemplates.retail;const st=document.getElementById('wa-template-status');if(st)st.textContent='Template dimuat dari server.';if(showMessage)showToast('Template WhatsApp dimuat.');}catch(e){const st=document.getElementById('wa-template-status');if(st)st.textContent='Belum tersambung ke backend template. Deploy backend terbaru.';if(showMessage)showToast('Gagal memuat template: '+e.message);}}
-async function saveWhatsAppTemplates(){const store=String(document.getElementById('wa-template-store')?.value||'').trim(),retail=String(document.getElementById('wa-template-retail')?.value||'').trim();if(!store||!retail)return showToast('Kedua template wajib diisi.');if(store.length>4000||retail.length>4000)return showToast('Template maksimal 4.000 karakter.');try{await apiPost({action:'saveWhatsAppTemplates',storeTemplate:store,retailTemplate:retail});whatsappTemplates={store,retail};document.getElementById('wa-template-status').textContent='Tersimpan di server.';showToast('Template WhatsApp berhasil disimpan.');}catch(e){showToast('Gagal menyimpan. Deploy backend terbaru: '+e.message);}}
-function resetWhatsAppTemplates(){document.getElementById('wa-template-store').value=WA_TEMPLATE_DEFAULTS.store;document.getElementById('wa-template-retail').value=WA_TEMPLATE_DEFAULTS.retail;showToast('Default dimuat ke editor. Tekan Simpan Template untuk menyimpan.');}
-function fillWhatsAppTemplate(t,v){return String(t||'').replace(/\{\{\s*([a-z_]+)\s*\}\}/gi,(m,k)=>String(v[k.toLowerCase()]??''));}
-function previewWhatsAppTemplate(kind){const el=document.getElementById(kind==='store'?'wa-template-store':'wa-template-retail'),out=document.getElementById(kind==='store'?'wa-template-store-preview':'wa-template-retail-preview');out.textContent=fillWhatsAppTemplate(el.value,{nama_pembeli:'Bapak/Ibu Contoh',nama_toko:'Toko Contoh',nomor_transaksi:'TRX-001',rincian_produk:'Tmeez Toilet Cleaner x10',total_jumlah:'10',total_pembelian:'Rp150.000',tanggal_transaksi:'10/10/2026'});out.classList.remove('hidden');}
 </script>
 <!-- Modal Selfie Absensi -->
 <div id="selfie-modal" class="fixed inset-0 z-[9999] hidden bg-black/80 p-4 items-center justify-center">
